@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VisualState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ShowCheckBoxes="true">
+  <TopNode>[0-1000]C:\scratch\y\git\Tsoyeow\ExcelXmlWriterNTest\ExcelXmlWriterNTest.csproj</TopNode>
+  <SelectedNode>[0-1004]ExcelXmlWriterTest.WorkbookTest.WorkbookQueryWriteResultsOverSizeTest</SelectedNode>
+  <ExcludeCategories>false</ExcludeCategories>
+  <Nodes>
+    <Node UniqueName="[0-1000]C:\scratch\y\git\Tsoyeow\ExcelXmlWriterNTest\ExcelXmlWriterNTest.csproj" Expanded="true" />
+    <Node UniqueName="[0-1011]C:\scratch\y\git\Tsoyeow\ExcelXmlWriterNTest\bin\Debug\ExcelXmlWriterNTest.exe" Expanded="true" />
+    <Node UniqueName="[0-1012]ExcelXmlWriterTest" Expanded="true" />
+    <Node UniqueName="[0-1006]ExcelXmlWriterTest.ConfigManipulatorTest" Expanded="true" />
+    <Node UniqueName="[0-1007]ExcelXmlWriterTest.ConfigManipulatorTest.GetSingularValueTest" Checked="true" />
+    <Node UniqueName="[0-1010]ExcelXmlWriterTest.ConfigManipulatorTest.SaveAndRetrieveDictionaryValueTest" Checked="true" />
+    <Node UniqueName="[0-1009]ExcelXmlWriterTest.ConfigManipulatorTest.SaveAndRetrieveSingularValueTest" Checked="true" />
+    <Node UniqueName="[0-1008]ExcelXmlWriterTest.ConfigManipulatorTest.SaveWriteAndRetrieveSingularValueTest" Checked="true" />
+    <Node UniqueName="[0-1001]ExcelXmlWriterTest.WorkbookTest" Expanded="true" Checked="true" />
+    <Node UniqueName="[0-1002]ExcelXmlWriterTest.WorkbookTest.WorkbookFromFileConstructorTest" Checked="true" />
+    <Node UniqueName="[0-1003]ExcelXmlWriterTest.WorkbookTest.WorkbookQueryConstructorTest" Checked="true" />
+    <Node UniqueName="[0-1005]ExcelXmlWriterTest.WorkbookTest.WorkbookQueryWriteResultOverSizeTest" Checked="true" />
+    <Node UniqueName="[0-1004]ExcelXmlWriterTest.WorkbookTest.WorkbookQueryWriteResultsOverSizeTest" Checked="true" />
+  </Nodes>
+</VisualState>

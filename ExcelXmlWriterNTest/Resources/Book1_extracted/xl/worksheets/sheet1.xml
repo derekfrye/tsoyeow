@@ -1,0 +1,34 @@
+<worksheet>
+  <dimension ref="A1"/>
+  <sheetViews>
+    <sheetView workbookViewId="0"/>
+  </sheetViews>
+  <sheetFormatPr defaultRowHeight="15"/>
+  <sheetData>
+    <row>
+      <c t="s">
+        <v>0</v>
+      </c>
+      <c t="s">
+        <v>1</v>
+      </c>
+      <c t="s">
+        <v>2</v>
+      </c>
+      <c>
+        <v>332.11234567890123456789</v>
+      </c>
+    </row>
+    <row>
+      <!-- r references the cell's location -->
+      <c r="d2">
+        <v>123</v></c>
+    </row>
+    <row>
+      <c r="d3">
+        <f>sum(d1:d2)</f>
+      </c>
+    </row>
+  </sheetData>
+  <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
+</worksheet>
