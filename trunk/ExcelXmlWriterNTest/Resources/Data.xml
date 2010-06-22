@@ -1,0 +1,33 @@
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <Table>
+    <a>1</a>
+    <b>this is a cell</b>
+    <c>2009-12-08T18:19:17.66-06:00</c>
+  </Table>
+  <Table>
+    <a>1</a>
+    <b>this is another cell</b>
+    <c>2009-12-18T18:19:25.787-06:00</c>
+  </Table>
+  <Table1>
+    <a>1</a>
+    <b>this is a new sheet</b>
+  </Table1>
+  <Table1>
+    <a>1</a>
+    <b>this is also on hte new sheet</b>
+  </Table1>
+  <Table1>
+    <a>1a</a>
+    <b>this is also on hte new sheet</b>
+  </Table1>
+  <Table1>
+    <a>2009-01-01T00:00:00</a>
+    <b>this is also on hte new sheet</b>
+  </Table1>
+  <Table1>
+    <a>12/31/2009</a>
+    <b>this is also on hte new sheet</b>
+  </Table1>
+</NewDataSet>
