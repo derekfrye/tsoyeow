@@ -31,15 +31,20 @@ namespace ExcelXmlWriter
             this.id = id;
             sheetname = name;
 
-            write(@"<worksheet>" + Environment.NewLine);
+            write(@"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>");
+            write("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\""
+            + " xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"" 
+            + " xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"" 
+            + " mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\">" 
+            + Environment.NewLine);
             write(@"<dimension ref=""A1""/>" + Environment.NewLine);
             write(@"<sheetViews>" + Environment.NewLine);
             write(@"<sheetView workbookViewId=""0"">" + Environment.NewLine);
-            write(@"<pane ySplit=""1"" topLeftCell=""A2"" activePane=""bottomLeft"" state=""frozen"" />");
-            write(@"<selection pane=""bottomLeft"" activeCell=""A2"" sqref=""A2"" />");
+            //write(@"<pane ySplit=""1"" topLeftCell=""A2"" activePane=""bottomLeft"" state=""frozen"" />");
+            //write(@"<selection pane=""bottomLeft"" activeCell=""A2"" sqref=""A2"" />");
             write(@"</sheetView>");
             write(@"</sheetViews>" + Environment.NewLine);
-            write(@"<sheetFormatPr defaultRowHeight=""15""/>" + Environment.NewLine);
+            write(@"<sheetFormatPr defaultRowHeight=""15"" x14ac:dyDescent=""0.25""/>" + Environment.NewLine);
             write(@"<sheetData>" + Environment.NewLine);
 
             // write row hdr
@@ -104,15 +109,20 @@ namespace ExcelXmlWriter
             File.Delete(fs.Name);
         }
 
-        void hdr()
-        {
-            write(@"<worksheet>" + Environment.NewLine);
-            write(@"<dimension ref=""A1""/>" + Environment.NewLine);
-            write(@"<sheetViews>" + Environment.NewLine);
-            write(@"<sheetView workbookViewId=""0""/>" + Environment.NewLine);
-            write(@"</sheetViews>" + Environment.NewLine);
-            write(@"<sheetFormatPr defaultRowHeight=""15""/>" + Environment.NewLine);
-            write(@"<sheetData>" + Environment.NewLine);
-        }
+        //void hdr()
+        //{
+        //    write(@"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>");
+        //    write("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\""
+        //    + " xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\""
+        //    + " xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\""
+        //    + " mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\">"
+        //    + Environment.NewLine);
+        //    write(@"<dimension ref=""A1""/>" + Environment.NewLine);
+        //    write(@"<sheetViews>" + Environment.NewLine);
+        //    write(@"<sheetView workbookViewId=""0""/>" + Environment.NewLine);
+        //    write(@"</sheetViews>" + Environment.NewLine);
+        //    write(@"<sheetFormatPr defaultRowHeight=""15"" x14ac:dyDescent=""0.25""/>" + Environment.NewLine);
+        //    write(@"<sheetData>" + Environment.NewLine);
+        //}
     }
 }
