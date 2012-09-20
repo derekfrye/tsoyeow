@@ -9,6 +9,8 @@ namespace ExcelXmlWriter
 {
     using System;
     using System.Security.Cryptography;
+    using System.Security;
+    using System.Text.RegularExpressions;
 
     // courtesy Damien Guard from http://damieng.com/blog/2006/08/08/calculating_crc32_in_c_and_net
     public class Crc32 : HashAlgorithm
@@ -144,7 +146,11 @@ namespace ExcelXmlWriter
 
         static string RemoveXmlChars(string inp)
         {
-            return inp.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace(@"""", "&quot;").Replace("'", "&apos;");
+            //return SecurityElement.Escape(inp);
+            //return inp.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace(@"""", "&quot;").Replace("'", "&apos;");
+            string s = inp;
+            s=Regex.Replace(s, @"[\u0000-\u001F,\u007F,\u0080-\u009F]", string.Empty);
+            return s.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace(@"""", "&quot;").Replace("'", "&apos;");
         }
     } 
 }

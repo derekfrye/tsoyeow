@@ -60,6 +60,7 @@ namespace ExcelXmlWriter
 
             #region application/xml
 
+            // here to start the pkg?
             Uri u1_1 = new Uri("/xl/unused.xml", UriKind.Relative);
             PackagePart p1_1 = packageObject.CreatePart(u1_1, "application/xml", CompressionOption.Normal);
 

@@ -16,8 +16,8 @@ namespace ExcelXmlWriter
         FileStream fs;
         Crc32 c = new Crc32();
         Dictionary<string, long> a = new Dictionary<string, long>();
-        readonly byte[] bbb = Encoding.UTF8.GetBytes("<si><t>");
-        readonly byte[] bbb1 = Encoding.UTF8.GetBytes("</t></si>" + Environment.NewLine);
+        readonly byte[] openString = Encoding.UTF8.GetBytes("<si><t>");
+        readonly byte[] closeString = Encoding.UTF8.GetBytes("</t></si>" + Environment.NewLine);
 
         internal XlsxSharedStringsXml(Package p, PackagePart p1)
         {
@@ -62,9 +62,9 @@ namespace ExcelXmlWriter
             {
                 //byte[] ba = Encoding.UTF8.GetBytes(s);
                 // fixme, xml:space="preserve"
-                fs.Write(bbb, 0, bbb.Length);
+                fs.Write(openString, 0, openString.Length);
                 fs.Write(ba, 0, ba.Length);
-                fs.Write(bbb1, 0, bbb1.Length);
+                fs.Write(closeString, 0, closeString.Length);
                 a.Add(res, ss); 
                 return ss++;
             }
