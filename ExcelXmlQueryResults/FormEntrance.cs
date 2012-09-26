@@ -70,19 +70,27 @@ namespace ExcelXmlQueryResults
             fileName = userFileName.Text + textBox1.Text;
 
 #if DEBUG
-             string path = Environment.CurrentDirectory;
+
+            string path = Environment.CurrentDirectory;
+            if(!string.IsNullOrEmpty(path))
             path = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(path))
             path = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(path))
             path = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(path))
             path = path + Path.DirectorySeparatorChar.ToString()
                 + "ExcelXmlWriterNTest" + Path.DirectorySeparatorChar.ToString()
                 + "Resources" + Path.DirectorySeparatorChar.ToString()
                 + "Sql exceeds filesize limit.sql";
-            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            StreamReader sr = new StreamReader(fs);
-            richTextBox1.Text = sr.ReadToEnd();
-            sr.Close();
-            fs.Close();
+            if (File.Exists(path))
+            {
+                FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                StreamReader sr = new StreamReader(fs);
+                richTextBox1.Text = sr.ReadToEnd();
+                sr.Close();
+                fs.Close();
+            }
 #endif
         }
 
