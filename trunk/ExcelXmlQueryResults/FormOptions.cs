@@ -62,6 +62,7 @@ namespace ExcelXmlQueryResults
                 textBox4.Text = c.GetValue("ConnectionPassword");
 
                 checkBox1.Checked = p.p.writeEmptyResultSetColumns;
+                checkBox2.Checked = p.p.AutoRewriteOverpunch;
 
                 textBox5.Text = p.p.queryTimeout.ToString();
                 textBox6.Text = p.p.maxRowsPerSheet.ToString();
@@ -117,6 +118,7 @@ namespace ExcelXmlQueryResults
             a.p = new WorkBookParams();
             a.newResultSetMethod = c.GetValue("NewResultSet");
             a.p.writeEmptyResultSetColumns = Convert.ToBoolean(c.GetValue("WriteEmptyResultColumnHeaders"));
+            a.p.AutoRewriteOverpunch = Convert.ToBoolean(c.GetValue("AutoRewriteOverpunch"));
             a.p.backendMethod = Enum.GetValues(typeof(ExcelBackend))
                             .Cast<ExcelBackend>()
                             .Where(x => String.Equals(x.ToString(), c.GetValue("ExcelFileType"))).First();
@@ -174,6 +176,7 @@ namespace ExcelXmlQueryResults
             else
                 h.Add("ExcelFileType", Resources.FileTypeXlsx);
             h.Add("WriteEmptyResultColumnHeaders", checkBox1.Checked.ToString());
+            h.Add("AutoRewriteOverpunch", checkBox2.Checked.ToString());
 
             Dictionary<object, object> d1 = new Dictionary<object, object>();
 
@@ -273,9 +276,15 @@ namespace ExcelXmlQueryResults
                 int res = 0;
                 if (!Int32.TryParse(e.FormattedValue.ToString(), out res))
                 {
-                    MessageBox.Show("Non-integer:" + e.FormattedValue.ToString());
+                    MessageBox.Show("Non-integer: " + e.FormattedValue.ToString());
                     e.Cancel = true;
                 }
+            }
+            else if (e.ColumnIndex == 1 && e.FormattedValue.ToString().Length>25)
+            {
+               MessageBox.Show("Sheet names cannot exceed 25 characters: " + e.FormattedValue.ToString() + " is "+e.FormattedValue.ToString().Length.ToString()+" chars.");
+                    e.Cancel = true;
+                
             }
         }
 
@@ -322,7 +331,14 @@ namespace ExcelXmlQueryResults
                     // starting at the selected row, add in each clipboard item
                     int rowToModify = i + row;
 
-                    resultSetNamesGrid.Rows[rowToModify].Cells[1].Value = clipboardContentsArray[0];
+                    if (!string.IsNullOrEmpty(clipboardContentsArray[0]))
+                    {
+                        string val = Regex.Replace(clipboardContentsArray[0], @"[\u0000-\u001F,\u007F,\u0080-\u009F]", string.Empty);
+                        if (clipboardContentsArray[0].Length > 25)
+                            resultSetNamesGrid.Rows[rowToModify].Cells[1].Value = val.Substring(0, 25);
+                        else
+                            resultSetNamesGrid.Rows[rowToModify].Cells[1].Value = val;
+                    }
                     if (resultSetNamesGrid.Rows[rowToModify].Cells[0].Value == null)
                     {
                         int maxVal;

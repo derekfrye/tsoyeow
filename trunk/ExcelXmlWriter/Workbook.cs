@@ -66,6 +66,9 @@ namespace ExcelXmlWriter
         /// </summary>
         public int MaxWorkBookSize;
 
+        public bool AutoRewriteOverpunch
+        { get; set; }
+
         public WorkBookParams()
         {
             queryTimeout = 30;
@@ -81,7 +84,7 @@ namespace ExcelXmlWriter
     /// An Excel data type. A setting of general forces the workbook to infer each cell's type 
     /// throughout query execution (without truncating numbers over Excel's length limit). The default is string.
     /// </summary>
-    public enum ExcelDataType { String, Number, Date, General }
+    public enum ExcelDataType { String, Number, Date, General, OverpunchNumber }
 
     /// <summary>
     /// An Excel data type. A setting of general forces the workbook to infer each cell's type 

@@ -40,8 +40,8 @@ namespace ExcelXmlWriter
             write(@"<dimension ref=""A1""/>" + Environment.NewLine);
             write(@"<sheetViews>" + Environment.NewLine);
             write(@"<sheetView workbookViewId=""0"">" + Environment.NewLine);
-            //write(@"<pane ySplit=""1"" topLeftCell=""A2"" activePane=""bottomLeft"" state=""frozen"" />");
-            //write(@"<selection pane=""bottomLeft"" activeCell=""A2"" sqref=""A2"" />");
+            write(@"<pane ySplit=""1"" topLeftCell=""A2"" activePane=""bottomLeft"" state=""frozen"" />");
+            write(@"<selection pane=""bottomLeft"" activeCell=""A2"" sqref=""A2"" />");
             write(@"</sheetView>");
             write(@"</sheetViews>" + Environment.NewLine);
             write(@"<sheetFormatPr defaultRowHeight=""15"" x14ac:dyDescent=""0.25""/>" + Environment.NewLine);
@@ -51,7 +51,9 @@ namespace ExcelXmlWriter
             write(XlsxRow.hdr);
             foreach (DataRow rows in d)
             {
-                writeval(rows["ColumnName"].ToString(), StaticFunctions.ResolveDataType(rows["ColumnName"].ToString()), s);
+                // FIXME don't hardcode 100
+                // FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
+                writeval(rows["ColumnName"].ToString(), StaticFunctions.ResolveDataType(rows["ColumnName"].ToString(), 100), s);
             }
             // write row close
             write(XlsxRow.hdrclose);
@@ -73,6 +75,11 @@ namespace ExcelXmlWriter
                 case ExcelDataType.Date:
                     write(XlsxData.DataVal(p, excelDataType));
                     break;
+                case ExcelDataType.OverpunchNumber:
+                    //fixme don't hardcoe 100
+                    Overpunch i = StaticFunctions.applyOverPunch(p, 100);
+                    write(XlsxData.DataVal(i.val.ToString(), ExcelDataType.Number));
+                    break;
                 default:
                     long d=s.write(XlsxData.DataVal(p, excelDataType));
                     write(d.ToString());
@@ -88,7 +95,9 @@ namespace ExcelXmlWriter
             // cycle through the columns, writing the values
             for (int i = 0; i < queryReader.FieldCount; i++)
             {
-                writeval(queryReader[i].ToString(), StaticFunctions.ResolveDataType(queryReader[i].ToString()), s);
+                // FIXME don't hardcode 100
+                // FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
+                writeval(queryReader[i].ToString(), StaticFunctions.ResolveDataType(queryReader[i].ToString(), 100), s);
             }
             // write row close
             write(XlsxRow.hdrclose);
@@ -103,11 +112,11 @@ namespace ExcelXmlWriter
             fs.Seek(0, SeekOrigin.Begin);
         }
 
-        void Dispose()
-        {
-            fs.Close();
-            File.Delete(fs.Name);
-        }
+        //void Dispose()
+        //{
+        //    fs.Close();
+        //    File.Delete(fs.Name);
+        //}
 
         //void hdr()
         //{
