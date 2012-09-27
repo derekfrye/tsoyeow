@@ -1,0 +1,1 @@
+﻿Make sure the working directory under ExcelXmlWriterNTest's properties page points to the directory containing ExcelXmlWriterNTest.csproj

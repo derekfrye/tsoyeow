@@ -1,0 +1,10 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartArguments>ExcelXmlWriterNTest.csproj</StartArguments>
+    <StartWorkingDirectory>C:\scratch\y\git\Tsoyeow\ExcelXmlWriterNTest\</StartWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <StartArguments>ExcelXmlWriterNTest.csproj</StartArguments>
+    <StartWorkingDirectory>C:\scratch\z\ExcelXmlQueryResults\ExcelXmlWriterNTest\</StartWorkingDirectory>
+  </PropertyGroup>
+</Project>
