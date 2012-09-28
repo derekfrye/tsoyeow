@@ -1,137 +1,183 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ExcelXmlWriter;
 using System.IO;
 using System.IO.Packaging;
 using System.Data;
 using System.Collections;
+using System.Xml;
 
 namespace ExcelXmlWriter
 {
-    class XlsxWorksheet
-    {
+	class XlsxWorksheet
+	{
 
-        public string sheetname;
-        FileStream fs;
-        string id;
+		public string sheetname;
+		XmlWriter wx;
+		string id;
+		Stream sasdf;
+		
+		internal string Id
+		{
+			get { return id; }
+		}
 
-        internal string Id
-        {
-            get { return id; }
-        }
 
-        internal FileStream s
-        { get { return fs; } }
+		internal XlsxWorksheet(Stream sss,int count, int subcount, string name, string id, DataRowCollection d, XlsxSharedStringsXml s)
+		{
+			sasdf=sss;
+			wx = XmlWriter.Create(sasdf);
 
-        internal XlsxWorksheet(int count, int subcount, string name, string id, DataRowCollection d, XlsxSharedStringsXml s)
-        {
-            fs = new FileStream(Path.GetTempFileName(), FileMode.Create);
+			this.id = id;
+			sheetname = name;
+			
+			wx.WriteStartDocument(true);
+			
+			wx.WriteStartElement("worksheet", "http://schemas.openxmlformats.org/spreadsheetml/2006/main");
+			
+			wx.WriteAttributeString("xmlns", "r", null, "http://schemas.openxmlformats.org/officeDocument/2006/relationships");
+			wx.WriteAttributeString("xmlns", "mc", null, "http://schemas.openxmlformats.org/markup-compatibility/2006");
+			wx.WriteAttributeString("mc", "Ignorable", null, "x14ac");
+			wx.WriteAttributeString("xmlns", "x14ac", null, "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
+			wx.WriteWhitespace(Environment.NewLine);
+			
+			wx.WriteStartElement("dimension");
+			wx.WriteAttributeString("ref", "A1");
+			wx.WriteEndElement();
+			wx.WriteWhitespace(Environment.NewLine);
+			
+			wx.WriteStartElement("sheetViews");
+			wx.WriteWhitespace(Environment.NewLine);
+			
+			wx.WriteStartElement("sheetView");
+			wx.WriteAttributeString("workbookViewId", "0");
+			wx.WriteWhitespace(Environment.NewLine);
+			
+			wx.WriteStartElement("pane");
+			wx.WriteAttributeString("ySplit", "1");
+			wx.WriteAttributeString("topLeftCell", "A2");
+			wx.WriteAttributeString("activePane", "bottomLeft");
+			wx.WriteAttributeString("state", "frozen");
+			wx.WriteEndElement();
+			
+			wx.WriteStartElement("selection");
+			wx.WriteAttributeString("pane", "bottomLeft");
+			wx.WriteAttributeString("activeCell", "A2");
+			wx.WriteAttributeString("sqref", "A2");
+			wx.WriteEndElement();
+			//</sheetView>
+			wx.WriteEndElement();
+			wx.WriteWhitespace(Environment.NewLine);
+			//</sheetViews>
+			wx.WriteEndElement();
+			wx.WriteWhitespace(Environment.NewLine);
+			
+			wx.WriteStartElement("sheetFormatPr");
+			wx.WriteAttributeString("defaultRowHeight", "15");
+			wx.WriteAttributeString("x14ac", "dyDescent", null, "0.25");
+			wx.WriteEndElement();
+			wx.WriteWhitespace(Environment.NewLine);
+			
+			wx.WriteStartElement("sheetData");
+			wx.WriteWhitespace(Environment.NewLine);
 
-            this.id = id;
-            sheetname = name;
+			// write row hdr
+			
+			wx.WriteStartElement("row");
+			wx.WriteWhitespace(Environment.NewLine);
+			foreach (DataRow rows in d)
+			{
+				// FIXME don't hardcode 100
+				// FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
+				writeval(rows["ColumnName"].ToString(), StaticFunctions.ResolveDataType(rows["ColumnName"].ToString(), 100), s);
+			}
+			// write row close
+			
+			wx.WriteEndElement();
+			wx.WriteWhitespace(Environment.NewLine);
+		}
 
-            write(@"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>");
-            write("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\""
-            + " xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"" 
-            + " xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\"" 
-            + " mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\">" 
-            + Environment.NewLine);
-            write(@"<dimension ref=""A1""/>" + Environment.NewLine);
-            write(@"<sheetViews>" + Environment.NewLine);
-            write(@"<sheetView workbookViewId=""0"">" + Environment.NewLine);
-            write(@"<pane ySplit=""1"" topLeftCell=""A2"" activePane=""bottomLeft"" state=""frozen"" />");
-            write(@"<selection pane=""bottomLeft"" activeCell=""A2"" sqref=""A2"" />");
-            write(@"</sheetView>");
-            write(@"</sheetViews>" + Environment.NewLine);
-            write(@"<sheetFormatPr defaultRowHeight=""15"" x14ac:dyDescent=""0.25""/>" + Environment.NewLine);
-            write(@"<sheetData>" + Environment.NewLine);
+		void writeval(string p, ExcelDataType excelDataType, XlsxSharedStringsXml s)
+		{
+			//write(XlsxCell.hdr(excelDataType));
+			wx.WriteStartElement("c");
+			
+			
+			switch (excelDataType)
+			{
+				case ExcelDataType.Number:
+				case ExcelDataType.Date:
+					if(excelDataType==ExcelDataType.Date)
+					{
+						wx.WriteAttributeString("s","1");
+					}
+					wx.WriteStartElement("v");
+					wx.WriteString(XlsxData.DataVal(p, excelDataType));
+					break;
+				case ExcelDataType.OverpunchNumber:
+					wx.WriteStartElement("v");
+					//fixme don't hardcoe 100
+					Overpunch i = StaticFunctions.applyOverPunch(p, 100);
+					wx.WriteString(XlsxData.DataVal(i.val.ToString(), ExcelDataType.Number));
+					break;
+				default:
+					var pa=XlsxData.DataVal(p, excelDataType);
+					long d=s.write(pa);
+					
+					wx.WriteAttributeString("t","s");
+					wx.WriteStartElement("v");
+					wx.WriteString(d.ToString());
+					break;
+			}
+			// </v>
+			wx.WriteEndElement();
+			// </c>
+			wx.WriteEndElement();
+		}
 
-            // write row hdr
-            write(XlsxRow.hdr);
-            foreach (DataRow rows in d)
-            {
-                // FIXME don't hardcode 100
-                // FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
-                writeval(rows["ColumnName"].ToString(), StaticFunctions.ResolveDataType(rows["ColumnName"].ToString(), 100), s);
-            }
-            // write row close
-            write(XlsxRow.hdrclose);
-        }
+		internal void writerow(IDataReader queryReader, XlsxSharedStringsXml s)
+		{
+			// write row hdr
+			wx.WriteStartElement("row");
+			wx.WriteWhitespace(Environment.NewLine);
+			
+			// cycle through the columns, writing the values
+			for (int i = 0; i < queryReader.FieldCount; i++)
+			{
+				// FIXME don't hardcode 100
+				// FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
+				writeval(queryReader[i].ToString(), StaticFunctions.ResolveDataType(queryReader[i].ToString(), 100), s);
+			}
+			
+			// write row close
+			wx.WriteEndElement();
+			wx.WriteWhitespace(Environment.NewLine);
+		}
 
-        void write(string s)
-        {
-            byte[] b = Encoding.UTF8.GetBytes(s);
-            fs.Write(b, 0, b.Length);
-            //fileSize += b.Length;
-        }
+		
+		internal void Close()
+		{
+			//write(@"</sheetData>");
+			wx.WriteEndElement();
+			//write(@"<pageMargins left=""0.7"" right=""0.7"" top=""0.75"" bottom=""0.75"" header=""0.3"" footer=""0.3""/>");
+			wx.WriteStartElement("pageMargins");
+			wx.WriteAttributeString("left", "0.7");
+			wx.WriteAttributeString("right", "0.7");
+			wx.WriteAttributeString("top", "0.75");
+			wx.WriteAttributeString("bottom", "0.75");
+			wx.WriteAttributeString("header", "0.3");
+			wx.WriteAttributeString("footer", "0.3");
+			wx.WriteEndElement();
+			//write(@"</worksheet>");
+			wx.WriteEndElement();
+			// close the writer
+			wx.Close();
+			// close the stream
+			sasdf.Close();
+			
+		}
 
-        void writeval(string p, ExcelDataType excelDataType, XlsxSharedStringsXml s)
-        {
-            write(XlsxCell.hdr(excelDataType));
-            switch (excelDataType)
-            {
-                case ExcelDataType.Number:
-                case ExcelDataType.Date:
-                    write(XlsxData.DataVal(p, excelDataType));
-                    break;
-                case ExcelDataType.OverpunchNumber:
-                    //fixme don't hardcoe 100
-                    Overpunch i = StaticFunctions.applyOverPunch(p, 100);
-                    write(XlsxData.DataVal(i.val.ToString(), ExcelDataType.Number));
-                    break;
-                default:
-                    long d=s.write(XlsxData.DataVal(p, excelDataType));
-                    write(d.ToString());
-                    break;
-            }
-            write(XlsxCell.hdrclose);
-        }
-
-        internal void writerow(IDataReader queryReader, XlsxSharedStringsXml s)
-        {
-            // write row hdr
-            write(XlsxRow.hdr);
-            // cycle through the columns, writing the values
-            for (int i = 0; i < queryReader.FieldCount; i++)
-            {
-                // FIXME don't hardcode 100
-                // FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
-                writeval(queryReader[i].ToString(), StaticFunctions.ResolveDataType(queryReader[i].ToString(), 100), s);
-            }
-            // write row close
-            write(XlsxRow.hdrclose);
-        }
-
-        internal void Close()
-        {
-            write(@"</sheetData>");
-            write(@"<pageMargins left=""0.7"" right=""0.7"" top=""0.75"" bottom=""0.75"" header=""0.3"" footer=""0.3""/>");
-            write(@"</worksheet>");
-            fs.Flush();
-            fs.Seek(0, SeekOrigin.Begin);
-        }
-
-        //void Dispose()
-        //{
-        //    fs.Close();
-        //    File.Delete(fs.Name);
-        //}
-
-        //void hdr()
-        //{
-        //    write(@"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>");
-        //    write("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\""
-        //    + " xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\""
-        //    + " xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\""
-        //    + " mc:Ignorable=\"x14ac\" xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\">"
-        //    + Environment.NewLine);
-        //    write(@"<dimension ref=""A1""/>" + Environment.NewLine);
-        //    write(@"<sheetViews>" + Environment.NewLine);
-        //    write(@"<sheetView workbookViewId=""0""/>" + Environment.NewLine);
-        //    write(@"</sheetViews>" + Environment.NewLine);
-        //    write(@"<sheetFormatPr defaultRowHeight=""15"" x14ac:dyDescent=""0.25""/>" + Environment.NewLine);
-        //    write(@"<sheetData>" + Environment.NewLine);
-        //}
-    }
+	}
 }

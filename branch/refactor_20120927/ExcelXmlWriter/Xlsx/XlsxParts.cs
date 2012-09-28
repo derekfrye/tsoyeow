@@ -28,7 +28,7 @@ namespace ExcelXmlWriter
             string id = workbookXmlPackagePart.CreateRelationship(new Uri("worksheets/sheet" + sheetCount.ToString()
                 + "_" + subSheetCount.ToString() + ".xml", UriKind.Relative), TargetMode.Internal
                , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet").Id;
-            XlsxWorksheet w = new XlsxWorksheet(sheetCount, subSheetCount, sheetName, id, resultHeaders, sharedStrings);
+            XlsxWorksheet w = new XlsxWorksheet(pt.GetStream(), sheetCount, subSheetCount, sheetName, id, resultHeaders, sharedStrings);
 
             worksheets.Add(w, pt);
             currentWorksheet = w;
@@ -37,7 +37,7 @@ namespace ExcelXmlWriter
         public void CloseSheet()
         {
             currentWorksheet.Close();
-            StaticFunctions.copyStream(currentWorksheet.s, worksheets.retrieveStream(currentWorksheet));
+            //StaticFunctions.copyStream(currentWorksheet.s, worksheets.retrieveStream(currentWorksheet));
         }
 
         public void Close()
@@ -60,7 +60,7 @@ namespace ExcelXmlWriter
 
             #region application/xml
 
-            // here to start the pkg?
+            // just here to start the pkg?
             Uri u1_1 = new Uri("/xl/unused.xml", UriKind.Relative);
             PackagePart p1_1 = packageObject.CreatePart(u1_1, "application/xml", CompressionOption.Normal);
 
@@ -88,13 +88,8 @@ namespace ExcelXmlWriter
 
             Uri u7 = new Uri("/xl/theme/theme1.xml", UriKind.Relative);
             PackagePart p7 = packageObject.CreatePart(u7, "application/vnd.openxmlformats-officedocument.theme+xml", CompressionOption.Normal);
-            using (MemoryStream fs = new MemoryStream())
-            {
-                Settings.Default.ThemeXml.Save(fs);
-                fs.Flush();
-                fs.Seek(0, SeekOrigin.Begin);
-                StaticFunctions.copyStream(fs, p7.GetStream());
-            }
+            Settings.Default.ThemeXml.Save(p7.GetStream());
+            p7.GetStream().Close();
             workbookXmlPackagePart.CreateRelationship(new Uri("theme/theme1.xml", UriKind.Relative), TargetMode.Internal
                 , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme");
 
@@ -104,13 +99,8 @@ namespace ExcelXmlWriter
 
             Uri u8 = new Uri("/xl/styles.xml", UriKind.Relative);
             PackagePart p8 = packageObject.CreatePart(u8, "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml", CompressionOption.Normal);
-            using (MemoryStream fs = new MemoryStream())
-            {
-                Settings.Default.StylesXml.Save(fs);
-                fs.Flush();
-                fs.Seek(0, SeekOrigin.Begin);
-                StaticFunctions.copyStream(fs, p8.GetStream());
-            }
+            Settings.Default.StylesXml.Save(p8.GetStream());
+            p8.GetStream().Close();
             workbookXmlPackagePart.CreateRelationship(new Uri("styles.xml", UriKind.Relative), TargetMode.Internal
                 , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles");
 

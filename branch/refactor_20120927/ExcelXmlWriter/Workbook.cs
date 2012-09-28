@@ -268,6 +268,7 @@ namespace ExcelXmlWriter
                 case ExcelBackend.Xlsx:
                     pts = new XlsxParts(path);
                     break;
+                    // FIXME tghis isnt an xml backend :(
                 case ExcelBackend.Xml:
                     pts = new XlsxParts(path);
                     break;

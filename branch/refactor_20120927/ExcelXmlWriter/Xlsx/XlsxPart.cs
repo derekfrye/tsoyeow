@@ -32,17 +32,11 @@ namespace ExcelXmlWriter
         }
 
         internal void close()
-        {
-            using (MemoryStream fs = new MemoryStream())
-            {
-                XmlWriter xxx = XmlWriter.Create(fs);
-                appXml.Save(xxx);
-                xxx.Flush();
-                fs.Flush();
-                fs.Seek(0, SeekOrigin.Begin);
-
-                StaticFunctions.copyStream(fs, p3.GetStream());
-            }
+        {        	
+            XmlWriter xxx = XmlWriter.Create(p3.GetStream());
+            appXml.Save(xxx);
+            xxx.Close();
+			p3.GetStream().Close();
         }
     }
 }

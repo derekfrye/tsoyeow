@@ -27,10 +27,5 @@ namespace ExcelXmlWriter
         internal IList<XlsxWorksheet> aa
         { get { return worksheets; } }
 
-        internal Stream retrieveStream(XlsxWorksheet ww)
-        {
-            int i = worksheets.IndexOf(ww);
-            return packageparts[i].GetStream();
-        }
     }
 }

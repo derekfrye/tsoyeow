@@ -1,6 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+# SharpDevelop 4.2.2.8818
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{699CBD61-CF03-415E-8D00-EC82A1839252}"
+	ProjectSection(SolutionItems) = postProject
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlQueryResults", "ExcelXmlQueryResults\ExcelXmlQueryResults.csproj", "{20DDAFBB-ED39-42D9-A5CE-737ED50FCEE9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3A145151-9621-4D4E-A22F-06BB35157022} = {3A145151-9621-4D4E-A22F-06BB35157022}
@@ -9,8 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlWriter", "ExcelXmlWriter\ExcelXmlWriter.csproj", "{3A145151-9621-4D4E-A22F-06BB35157022}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlWriterNTest", "ExcelXmlWriterNTest\ExcelXmlWriterNTest.csproj", "{0ED1786A-C42C-4FBC-BEB3-7F332071AD93}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{699CBD61-CF03-415E-8D00-EC82A1839252}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlWriterTest_vs2008", "ExcelXmlWriterTest_vs2008\ExcelXmlWriterTest_vs2008.csproj", "{1E5A7DAB-7205-4070-8D42-4B8715BB6FDB}"
 EndProject
