@@ -143,7 +143,7 @@ namespace ExcelXmlQueryResults
 
             fileName = userFileName.Text + textBox1.Text;
             buildConnStr();
-            writeSpreadsheets();
+            writeSpreadsheets(); 
         }
 
         void writeSpreadsheets()

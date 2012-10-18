@@ -18,7 +18,7 @@ namespace ExcelXmlWriter
           //  packageparts = new List<PackagePart>();
         }
 
-        internal void Add(XlsxWorksheet w1, System.IO.Packaging.PackagePart pt1)
+        internal void Add(XlsxWorksheet w1)
         {
             worksheets.Add(w1);
             //packageparts.Add(pt1);

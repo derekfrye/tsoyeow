@@ -17,7 +17,7 @@ namespace ExcelXmlWriter
 		public string sheetname;
 		XmlWriter wx;
 		string id;
-		Stream sasdf;
+		
         public bool closed
         { get; private set; }
 
@@ -26,9 +26,25 @@ namespace ExcelXmlWriter
 			get { return id; }
 		}
 
+        internal Stream sasdf
+        {
+            get;
+            private set;
+        }
 
-		internal XlsxWorksheet(Stream sss,int count, int subcount, string name, string id, DataRowCollection d, XlsxSharedStringsXml s)
+        internal string filenmOs
+        { get; private set; }
+
+        /// <summary>
+        /// Filename within the zip archive.
+        /// </summary>
+        internal string filenm
+        { get; set; }
+
+
+		internal XlsxWorksheet(Stream sss,int count, int subcount, string name, string id, DataRowCollection d, XlsxSharedStringsXml s,string jdfk)
 		{
+            filenmOs = jdfk;
 			sasdf=sss;
             closed = false;
 			wx = XmlWriter.Create(sasdf);
@@ -179,7 +195,8 @@ namespace ExcelXmlWriter
 			// close the writer
 			wx.Close();
 			// close the stream
-			sasdf.Close();
+            sasdf.Flush();
+            sasdf.Seek(0, SeekOrigin.Begin);
             closed = true;
 		}
 

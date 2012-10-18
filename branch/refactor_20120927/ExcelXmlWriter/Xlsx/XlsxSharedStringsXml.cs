@@ -18,16 +18,21 @@ namespace ExcelXmlWriter
 		long curentSharedStringPosition = 0;
 		//SHA256Cng h;
 		XmlWriter xw;
-		
+        //Stream s;
+
 		Dictionary<int, Tuple<long, string>> sharedStringDictionary = new Dictionary<int, Tuple<long, string>>();
-		
-		internal XlsxSharedStringsXml(Package p, PackagePart p1)
+
+        public Stream s
+        { get; private set; }
+        internal string jf
+        { get; private set; }
+		internal XlsxSharedStringsXml(Stream ss,string jf)
 		{
-			
-			Uri u9 = new Uri("/xl/sharedStrings.xml", UriKind.Relative);
-			sharedStringsPt = p.CreatePart(u9, "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
-			                               , CompressionOption.Normal);
-			Stream s=sharedStringsPt.GetStream();
+            this.jf = jf;
+            //Uri u9 = new Uri("/xl/sharedStrings.xml", UriKind.Relative);
+            //sharedStringsPt = p.CreatePart(u9, "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
+            //                               , CompressionOption.Normal);
+            s = ss;
 			//h = new SHA256Cng();
 
 			xw = XmlWriter.Create(s);
@@ -35,9 +40,21 @@ namespace ExcelXmlWriter
 			
 			xw.WriteStartElement("sst", "http://schemas.openxmlformats.org/spreadsheetml/2006/main");
 			xw.WriteWhitespace(Environment.NewLine);
-			p1.CreateRelationship(new Uri("sharedStrings.xml", UriKind.Relative), TargetMode.Internal
-			                      , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings");
+            //p1.CreateRelationship(new Uri("sharedStrings.xml", UriKind.Relative), TargetMode.Internal
+            //                      , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings");
 		}
+
+        //fixme could inherit from xlsxpart
+        internal ZipAAA LinkToPackage(string reltp, string pth)
+        {
+            //return base.LinkToPackage(p, new Uri("/docProps/app.xml", UriKind.Relative)
+            //    , "application/vnd.openxmlformats-officedocument.extended-properties+xml"
+            //    , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"
+            //    );
+            //"/xl/sharedStrings.xml"
+            //"application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
+            return new ZipAAA() { path = pth, RelType = reltp };
+        }
 
 		/// <summary>
 		/// Write a string value to the sharedStrings.xml file, and write the sharedStrings array entry in the current worksheet stream.
@@ -91,6 +108,9 @@ namespace ExcelXmlWriter
 		{
 			xw.WriteEndElement();
 			xw.Close();
+            s.Flush();
+            s.Seek(0, SeekOrigin.Begin);
+            //s.Close();
 		}
 	}
 }

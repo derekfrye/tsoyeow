@@ -6,12 +6,13 @@ using System.IO.Packaging;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml;
+using ExcelXmlWriter.Xlsx;
 
 namespace ExcelXmlWriter
 {
-    class XlsxAppXml : XlsxPart
+    class XlsxAppXml 
     {
-
+        protected XDocument appXml = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
         XNamespace xn = "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
         XNamespace xn2 = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties";
 
@@ -21,7 +22,7 @@ namespace ExcelXmlWriter
             //    , "application/vnd.openxmlformats-officedocument.extended-properties+xml"
             //    , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"
             //    );
-            return new ZipAAA() { path = "/docProps/app.xml", RelType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" };
+            return new ZipAAA() { path = "docProps/app.xml", RelType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" };
         }
 
         internal void SetSheetCount(IList<XlsxWorksheet> sheets)
@@ -42,6 +43,30 @@ namespace ExcelXmlWriter
                 .Element(xn + "vector").Elements(xn + "variant").Where(x => x.Elements(xn + "i4").Any()).First().Element(xn + "i4").SetValue(totalsheets);
 
             //base.close();
+        }
+
+        public string Write()
+        {
+            //XNamespace xn2 = "http://schemas.openxmlformats.org/package/2006/relationships";
+
+            ////<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+
+            //var t = new XElement(xn2 + "Relationships");
+            //foreach (var z in rels)
+            //{
+            //    t.Add(new XElement(xn2 + "Relationship", new XAttribute("Type", z.Value.RelType), new XAttribute("Target", z.Value.path), new XAttribute("Id", z.Key.ToString())));
+            //}
+            //XDocument x = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), t);
+
+            StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8);
+
+            var za = new XmlWriterSettings();
+            za.Encoding = Encoding.UTF8;
+
+            XmlWriter apo = XmlWriter.Create(sb, za);
+            appXml.Save(apo);
+            apo.Close();
+            return sb.ToString();
         }
 
         public XlsxAppXml()
