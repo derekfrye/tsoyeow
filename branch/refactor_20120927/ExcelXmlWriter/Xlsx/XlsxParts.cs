@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO.Packaging;
 using System.IO;
 using ExcelXmlWriter.Properties;
 using System.Data;
@@ -11,107 +10,34 @@ using ExcelXmlWriter.Xlsx;
 using System.Xml.Linq;
 using System.Xml;
 
-namespace ExcelXmlWriter
+namespace ExcelXmlWriter.Xlsx
 {
-
-    // fixme
-    public class FixMeContentTypes
-    {
-        protected XDocument appXml = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
-        XNamespace xn11 = "http://schemas.openxmlformats.org/package/2006/content-types";
-        public string Write()
-        {
-            //XNamespace xn2 = "http://schemas.openxmlformats.org/package/2006/relationships";
-
-            ////<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-
-            //var t = new XElement(xn2 + "Relationships");
-            //foreach (var z in rels)
-            //{
-            //    t.Add(new XElement(xn2 + "Relationship", new XAttribute("Type", z.Value.RelType), new XAttribute("Target", z.Value.path), new XAttribute("Id", z.Key.ToString())));
-            //}
-            //XDocument x = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), t);
-
-            StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8);
-
-            var za = new XmlWriterSettings();
-            za.Encoding = Encoding.UTF8;
-
-            XmlWriter apo = XmlWriter.Create(sb, za);
-            appXml.Save(apo);
-            apo.Close();
-            return sb.ToString();
-        }
-        internal FixMeContentTypes(XlsxWorksheetPartCollection worksheets)
-        {
-            appXml.Add(
-                new XElement(xn11 + "Types"
-                    , new XElement(xn11 + "Default", new XAttribute("Extension", "xml"), new XAttribute("ContentType", "application/xml"))
-                    , new XElement(xn11 + "Default", new XAttribute("Extension", "rels")
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-package.relationships+xml"))
-                    , new XElement(xn11 + "Override", new XAttribute("PartName", "/xl/workbook.xml")
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"))
-                    , new XElement(xn11 + "Override", new XAttribute("PartName", "/docProps/core.xml")
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-package.core-properties+xml"))
-                    , new XElement(xn11 + "Override", new XAttribute("PartName", "/xl/theme/theme1.xml")
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.theme+xml"))
-                    , new XElement(xn11 + "Override", new XAttribute("PartName", "/xl/styles.xml")
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"))
-                    , new XElement(xn11 + "Override", new XAttribute("PartName", "/xl/sharedStrings.xml")
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"))
-                    , new XElement(xn11 + "Override", new XAttribute("PartName", "/docProps/app.xml")
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.extended-properties+xml"))
-                ));
-
-            foreach (var x in worksheets.aa)
-            {
-                 appXml.Elements().First(xx => xx.Name.LocalName== "Types"&&xx.Name.Namespace==xn11).Add(new XElement(xn11 + "Override", new XAttribute("PartName", x.filenm)
-                        , new XAttribute("ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml")));
-            }
-        }
-    }
-
-
-
     public class XlsxParts : IExcelBackend
     {
-
-        //Package packageObject;
         ZipFile z;
-        Rels r;
-        Rels relsforwkshts;
+        Stream p;
+        Relationships mainRels;
+        Relationships xlRels;
         XlsxWorkbookMetadata workbookXml;
-        ZipAAA workbookXmlPackagePart;
+        ContentRelationships workbookXmlPackagePart;
         XlsxSharedStringsXml sharedStrings;
 
         XlsxWorksheet currentWorksheet;
-        XlsxWorksheetPartCollection worksheets;
+        List<XlsxWorksheet> worksheets = new List<XlsxWorksheet>();
 
         public void CreateSheet(int sheetCount, int subSheetCount, string sheetName, DataRowCollection resultHeaders)
         {
-            //Uri u4 = new Uri(, UriKind.Relative);
-            
-            string shtnm ="worksheets/sheet" + sheetCount.ToString() + "_" + subSheetCount.ToString() + ".xml";
-            string filnm = "/xl/"+shtnm;
-            var djfk = new ZipAAA() { path = shtnm, RelType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" };
-            relsforwkshts.Link(djfk);
-            string id = relsforwkshts.Id(djfk).ToString();
+            string shtnm = "worksheets/sheet" + sheetCount.ToString() + "_" + subSheetCount.ToString() + ".xml";
+            string filnm = "/xl/" + shtnm;
+            var djfk = new ContentRelationships() { PackagePath = shtnm, RelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" };
+            xlRels.Link(djfk);
+            string id = xlRels.Id(djfk).ToString();
 
-            //PackagePart pt = packageObject.CreatePart(u4, "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml", CompressionOption.Normal);
-            //string id = workbookXmlPackagePart.CreateRelationship(new Uri("worksheets/sheet" + sheetCount.ToString()
-            //    + "_" + subSheetCount.ToString() + ".xml", UriKind.Relative), TargetMode.Internal
-            //   , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet").Id;
-
-            string jf=Path.GetTempFileName();
+            string jf = Path.GetTempFileName();
             var strm1 = new FileStream(jf, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
             var strm = z.AddEntry(filnm, strm1).InputStream;
-            XlsxWorksheet w = new XlsxWorksheet(strm, sheetCount, subSheetCount, sheetName, id, resultHeaders, sharedStrings,jf);
-            w.filenm = filnm;
+            XlsxWorksheet w = new XlsxWorksheet(strm, sheetName, id, resultHeaders, sharedStrings, jf,filnm);
 
-
-            
-
-            
             worksheets.Add(w);
             currentWorksheet = w;
         }
@@ -119,79 +45,65 @@ namespace ExcelXmlWriter
         public void CloseSheet()
         {
             currentWorksheet.Close();
-            //StaticFunctions.copyStream(currentWorksheet.s, worksheets.retrieveStream(currentWorksheet));
         }
 
         public void Close()
         {
             XlsxAppXml a = new XlsxAppXml();
-            //a.LinkToPackage(packageObject);
-            a.SetSheetCount(worksheets.aa);
-            r.Link(a.LinkToPackage());
 
-            workbookXml.SetSheetCount(worksheets.aa);
+            a.SetSheetCount(worksheets);
+            mainRels.Link(XlsxAppXml.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties", "docProps/app.xml"));
 
-            //sharedStrings.close();
+            workbookXml.SetSheetCount(worksheets);
 
-            //packageObject.Close();
-            z.AddEntry("_rels/.rels", r.Write().ToString());
+            z.AddEntry("_rels/.rels", mainRels.Write().ToString());
 
             z.AddEntry("/docProps/app.xml", a.Write().ToString());
 
-            FixMeContentTypes f = new FixMeContentTypes(worksheets);
+            ContentTypes f = new ContentTypes(worksheets);
             z.AddEntry("/[Content_Types].xml", f.Write());
 
             z.AddEntry("/xl/workbook.xml", workbookXml.Write());
 
-            z.AddEntry("/xl/_rels/workbook.xml.rels", relsforwkshts.Write());
-            sharedStrings.close();
-            z.Save();
+            z.AddEntry("/xl/_rels/workbook.xml.rels", xlRels.Write());
+            sharedStrings.Close();
+            z.Save(p);
 
-            foreach (var djfak in worksheets.aa)
+            foreach (var djfak in worksheets)
             {
-                djfak.sasdf.Close();
-                if(File.Exists(djfak.filenmOs))
-                File.Delete(djfak.filenmOs);
+                djfak.OutputStream.Close();
+                if (File.Exists(djfak.FileAssociatedWithOutputStream))
+                    File.Delete(djfak.FileAssociatedWithOutputStream);
             }
 
-            
-            sharedStrings.s.Close();
-            if (File.Exists(sharedStrings.jf))
-                File.Delete(sharedStrings.jf);
+            sharedStrings.OutputStream.Close();
+            if (File.Exists(sharedStrings.FileAssociateWithOutputStream))
+                File.Delete(sharedStrings.FileAssociateWithOutputStream);
         }
 
-        public XlsxParts(string path)
+        public XlsxParts(Stream path)
         {
-            //packageObject = Package.Open(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
-            if (File.Exists(path))
-                File.Delete(path);
-            z = new ZipFile(path);
+            p=path;
+        	z = new ZipFile();
 
-             r = new Rels();
-             relsforwkshts = new Rels();
-
-            worksheets = new XlsxWorksheetPartCollection();
-
-            
+            mainRels = new Relationships();
+            xlRels = new Relationships();
 
             #region workbook.xml_Content_Type
 
             workbookXml = new XlsxWorkbookMetadata();
-            workbookXmlPackagePart = workbookXml.LinkToPackage();
-            r.Link(workbookXmlPackagePart);
-            
+            workbookXmlPackagePart = XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument", "xl/workbook.xml");
+            mainRels.Link(workbookXmlPackagePart);
 
             #endregion
 
             #region core.xml
 
-            XlsxPart core = new XlsxPart(Settings.Default.CoreXml);
             XDocument xdjfkd = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
 
             xdjfkd = XDocument.Parse(Settings.Default.CoreXml.OuterXml, LoadOptions.None);
-            r.Link(core.LinkToPackage("http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties","docProps/core.xml"
+            mainRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties", "docProps/core.xml"
                 ));
-            
 
             StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8);
 
@@ -203,25 +115,16 @@ namespace ExcelXmlWriter
             apo.Close();
 
             z.AddEntry("/docProps/core.xml", sb.ToString());
-            //core.close();
 
             #endregion
 
             #region theme
 
-            //Uri u7 = new Uri("/xl/theme/theme1.xml", UriKind.Relative);
-            //PackagePart p7 = packageObject.CreatePart(u7, "application/vnd.openxmlformats-officedocument.theme+xml", CompressionOption.Normal);
-            //Settings.Default.ThemeXml.Save(p7.GetStream());
-            //p7.GetStream().Close();
-            //workbookXmlPackagePart.CreateRelationship(new Uri("theme/theme1.xml", UriKind.Relative), TargetMode.Internal
-            //    , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme");
-            XlsxPart theme = new XlsxPart(Settings.Default.ThemeXml);
             XDocument xdjfkdd = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
 
             xdjfkdd = XDocument.Parse(Settings.Default.ThemeXml.OuterXml, LoadOptions.None);
-            relsforwkshts.Link(theme.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme","theme/theme1.xml"
+            xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme", "theme/theme1.xml"
                 ));
-
 
             StringWriterWithEncoding sbs = new StringWriterWithEncoding(Encoding.UTF8);
 
@@ -238,19 +141,11 @@ namespace ExcelXmlWriter
 
             #region styles
 
-            //Uri u8 = new Uri("/xl/styles.xml", UriKind.Relative);
-            //PackagePart p8 = packageObject.CreatePart(u8, "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml", CompressionOption.Normal);
-            //Settings.Default.StylesXml.Save(p8.GetStream());
-            //p8.GetStream().Close();
-            //workbookXmlPackagePart.CreateRelationship(new Uri("styles.xml", UriKind.Relative), TargetMode.Internal
-            //    , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles");
-            XlsxPart styles = new XlsxPart(Settings.Default.StylesXml);
             XDocument xdjfkdsa = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
 
             xdjfkdsa = XDocument.Parse(Settings.Default.StylesXml.OuterXml, LoadOptions.None);
-           relsforwkshts.Link(styles.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles","styles.xml"
-                ));
-
+            xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles", "styles.xml"
+                 ));
 
             StringWriterWithEncoding sasb = new StringWriterWithEncoding(Encoding.UTF8);
 
@@ -267,25 +162,20 @@ namespace ExcelXmlWriter
 
             #region sharedstrings
 
-            
             string jf = Path.GetTempFileName();
             var strm1 = new FileStream(jf, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            var t = z.AddEntry("/xl/sharedStrings.xml", strm1);
+            z.AddEntry("/xl/sharedStrings.xml", strm1);
             sharedStrings = new XlsxSharedStringsXml(strm1, jf);
-            //r.Link(sharedStrings.LinkToPackage());
-            relsforwkshts.Link(sharedStrings.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings","sharedStrings.xml"));
+
+            xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings", "sharedStrings.xml"));
 
             #endregion
 
-            
-
-            
         }
 
         public void WriteRow(IDataReader queryReader)
         {
-            
-            currentWorksheet.writerow(queryReader, sharedStrings);
+            currentWorksheet.writerow(queryReader);
         }
     }
 }

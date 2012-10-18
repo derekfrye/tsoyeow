@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
 using System.Data.SqlClient;
+using Ionic.Zip;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -22,7 +23,7 @@ namespace ExcelXmlWriterTest
         ///A test for Workbook Constructor
         ///</summary>
         [Test()]
-        public void WorkbookFromFileConstructorTest()
+        public void BrokenWorkbookFromFileConstructorTest()
         {
             WorkBookParams p = new WorkBookParams();
 
@@ -35,15 +36,15 @@ namespace ExcelXmlWriterTest
                 + "Resources" + Path.DirectorySeparatorChar.ToString()
                 + "Data.xml";
 
-            p.query = path;
-            p.fromFile = true;
+            p.Query = path;
+            p.FromFile = true;
             //p.connStr = connStr;
             //p.columnTypeMappings = columnTypeMappings;
-            p.maxRowsPerSheet = 100000;
+            p.MaxRowsPerSheet = 100000;
             //p.resultNames = resultNames;
             
             //p.defaultColumnType = ExcelDataType.General;
-            p.queryTimeout = 0;
+            p.QueryTimeout = 0;
             //p.numberFormatCulture = c1;
 
             Workbook target = new Workbook(p);
@@ -83,7 +84,7 @@ namespace ExcelXmlWriterTest
         }
 
         [Test()]
-        public void WorkbookQueryConstructorTest()
+        public void BrokenWorkbookQueryConstructorTest()
         {
             WorkBookParams p = new WorkBookParams();
 
@@ -97,21 +98,21 @@ namespace ExcelXmlWriterTest
                 + "SQL.sql";
 
             StreamReader sr = new StreamReader(path);
-            p.query = sr.ReadToEnd();
+            p.Query = sr.ReadToEnd();
             sr.Close();
-            p.fromFile = false;
+            p.FromFile = false;
 
             SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
             sb.DataSource = @".";
                 sb.InitialCatalog = "master";
             sb.IntegratedSecurity = true;
-p.connStr = sb.ConnectionString;
+			p.ConnectionString = sb.ConnectionString;
             //p.columnTypeMappings = columnTypeMappings;
-            p.maxRowsPerSheet = 100000;
+            p.MaxRowsPerSheet = 100000;
             //p.resultNames = resultNames;
            //p.defaultColumnType = ExcelDataType.General;
-            p.queryTimeout = 0;
-            p.writeEmptyResultSetColumns = false;
+            p.QueryTimeout = 0;
+            p.WriteEmptyResultSetColumns = false;
             //p.numberFormatCulture = c1;
 
             Workbook target = new Workbook(p);
@@ -150,7 +151,7 @@ p.connStr = sb.ConnectionString;
             Assert.AreEqual(x3.Value, "2009-12-08T18:19:17");
             Assert.AreEqual(x3.Attribute("{urn:schemas-microsoft-com:office:spreadsheet}Type").Value, "DateTime");
 
-            p.writeEmptyResultSetColumns = true;
+            p.WriteEmptyResultSetColumns = true;
             target = new Workbook(p);
             fs = new MemoryStream();
 
@@ -198,7 +199,7 @@ p.connStr = sb.ConnectionString;
         }
 
         [Test()]
-        public void WorkbookQueryWriteResultsOverSizeTest()
+        public void BrokenWorkbookQueryWriteResultsOverSizeTest()
         {
             WorkBookParams p = new WorkBookParams();
 
@@ -212,23 +213,23 @@ p.connStr = sb.ConnectionString;
                 + "SQL exceeds filesize limit.sql";
 
             StreamReader sr = new StreamReader(path);
-            p.query = sr.ReadToEnd();
+            p.Query = sr.ReadToEnd();
             sr.Close();
-            p.fromFile = false;
+            p.FromFile = false;
 
             SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
             sb.DataSource = @".";
             sb.InitialCatalog = "master";
             sb.IntegratedSecurity = true;
-            p.connStr = sb.ConnectionString;
+            p.ConnectionString = sb.ConnectionString;
             //p.columnTypeMappings = columnTypeMappings;
-            p.maxRowsPerSheet = 100000;
+            p.MaxRowsPerSheet = 100000;
             //p.resultNames = resultNames;
-            p.defaultColumnType = ExcelDataType.General;
-            p.queryTimeout = 0;
+            //p.de = ExcelDataType.General;
+            p.QueryTimeout = 0;
             // 1 MB
             p.MaxWorkBookSize = 1000000;
-            p.writeEmptyResultSetColumns = false;
+            p.WriteEmptyResultSetColumns = false;
             //p.numberFormatCulture = c1;
 
             Workbook target = new Workbook(p);
@@ -311,7 +312,7 @@ p.connStr = sb.ConnectionString;
         }
 
         [Test()]
-        public void WorkbookQueryWriteResultOverSizeTest()
+        public void BrokenWorkbookQueryWriteResultOverSizeTest()
         {
             WorkBookParams p = new WorkBookParams();
 
@@ -325,23 +326,23 @@ p.connStr = sb.ConnectionString;
                 + "SQL exceeds filesize limit 5 result sets.sql";
 
             StreamReader sr = new StreamReader(path);
-            p.query = sr.ReadToEnd();
+            p.Query = sr.ReadToEnd();
             sr.Close();
-            p.fromFile = false;
+            p.FromFile = false;
 
             SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
             sb.DataSource = @".";
             sb.InitialCatalog = "master";
             sb.IntegratedSecurity = true;
-            p.connStr = sb.ConnectionString;
+            p.ConnectionString = sb.ConnectionString;
             //p.columnTypeMappings = columnTypeMappings;
-            p.maxRowsPerSheet = 100000;
+            p.MaxRowsPerSheet = 100000;
             //p.resultNames = resultNames;
-            p.defaultColumnType = ExcelDataType.General;
-            p.queryTimeout = 0;
+            //p.DefaultColumnType = ExcelDataType.General;
+            p.QueryTimeout = 0;
             // 100 KB
             p.MaxWorkBookSize = 100000;
-            p.writeEmptyResultSetColumns = false;
+            p.WriteEmptyResultSetColumns = false;
             //p.numberFormatCulture = c1;
 
             Workbook target = new Workbook(p);
@@ -479,7 +480,7 @@ p.connStr = sb.ConnectionString;
         }
         
         [Test()]
-        public void XlsxFromFileSeparateTabsTest()
+        public void IncompleteXlsxFromFileSeparateTabsTest()
         {
             WorkBookParams p = new WorkBookParams();
 
@@ -492,16 +493,16 @@ p.connStr = sb.ConnectionString;
                 + "Resources" + Path.DirectorySeparatorChar.ToString()
                 + "Data.xml";
 
-            p.query = path;
-            p.fromFile = true;
+            p.Query = path;
+            p.FromFile = true;
             //p.connStr = connStr;
             //p.columnTypeMappings = columnTypeMappings;
-            p.maxRowsPerSheet = 100000;
-            p.resultNames = new Dictionary<int, string>();
-            p.resultNames.Add(1, "blah blah");
-            p.resultNames.Add(2, "x");
+            p.MaxRowsPerSheet = 100000;
+            p.ResultNames = new Dictionary<int, string>();
+            p.ResultNames.Add(1, "blah blah");
+            p.ResultNames.Add(2, "x");
             
-            p.queryTimeout = 0;
+            p.QueryTimeout = 0;
             //p.numberFormatCulture = c1;
 
             Workbook target = new Workbook(p);
@@ -522,20 +523,32 @@ p.connStr = sb.ConnectionString;
 
             File.Copy(path1, path2, true);
 
-            Package pa = Package.Open(path2);
+            //Package pa = Package.Open(path2);
+            ZipFile z = new ZipFile(path2);
+            var t = z.SelectEntries("xl/worksheets/sheet1_1.xml").First();
+            MemoryStream ms = new MemoryStream();
+            t.Extract(ms);
+            ms.Flush();
+            ms.Seek(0, SeekOrigin.Begin);
 
-            PackagePart strm = pa.GetPart(new Uri("/xl/worksheets/sheet1_1.xml", UriKind.Relative));
+            //PackagePart strm = pa.GetPart(new Uri("/xl/worksheets/sheet1_1.xml", UriKind.Relative));
 
-            Stream m = strm.GetStream(FileMode.Open, FileAccess.Read);
+            //Stream m = t.InputStream;
 
-            StreamReader sr = new StreamReader(m, Encoding.UTF8);
-            XDocument x = XDocument.Parse(sr.ReadToEnd(), LoadOptions.None);
+            StreamReader sr = new StreamReader(ms, Encoding.UTF8);
+            string b = sr.ReadToEnd();
+            XDocument x = XDocument.Parse(b, LoadOptions.None);
 
-            m.Close();
+            ms.Close();
+
+            var asdz = x.Elements().First(aa => aa.Name.LocalName == "worksheet").Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
+                .First(aaa => aaa.Name.LocalName == "row"
+                && aaa
+                .Elements().Where(bbb => bbb.Name.LocalName == "c").Any(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1))
+                .Elements().First(ccc => ccc.Name.LocalName == "c" && ccc.Attributes("s").Any() && Convert.ToInt32(ccc.Attribute("s").Value) == 1).Value;
 
             // ensure correct xl date value
-            Assert.AreEqual(Convert.ToDouble(x.Element("worksheet").Element("sheetData").Elements("row").First()
-                .Elements("c").Where(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1).First().Element("v").Value)
+            Assert.AreEqual(Convert.ToDouble(asdz)
             , 40155.7633988426);
 
             // ensure correct xl date value
@@ -556,7 +569,7 @@ p.connStr = sb.ConnectionString;
                 .Elements("c").Where(xx => xx.Attributes("t").Any() && xx.Attribute("t").Value == "s").First().Element("v").Value)
                 , 1);
 
-            pa.Close();
+            
         }
     }
 }

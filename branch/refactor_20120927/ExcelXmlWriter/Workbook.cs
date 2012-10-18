@@ -13,6 +13,7 @@ using System.Data.SqlClient;
 using ExcelXmlWriter.Properties;
 using System.Xml.Linq;
 using System.Xml;
+using ExcelXmlWriter.Xlsx;
 
 namespace ExcelXmlWriter
 {
@@ -25,58 +26,68 @@ namespace ExcelXmlWriter
         /// <summary>
         /// The query to execute and output results to the workbook.
         /// </summary>
-        public string query;
+        public string Query
+        { get; set; }
         /// <summary>
         /// The Sql Server connection string.
         /// </summary>
-        public string connStr;
+        public string ConnectionString
+        { get; set; }
         /// <summary>
         /// The filetype to write.
         /// </summary>
-        public ExcelBackend backendMethod;
+        public ExcelBackend BackendMethod
+        { get; set; }
         /// <summary>
         /// If true, the query is a path to an XML file representation of a DataSet.
         /// </summary>
-        public bool fromFile;
+        public bool FromFile
+        { get; set; }
         /// <summary>
         /// The maximum number of rows to write per worksheet before starting a new worksheet with remaining rows.
         /// </summary>
-        public int maxRowsPerSheet;
+        public int MaxRowsPerSheet
+        { get; set; }
         /// <summary>
         /// If provided, a 1-based index of column numbers and the corresponding ExcelDataType to cast each written value.
         /// </summary>
-        public Dictionary<int, ExcelDataType> columnTypeMappings;
+        public Dictionary<int, ExcelDataType> ColumnTypeMappings
+        { get; private set; }
         /// <summary>
         /// If provided, a 1-based index of result set numbers and the corresponding WorkSheet name.
         /// </summary>
-        public Dictionary<int, string> resultNames;
+        public Dictionary<int, string> ResultNames
+        { get; set; }
         /// <summary>
         /// If provided, the time in seconds to wait for the query to execute. The default is 30 seconds.
         /// </summary>
-        public int queryTimeout;
+        public int QueryTimeout
+        { get; set; }
         /// <summary>
         /// If a result set returns with no rows, this controls whether an empty worksheet is written or not (containing just the column headers). The default is true.
         /// </summary>
-        public bool writeEmptyResultSetColumns;
+        public bool WriteEmptyResultSetColumns
+        { get; set; }
         /// <summary>
         /// The maximum workbook size in bytes; this value is checked after writing each row.
         /// Excel refuses to open files larger than 2GiB, so this value defaults to 2,000,000,000 to be safe.
         /// If this value is met or exceeded, the workbook finishes writing the necessary data to close the workbook and stops processing the query results.
         /// The recommended action after exceeding this value is to finish writing the remaining query results to a new stream.
         /// </summary>
-        public int MaxWorkBookSize;
+        public int MaxWorkBookSize
+        { get; set; }
 
         public bool AutoRewriteOverpunch
         { get; set; }
 
         public WorkBookParams()
         {
-            queryTimeout = 30;
-            resultNames = new Dictionary<int, string>();
-            columnTypeMappings = new Dictionary<int, ExcelDataType>();
-            writeEmptyResultSetColumns = true;
+            QueryTimeout = 30;
+            ResultNames = new Dictionary<int, string>();
+            ColumnTypeMappings = new Dictionary<int, ExcelDataType>();
+            WriteEmptyResultSetColumns = true;
             MaxWorkBookSize = 2000000000;
-            backendMethod = ExcelBackend.Xlsx;
+            BackendMethod = ExcelBackend.Xlsx;
         }
     }
 
@@ -183,9 +194,9 @@ namespace ExcelXmlWriter
         {
             this.runParameters = p1;
             // max rows is actually max rows subtract 1, since we're including row headers
-            this.runParameters.maxRowsPerSheet = this.runParameters.maxRowsPerSheet - 1;
+            this.runParameters.MaxRowsPerSheet = this.runParameters.MaxRowsPerSheet - 1;
 
-            queryReader = new QueryReader(runParameters.query, runParameters.queryTimeout, runParameters.fromFile, runParameters.connStr);
+            queryReader = new QueryReader(runParameters.Query, runParameters.QueryTimeout, runParameters.FromFile, runParameters.ConnectionString);
 
             workers = new List<WorkerProgress>();
 
@@ -234,7 +245,18 @@ namespace ExcelXmlWriter
         /// </summary>
         public WorkBookStatus WriteQueryResults(string path)
         {
-            return WriteQueryResults(path, true);
+        	FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            WorkBookStatus t=WriteQueryResults(fs, true);
+            fs.Close();
+            return t;
+        }
+        
+         /// <summary>
+        /// Write the query result set(s) to the specified stream, starting a new worksheet for each resultset.
+        /// </summary>
+        public WorkBookStatus WriteQueryResults(Stream stream)
+        {
+            return WriteQueryResults(stream, true);
         }
 
         /// <summary>
@@ -242,7 +264,18 @@ namespace ExcelXmlWriter
         /// </summary>
         public WorkBookStatus WriteQueryResult(string path)
         {
-            return WriteQueryResults(path, false);
+            FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+            WorkBookStatus t=WriteQueryResults(fs, false);
+            fs.Close();
+            return t;
+        }
+
+        /// <summary>
+        /// Write the current query result set to the specified stream.
+        /// </summary>
+        public WorkBookStatus WriteQueryResult(Stream stream)
+        {
+            return WriteQueryResults(stream, false);
         }
 
         /// <summary>
@@ -256,14 +289,14 @@ namespace ExcelXmlWriter
 
         #endregion
 
-        WorkBookStatus WriteQueryResults(string path, bool multipleSheetsPerStream)
+        WorkBookStatus WriteQueryResults(Stream path, bool multipleSheetsPerStream)
         {
             if (!queryRan)
             {
                 throw new WorkbookNotStartedException();
             }
 
-            switch (runParameters.backendMethod)
+            switch (runParameters.BackendMethod)
             {
                 case ExcelBackend.Xlsx:
                     pts = new XlsxParts(path);
@@ -283,7 +316,7 @@ namespace ExcelXmlWriter
             bool workbookTooBig = false;
 
         READ:
-            if (runParameters.writeEmptyResultSetColumns)
+            if (runParameters.WriteEmptyResultSetColumns)
             {
                 // create the worksheet
                 pts.CreateSheet(queryReader.CurrentResult
@@ -322,7 +355,7 @@ namespace ExcelXmlWriter
                 }
 
                 // if we've hit the max number of rows per sheet
-                if (rowCount % runParameters.maxRowsPerSheet == 0)
+                if (rowCount % runParameters.MaxRowsPerSheet == 0)
                 {
                     // close the worksheet
                     pts.CloseSheet();
@@ -372,10 +405,10 @@ namespace ExcelXmlWriter
         string retrieveSheetName(int sheetCount, int sheetSubCount)
         {
 
-            if (runParameters.resultNames != null && runParameters.resultNames.ContainsKey(sheetCount))
+            if (runParameters.ResultNames != null && runParameters.ResultNames.ContainsKey(sheetCount))
             {
 
-                return runParameters.resultNames[sheetCount] + "_" + sheetSubCount.ToString();
+                return runParameters.ResultNames[sheetCount] + "_" + sheetSubCount.ToString();
             }
             else
                 return "Sheet" + sheetCount.ToString() + "_" + sheetSubCount.ToString();

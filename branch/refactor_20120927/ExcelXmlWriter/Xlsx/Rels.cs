@@ -8,81 +8,71 @@ using System.IO;
 
 namespace ExcelXmlWriter.Xlsx
 {
-    public sealed class StringWriterWithEncoding : StringWriter
-    {
-        private readonly Encoding encoding;
-
-        public StringWriterWithEncoding(Encoding encoding)
-        {
-            this.encoding = encoding;
-        }
-
-        public override Encoding Encoding
-        {
-            get { return encoding; }
-        }
-    }
-
-    static class RelInt
+    static class RelationshipIdGenerator
     {
         static readonly object ll = new object();
         static int i = 0;
-        public static string A()
+        internal static string RetrieveNextId()
         {
             lock (ll)
             {
                 i = i + 1;
-                
+
             }
-            return "rId"+i.ToString();
+            // Excel must have rId prefixed to the Id.
+            return "rId" + i.ToString();
         }
     }
 
-    class Rels
+    class ContentRelationships
     {
-        Dictionary<string,ZipAAA> rels;
-        //int i = 0;
+        internal string PackagePath
+        { get; set; }
+        internal string RelationshipType
+        { get; set; }
+    }
 
-        public Rels()
+    class Relationships
+    {
+        Dictionary<string, ContentRelationships> rels;
+
+        internal Relationships()
         {
-            rels = new Dictionary<string, ZipAAA>();
+            rels = new Dictionary<string, ContentRelationships>();
         }
 
-        public string Id(ZipAAA x)
+        internal string Id(ContentRelationships x)
         {
             return rels.First(xx => xx.Value == x).Key;
         }
 
-        public void Link(ZipAAA x)
+        internal void Link(ContentRelationships x)
         {
-            //i = i + 1;
-            var t = RelInt.A();
-            rels.Add(t,x);
+            var t = RelationshipIdGenerator.RetrieveNextId();
+            rels.Add(t, x);
         }
 
-        public string Write()
+        internal string Write()
         {
             XNamespace xn2 = "http://schemas.openxmlformats.org/package/2006/relationships";
 
-            //<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-            
             var t = new XElement(xn2 + "Relationships");
             foreach (var z in rels)
             {
-                t.Add(new XElement(xn2 + "Relationship", new XAttribute("Type", z.Value.RelType), new XAttribute("Target", z.Value.path), new XAttribute("Id", z.Key.ToString())));
+                t.Add(new XElement(xn2 + "Relationship", new XAttribute("Type", z.Value.RelationshipType), new XAttribute("Target", z.Value.PackagePath), new XAttribute("Id", z.Key.ToString())));
             }
             XDocument x = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), t);
 
             StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8);
-            
+
             var za = new XmlWriterSettings();
             za.Encoding = Encoding.UTF8;
-            
+
             XmlWriter apo = XmlWriter.Create(sb, za);
             x.Save(apo);
             apo.Close();
             return sb.ToString();
         }
-    
+
     }
 }

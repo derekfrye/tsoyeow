@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartArguments>ExcelXmlWriterNTest.csproj</StartArguments>
-    <StartWorkingDirectory>C:\scratch\y\git\Tsoyeow\ExcelXmlWriterNTest\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\scratch\temp\a\ExcelXmlWriterNTest</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <StartArguments>ExcelXmlWriterNTest.csproj</StartArguments>

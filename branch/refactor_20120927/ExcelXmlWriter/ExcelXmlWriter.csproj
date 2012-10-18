@@ -72,7 +72,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Xlsx\ContentTypes.cs" />
     <Compile Include="Xlsx\Rels.cs" />
+    <Compile Include="Xlsx\StringWriterWithEncoding.cs" />
     <Compile Include="Xlsx\XlsxData.cs" />
     <Compile Include="WorkbookEvents.cs" />
     <Compile Include="StaticFunctions.cs" />
@@ -96,7 +98,6 @@
     <Compile Include="Xml2003Table.cs" />
     <Compile Include="Workbook.cs" />
     <Compile Include="Xlsx\XlsxWorksheet.cs" />
-    <Compile Include="Xlsx\XlsxWorksheetPart.cs" />
     <Compile Include="Xlsx\XlsxPart.cs" />
     <Compile Include="Xlsx\XlsxParts.cs" />
   </ItemGroup>

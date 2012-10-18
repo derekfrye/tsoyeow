@@ -5,25 +5,21 @@ using ExcelXmlWriter;
 using System.Globalization;
 using System.IO;
 
-namespace ExcelXmlWriter
+namespace ExcelXmlWriter.Xlsx
 {
-   
     static class XlsxData
     {
-        
-        static readonly DateTime ExcelSince = new DateTime(1899, 12, 30, 0, 0, 0, DateTimeKind.Utc); 
+        static readonly DateTime ExcelSince = new DateTime(1899, 12, 30, 0, 0, 0, DateTimeKind.Utc);
 
-        internal static string DataVal(string val, ExcelDataType e)
+        internal static string ConvertToWriteableValue(string value, ExcelDataType dataType)
         {
-          //  StringBuilder sb = new StringBuilder();
+            if (dataType == ExcelDataType.Date)
+                return (((TimeSpan)(Convert.ToDateTime(value, CultureInfo.CurrentCulture) - ExcelSince)).TotalDays).ToString();
+            else if (dataType == ExcelDataType.Number)
+                return value.Trim();
+            else
+                return value;
 
-          if(e == ExcelDataType.Date)
-          	return (((TimeSpan) (Convert.ToDateTime(val, CultureInfo.CurrentCulture) - ExcelSince)).TotalDays).ToString();
-          else if(e==ExcelDataType.Number)
-                    return val.Trim();
-                    else 
-                    	return val;
-                
-            }
-    } 
+        }
+    }
 }

@@ -163,10 +163,10 @@ namespace ExcelXmlQueryResults
             p.p.query = path;
             p.p.fromFile = true;
 #else
-            p.p.query = richTextBox1.Text;
-            p.p.fromFile = false;
+            p.p.Query = richTextBox1.Text;
+            p.p.FromFile = false;
 #endif
-            p.p.connStr = connStr;
+            p.p.ConnectionString = connStr;
 
             // prevent changes while writing data
             LockUnlockGUIControls(true);
@@ -237,16 +237,16 @@ namespace ExcelXmlQueryResults
             {
                 int currentFile = 1;
                 // if we have a name for this file, retrieve it
-                if (p1.p.resultNames.ContainsKey(currentFile))
-                    filename = changeFileNameBaseName(filename, p1.p.resultNames[currentFile]);
+                if (p1.p.ResultNames.ContainsKey(currentFile))
+                    filename = changeFileNameBaseName(filename, p1.p.ResultNames[currentFile]);
                 
                 while (wb.NextResult())
                 {
                     if (currentFile != 1)
                     {
                         // if we have a name for this file, retrieve it
-                        if (p1.p.resultNames.ContainsKey(currentFile))
-                            filename = changeFileNameBaseName(filename, p1.p.resultNames[currentFile]);
+                        if (p1.p.ResultNames.ContainsKey(currentFile))
+                            filename = changeFileNameBaseName(filename, p1.p.ResultNames[currentFile]);
                         // otherwise, get the next filename in sequence
                         else
                             filename = getIncrFileName(currentFile, orig_filename);

@@ -61,13 +61,13 @@ namespace ExcelXmlQueryResults
                 textBox3.Text = c.GetValue("ConnectionUsername");
                 textBox4.Text = c.GetValue("ConnectionPassword");
 
-                checkBox1.Checked = p.p.writeEmptyResultSetColumns;
+                checkBox1.Checked = p.p.WriteEmptyResultSetColumns;
                 checkBox2.Checked = p.p.AutoRewriteOverpunch;
 
-                textBox5.Text = p.p.queryTimeout.ToString();
-                textBox6.Text = p.p.maxRowsPerSheet.ToString();
+                textBox5.Text = p.p.QueryTimeout.ToString();
+                textBox6.Text = p.p.MaxRowsPerSheet.ToString();
 
-                var p1 = p.p.resultNames;
+                var p1 = p.p.ResultNames;
                 int count = 0;
                 foreach (object o in p1.Keys)
                 {
@@ -117,24 +117,24 @@ namespace ExcelXmlQueryResults
             ExcelXmlQueryResultsParams a = new ExcelXmlQueryResultsParams();
             a.p = new WorkBookParams();
             a.newResultSetMethod = c.GetValue("NewResultSet");
-            a.p.writeEmptyResultSetColumns = Convert.ToBoolean(c.GetValue("WriteEmptyResultColumnHeaders"));
+            a.p.WriteEmptyResultSetColumns = Convert.ToBoolean(c.GetValue("WriteEmptyResultColumnHeaders"));
             a.p.AutoRewriteOverpunch = Convert.ToBoolean(c.GetValue("AutoRewriteOverpunch"));
-            a.p.backendMethod = Enum.GetValues(typeof(ExcelBackend))
+            a.p.BackendMethod = Enum.GetValues(typeof(ExcelBackend))
                             .Cast<ExcelBackend>()
                             .Where(x => String.Equals(x.ToString(), c.GetValue("ExcelFileType"))).First();
 
             int res = 0;
             if (!Int32.TryParse(c.GetValue("MaxRowsPerSheet"), out res))
-                a.p.maxRowsPerSheet = Convert.ToInt32(Resources.DefaultMaxRowsPerSheet);
+                a.p.MaxRowsPerSheet = Convert.ToInt32(Resources.DefaultMaxRowsPerSheet);
             else
-                a.p.maxRowsPerSheet = Convert.ToInt32(c.GetValue("MaxRowsPerSheet"));
+                a.p.MaxRowsPerSheet = Convert.ToInt32(c.GetValue("MaxRowsPerSheet"));
             if (Int32.TryParse(c.GetValue("QueryTimeout"), out res))
-                a.p.queryTimeout = Convert.ToInt32(c.GetValue("QueryTimeout"));
+                a.p.QueryTimeout = Convert.ToInt32(c.GetValue("QueryTimeout"));
             
             var p1 = c.GetDictionary("ResultNames", typeof(int), typeof(string));
             foreach (object o in p1.Keys)
             {
-                a.p.resultNames.Add(Convert.ToInt32(o)
+                a.p.ResultNames.Add(Convert.ToInt32(o)
                     , p1[o].ToString());
             }
 

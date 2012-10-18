@@ -104,7 +104,7 @@ namespace ExcelXmlWriter
                 return new Overpunch() { val = 0.0, IsOverpunchable = false };
         }
 
-        internal static ExcelDataType ResolveDataType(string dataValue, double significantDigits)
+        internal static ExcelDataType ResolveDataType(string dataValue)
         {
             decimal throwaway = new decimal();
             DateTime d = new DateTime();

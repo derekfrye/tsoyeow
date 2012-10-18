@@ -8,7 +8,11 @@ namespace ExcelXmlWriter
 {
     public class ReaderFinishedEvents: EventArgs
     {
-        public int totalRecordsRead;
+        public int totalRecordsRead
+        {
+            get;
+            private set;
+        }
 
         public ReaderFinishedEvents(int a)
         {
@@ -18,8 +22,13 @@ namespace ExcelXmlWriter
 
     public class QueryRowsOverTimeEvents : EventArgs
     {
-        public decimal rowsPerSecond;
-        public int total;
+        public decimal rowsPerSecond
+        { get; private set; }
+        public int total
+        {
+            get;
+            private set;
+        }
 
         public QueryRowsOverTimeEvents(decimal rowsPerSecond, int total)
         {
@@ -30,7 +39,8 @@ namespace ExcelXmlWriter
 
     public class QueryExceptionEvents : EventArgs
     {
-        public Exception e;
+        public Exception e 
+        { get; private set; }
 
         public QueryExceptionEvents(Exception e)
         {
