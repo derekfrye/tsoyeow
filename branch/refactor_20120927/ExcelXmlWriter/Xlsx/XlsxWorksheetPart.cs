@@ -10,18 +10,18 @@ namespace ExcelXmlWriter
     class XlsxWorksheetPartCollection
     {
         IList<XlsxWorksheet> worksheets;
-        IList<PackagePart> packageparts;
+        //IList<PackagePart> packageparts;
 
         internal XlsxWorksheetPartCollection()
         {
             worksheets = new List<XlsxWorksheet>();
-            packageparts = new List<PackagePart>();
+          //  packageparts = new List<PackagePart>();
         }
 
         internal void Add(XlsxWorksheet w1, System.IO.Packaging.PackagePart pt1)
         {
             worksheets.Add(w1);
-            packageparts.Add(pt1);
+            //packageparts.Add(pt1);
         }
 
         internal IList<XlsxWorksheet> aa

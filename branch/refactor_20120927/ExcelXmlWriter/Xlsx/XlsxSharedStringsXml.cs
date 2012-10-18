@@ -76,7 +76,7 @@ namespace ExcelXmlWriter
 				// if we can't find the value (as opposed to a hashcode collision)
 				// we need to write it to sharedstrings, and add it to the lookup array
 				// FIXME make this count() test a parameter
-				if (!found && sharedStringDictionary.Count < 5)
+				if (!found && sharedStringDictionary.Count < 500000)
 				{
 					sharedStringDictionary.Add(hdhdsdafd, new Tuple<long,string>(curentSharedStringPosition, sa));
 				}

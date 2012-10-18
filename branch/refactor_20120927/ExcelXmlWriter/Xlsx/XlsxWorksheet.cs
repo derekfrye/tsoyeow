@@ -18,7 +18,9 @@ namespace ExcelXmlWriter
 		XmlWriter wx;
 		string id;
 		Stream sasdf;
-		
+        public bool closed
+        { get; private set; }
+
 		internal string Id
 		{
 			get { return id; }
@@ -28,6 +30,7 @@ namespace ExcelXmlWriter
 		internal XlsxWorksheet(Stream sss,int count, int subcount, string name, string id, DataRowCollection d, XlsxSharedStringsXml s)
 		{
 			sasdf=sss;
+            closed = false;
 			wx = XmlWriter.Create(sasdf);
 
 			this.id = id;
@@ -134,6 +137,7 @@ namespace ExcelXmlWriter
 			// </v>
 			wx.WriteEndElement();
 			// </c>
+            // once encountered an error saying stream was disposed..
 			wx.WriteEndElement();
 		}
 
@@ -176,7 +180,7 @@ namespace ExcelXmlWriter
 			wx.Close();
 			// close the stream
 			sasdf.Close();
-			
+            closed = true;
 		}
 
 	}

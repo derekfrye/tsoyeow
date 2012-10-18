@@ -9,6 +9,15 @@ using System.IO.Packaging;
 
 namespace ExcelXmlWriter
 {
+
+    class ZipAAA
+    {
+        public string path
+        { get; set; }
+        public string RelType
+        {get;set;}
+    }
+
     /// <summary>
     /// /xl/workbook.xml
     /// </summary>
@@ -18,12 +27,13 @@ namespace ExcelXmlWriter
         XNamespace xn1 = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
         XNamespace xn11 = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
 
-        internal PackagePart LinkToPackage(Package p)
+        internal ZipAAA LinkToPackage()
         {
-            return base.LinkToPackage(p, new Uri("/xl/workbook.xml", UriKind.Relative)
-                , "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
-                , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
-                );
+            //return base.LinkToPackage(p, new Uri("/xl/workbook.xml", UriKind.Relative)
+            //    , "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
+            //    , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
+            //    );
+            return new ZipAAA() { path = "/xl/workbook.xml", RelType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" };
         }
 
         internal void SetSheetCount(IList<XlsxWorksheet> sheets)
@@ -41,7 +51,7 @@ namespace ExcelXmlWriter
                 order++;
             }
 
-            base.close();
+            //base.close();
         }
 
         internal XlsxWorkbookMetadata()
