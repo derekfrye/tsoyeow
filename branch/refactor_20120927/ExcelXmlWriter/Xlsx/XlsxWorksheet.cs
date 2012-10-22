@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace ExcelXmlWriter.Xlsx
 {
-    class XlsxWorksheet
+    class XlsxWorksheet: IDisposable
     {
 
         internal string Sheetname
@@ -42,12 +42,15 @@ namespace ExcelXmlWriter.Xlsx
         internal string PackageFileName
         { get; private set; }
 
-        internal XlsxWorksheet(Stream outputStream, string sheetName, string relationshipId, DataRowCollection inputData
-            , XlsxSharedStringsXml sharedStringReference, string fileAssociatedWithOutputStream,string packageFileName)
+        internal XlsxWorksheet(string sheetName, string relationshipId, DataRowCollection inputData
+            , XlsxSharedStringsXml sharedStringReference, string packageFileName)
         {
-            FileAssociatedWithOutputStream = fileAssociatedWithOutputStream;
             PackageFileName = packageFileName;
-            OutputStream = outputStream;
+
+            string jf = Path.GetTempFileName();
+            FileAssociatedWithOutputStream =jf;
+
+            OutputStream = new FileStream(jf, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
 
             SharedStringReference = sharedStringReference;
 
@@ -157,7 +160,7 @@ namespace ExcelXmlWriter.Xlsx
             // </v>
             wx.WriteEndElement();
             // </c>
-            // once encountered an error saying stream was disposed..
+            // once encountered an error saying stream was disposed here..
             wx.WriteEndElement();
         }
 
@@ -203,5 +206,25 @@ namespace ExcelXmlWriter.Xlsx
             
         }
 
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        // because we own the outputstream, must dispose here
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (OutputStream != null)
+                    OutputStream.Close();
+            }
+        }
+
+        #endregion
     }
 }

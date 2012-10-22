@@ -541,19 +541,24 @@ namespace ExcelXmlWriterTest
 
             ms.Close();
 
-            var asdz = x.Elements().First(aa => aa.Name.LocalName == "worksheet").Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
+            var asdz =
+                // Xml is e.g. <worksheet><sheetData><row>...</row><row><c s="1">12345.2423</c>...
+                x.Elements().First(aa => aa.Name.LocalName == "worksheet")
+                .Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
                 .First(aaa => aaa.Name.LocalName == "row"
-                && aaa
-                .Elements().Where(bbb => bbb.Name.LocalName == "c").Any(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1))
+                && aaa.Elements().Where(bbb => bbb.Name.LocalName == "c").Any(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1))
                 .Elements().First(ccc => ccc.Name.LocalName == "c" && ccc.Attributes("s").Any() && Convert.ToInt32(ccc.Attribute("s").Value) == 1).Value;
 
             // ensure correct xl date value
             Assert.AreEqual(Convert.ToDouble(asdz)
             , 40155.7633988426);
 
+            var asdz2 = x.Elements().First(aa => aa.Name.LocalName == "worksheet")
+                .Elements().First(aa => aa.Name.LocalName == "sheetData").Elements().Last(aaa => aaa.Name.LocalName == "row")
+                .Elements().Where(aaa=>aaa.Name.LocalName=="c").Where(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1).First();
+
             // ensure correct xl date value
-            Assert.AreEqual(Convert.ToDouble(x.Element("worksheet").Element("sheetData").Elements("row").Last()
-                .Elements("c").Where(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1).First().Element("v").Value)
+            Assert.AreEqual(Convert.ToDouble(asdz2.Elements().First(aaa=>aaa.Name.LocalName=="v").Value)
             , 40165.7634929051);
 
             // ensure correct cell counts in 1st row

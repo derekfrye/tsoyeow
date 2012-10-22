@@ -63,15 +63,7 @@ namespace ExcelXmlWriter.Xlsx
             }
             XDocument x = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), t);
 
-            StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8);
-
-            var za = new XmlWriterSettings();
-            za.Encoding = Encoding.UTF8;
-
-            XmlWriter apo = XmlWriter.Create(sb, za);
-            x.Save(apo);
-            apo.Close();
-            return sb.ToString();
+            return XlsxPart.Write(x);
         }
 
     }

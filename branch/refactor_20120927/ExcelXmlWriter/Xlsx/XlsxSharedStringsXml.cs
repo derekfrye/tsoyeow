@@ -13,7 +13,7 @@ namespace ExcelXmlWriter.Xlsx
     /// <summary>
     /// /xl/sharedStrings.xml
     /// </summary>
-    class XlsxSharedStringsXml
+    class XlsxSharedStringsXml : IDisposable
     {
         long curentSharedStringPosition = 0;
         XmlWriter xw;
@@ -100,5 +100,24 @@ namespace ExcelXmlWriter.Xlsx
             OutputStream.Flush();
             OutputStream.Seek(0, SeekOrigin.Begin);
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (xw != null)
+                    xw.Close();
+            }
+        }
+
+        #endregion
     }
 }

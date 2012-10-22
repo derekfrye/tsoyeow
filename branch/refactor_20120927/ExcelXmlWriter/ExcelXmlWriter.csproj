@@ -72,6 +72,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WorkbookParams.cs" />
     <Compile Include="Xlsx\ContentTypes.cs" />
     <Compile Include="Xlsx\Rels.cs" />
     <Compile Include="Xlsx\StringWriterWithEncoding.cs" />

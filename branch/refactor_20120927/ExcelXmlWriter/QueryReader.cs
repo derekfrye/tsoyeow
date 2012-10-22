@@ -16,9 +16,10 @@ namespace ExcelXmlWriter
         IDataReader dr;
         bool fromFile;
 
-        SqlCommand sc;
+        SqlCommand sc = new SqlCommand();
+        SqlConnection scc = new SqlConnection();
 
-        DataSet ds;
+        DataSet ds = new DataSet();
         int tableCount;
 
         readonly object dataReaderLocker = new object();
@@ -44,10 +45,10 @@ namespace ExcelXmlWriter
         {
             if (!queryIsFile)
             {
-                SqlCommand sc = new SqlCommand(query, new SqlConnection(connStr));
-                sc.CommandType = System.Data.CommandType.Text;
-                sc.CommandTimeout = queryTimeout;
-                this.sc = sc;
+                this.scc = new SqlConnection(connStr);
+                this.sc = new SqlCommand(query, this.scc);
+                this.sc.CommandType = System.Data.CommandType.Text;
+                this.sc.CommandTimeout = queryTimeout;                
             }
             else
             {
@@ -201,11 +202,9 @@ namespace ExcelXmlWriter
         {
             if (disposing)
             {
-                if (ds != null)
-                {
-                    ds.Dispose();
-                    ds = null;
-                }
+                ds.Dispose();
+                sc.Dispose();
+                scc.Dispose();
             }
         }
 

@@ -12,7 +12,7 @@ using System.Xml;
 
 namespace ExcelXmlWriter.Xlsx
 {
-    public class XlsxParts : IExcelBackend
+    public class XlsxParts : IExcelBackend, IDisposable
     {
         ZipFile z;
         Stream p;
@@ -33,10 +33,8 @@ namespace ExcelXmlWriter.Xlsx
             xlRels.Link(djfk);
             string id = xlRels.Id(djfk).ToString();
 
-            string jf = Path.GetTempFileName();
-            var strm1 = new FileStream(jf, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            var strm = z.AddEntry(filnm, strm1).InputStream;
-            XlsxWorksheet w = new XlsxWorksheet(strm, sheetName, id, resultHeaders, sharedStrings, jf,filnm);
+            XlsxWorksheet w = new XlsxWorksheet(sheetName, id, resultHeaders, sharedStrings, filnm);
+            z.AddEntry(filnm, w.OutputStream);
 
             worksheets.Add(w);
             currentWorksheet = w;
@@ -105,16 +103,17 @@ namespace ExcelXmlWriter.Xlsx
             mainRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties", "docProps/core.xml"
                 ));
 
-            StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8);
-
-            var za = new XmlWriterSettings();
-            za.Encoding = Encoding.UTF8;
-
-            XmlWriter apo = XmlWriter.Create(sb, za);
-            xdjfkd.Save(apo);
-            apo.Close();
-
-            z.AddEntry("/docProps/core.xml", sb.ToString());
+            using (StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8))
+            {
+                var za = new XmlWriterSettings();
+                za.Encoding = Encoding.UTF8;
+                using (XmlWriter apo = XmlWriter.Create(sb, za))
+                {
+                    xdjfkd.Save(apo);
+                    apo.Close();
+                    z.AddEntry("/docProps/core.xml", sb.ToString());
+                }
+            }
 
             #endregion
 
@@ -126,16 +125,19 @@ namespace ExcelXmlWriter.Xlsx
             xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme", "theme/theme1.xml"
                 ));
 
-            StringWriterWithEncoding sbs = new StringWriterWithEncoding(Encoding.UTF8);
+            using (StringWriterWithEncoding sbs = new StringWriterWithEncoding(Encoding.UTF8))
+            {
+                var zas = new XmlWriterSettings();
+                zas.Encoding = Encoding.UTF8;
 
-            var zas = new XmlWriterSettings();
-            zas.Encoding = Encoding.UTF8;
-
-            XmlWriter apos = XmlWriter.Create(sbs, zas);
-            xdjfkdd.Save(apos);
-            apos.Close();
-
-            z.AddEntry("/xl/theme/theme1.xml", sbs.ToString());
+                using (XmlWriter apos = XmlWriter.Create(sbs, zas))
+                {
+                    xdjfkdd.Save(apos);
+                    apos.Close();
+                    z.AddEntry("/xl/theme/theme1.xml", sbs.ToString());
+                }
+            }
+            
 
             #endregion
 
@@ -147,16 +149,18 @@ namespace ExcelXmlWriter.Xlsx
             xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles", "styles.xml"
                  ));
 
-            StringWriterWithEncoding sasb = new StringWriterWithEncoding(Encoding.UTF8);
+            using (StringWriterWithEncoding sasb =new StringWriterWithEncoding(Encoding.UTF8))
+            {
+                var zaaa = new XmlWriterSettings();
+                zaaa.Encoding = Encoding.UTF8;
 
-            var zaaa = new XmlWriterSettings();
-            zaaa.Encoding = Encoding.UTF8;
-
-            XmlWriter apso = XmlWriter.Create(sasb, zaaa);
-            xdjfkdsa.Save(apso);
-            apso.Close();
-
-            z.AddEntry("/xl/styles.xml", sasb.ToString());
+                using (XmlWriter apso = XmlWriter.Create(sasb, zaaa))
+                {
+                    xdjfkdsa.Save(apso);
+                    apso.Close();
+                    z.AddEntry("/xl/styles.xml", sasb.ToString());
+                }
+            }
 
             #endregion
 
@@ -177,5 +181,32 @@ namespace ExcelXmlWriter.Xlsx
         {
             currentWorksheet.writerow(queryReader);
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (z != null)
+                    z.Dispose();
+                if (sharedStrings != null)
+                    sharedStrings.Dispose();
+
+                foreach (var w in worksheets)
+                {
+                    w.Dispose();
+                }
+
+            }
+        }
+
+        #endregion
     }
 }

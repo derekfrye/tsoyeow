@@ -26,17 +26,26 @@ namespace ExcelXmlWriter.Xlsx
             return new ContentRelationships() { PackagePath = packagePath, RelationshipType = relationshipType };
         }
 
+        internal static string Write(XDocument appXml)
+        {
+            using (StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8))
+            {
+                var za = new XmlWriterSettings();
+                za.Encoding = Encoding.UTF8;
+
+                using (XmlWriter apo = XmlWriter.Create(sb, za))
+                {
+                    appXml.Save(apo);
+                    apo.Close();
+                    return sb.ToString();
+                }
+
+            }
+        }
+
         internal string Write()
         {
-            StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8);
-
-            var za = new XmlWriterSettings();
-            za.Encoding = Encoding.UTF8;
-
-            XmlWriter apo = XmlWriter.Create(sb, za);
-            appXml.Save(apo);
-            apo.Close();
-            return sb.ToString();
+            return Write(appXml);
         }
     }
 }
