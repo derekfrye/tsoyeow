@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using Ionic.Zip;
 using NUnit.Framework;
 using System.Collections.Generic;
+using ExcelXmlQueryResults;
 
 namespace ExcelXmlWriterTest
 {
@@ -199,7 +200,7 @@ namespace ExcelXmlWriterTest
         }
 
         [Test()]
-        public void BrokenWorkbookQueryWriteResultsOverSizeTest()
+        public void IncompleteWorkbookQueryWriteResultsOverSizeTest()
         {
             WorkBookParams p = new WorkBookParams();
 
@@ -207,6 +208,9 @@ namespace ExcelXmlWriterTest
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
+            string tempOutputPath=Path.Combine(path,"ExcelXmlWriterNTest","bin","Debug");
+            //tempOutputPath = Path.Combine(path, Utility.getIncrFileName(1, System.Reflection.MethodInfo.GetCurrentMethod().Name));
+
             path = path + Path.DirectorySeparatorChar.ToString()
                 + "ExcelXmlWriterNTest" + Path.DirectorySeparatorChar.ToString()
                 + "Resources" + Path.DirectorySeparatorChar.ToString()
@@ -233,23 +237,27 @@ namespace ExcelXmlWriterTest
             //p.numberFormatCulture = c1;
 
             Workbook target = new Workbook(p);
-            IList<MemoryStream> fs1 = new List<MemoryStream>();
+            IList<FileStream> fs1 = new List<FileStream>();
 
+            int i = 1;
             if (target.RunQuery())
             {
-                MemoryStream fs = new MemoryStream();
+                FileStream fs = new FileStream(Path.Combine(path, Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name))
+                    , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                 fs1.Add(fs);
                 WorkBookStatus status = target.WriteQueryResults(fs);
                 while (status != WorkBookStatus.Completed)
                 {
-                    MemoryStream fsa = new MemoryStream();
+                    i = i + 1;
+                    FileStream fsa = new FileStream(Path.Combine(path, Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name))
+                    , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                     fs1.Add(fsa);
                     status = target.WriteQueryResults(fsa);
                 }
             }
 
             int currentStream = 1;
-            foreach (MemoryStream fs in fs1)
+            foreach (var fs in fs1)
             {
                 fs.Flush();
                 fs.Seek(0, SeekOrigin.Begin);

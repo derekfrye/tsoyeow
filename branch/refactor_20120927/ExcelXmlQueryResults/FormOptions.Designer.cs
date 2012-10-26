@@ -28,12 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Format");
-            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Tab Names");
-            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Excel File Options", new System.Windows.Forms.TreeNode[] {
-            treeNode5,
-            treeNode6});
-            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("Sql Server Options");
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Format");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Tab Names");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Excel File Options", new System.Windows.Forms.TreeNode[] {
+            treeNode1,
+            treeNode2});
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Sql Server Options");
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -47,6 +48,8 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.excelformatpanel = new System.Windows.Forms.Panel();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBox7 = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.label6 = new System.Windows.Forms.Label();
             this.textBox6 = new System.Windows.Forms.TextBox();
@@ -75,6 +78,9 @@
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBox8 = new System.Windows.Forms.TextBox();
             this.tabPage2.SuspendLayout();
             this.excelformatpanel.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -205,6 +211,10 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.textBox8);
+            this.groupBox3.Controls.Add(this.label10);
+            this.groupBox3.Controls.Add(this.textBox7);
+            this.groupBox3.Controls.Add(this.label9);
             this.groupBox3.Controls.Add(this.checkBox2);
             this.groupBox3.Controls.Add(this.label6);
             this.groupBox3.Controls.Add(this.textBox6);
@@ -213,16 +223,32 @@
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Location = new System.Drawing.Point(3, 3);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(337, 109);
+            this.groupBox3.Size = new System.Drawing.Size(337, 168);
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Workbook options";
+            // 
+            // textBox7
+            // 
+            this.textBox7.Location = new System.Drawing.Point(177, 68);
+            this.textBox7.Name = "textBox7";
+            this.textBox7.Size = new System.Drawing.Size(144, 20);
+            this.textBox7.TabIndex = 13;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(9, 71);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(162, 13);
+            this.label9.TabIndex = 12;
+            this.label9.Text = "Maximum workbook filesize (GB):";
             // 
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
             this.checkBox2.Enabled = false;
-            this.checkBox2.Location = new System.Drawing.Point(12, 86);
+            this.checkBox2.Location = new System.Drawing.Point(12, 145);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(136, 17);
             this.checkBox2.TabIndex = 11;
@@ -240,7 +266,7 @@
             // 
             // textBox6
             // 
-            this.textBox6.Location = new System.Drawing.Point(164, 41);
+            this.textBox6.Location = new System.Drawing.Point(177, 41);
             this.textBox6.Name = "textBox6";
             this.textBox6.Size = new System.Drawing.Size(144, 20);
             this.textBox6.TabIndex = 8;
@@ -254,7 +280,7 @@
             this.comboBox3.Items.AddRange(new object[] {
             "Excel Workbook (*.xlsx)",
             "XML Spreadsheet 2003 (*.xml)"});
-            this.comboBox3.Location = new System.Drawing.Point(127, 14);
+            this.comboBox3.Location = new System.Drawing.Point(140, 14);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(181, 21);
             this.comboBox3.TabIndex = 0;
@@ -264,7 +290,7 @@
             this.checkBox1.AutoSize = true;
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(12, 67);
+            this.checkBox1.Location = new System.Drawing.Point(12, 126);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(188, 17);
             this.checkBox1.TabIndex = 7;
@@ -283,7 +309,7 @@
             // panel6
             // 
             this.panel6.Controls.Add(this.groupBox1);
-            this.panel6.Location = new System.Drawing.Point(3, 118);
+            this.panel6.Location = new System.Drawing.Point(3, 177);
             this.panel6.Name = "panel6";
             this.panel6.Size = new System.Drawing.Size(337, 88);
             this.panel6.TabIndex = 6;
@@ -494,17 +520,17 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.treeView1.Location = new System.Drawing.Point(3, 3);
             this.treeView1.Name = "treeView1";
-            treeNode5.Name = "Node3";
-            treeNode5.Text = "Format";
-            treeNode6.Name = "Node1";
-            treeNode6.Text = "Tab Names";
-            treeNode7.Name = "Node0";
-            treeNode7.Text = "Excel File Options";
-            treeNode8.Name = "Node5";
-            treeNode8.Text = "Sql Server Options";
+            treeNode1.Name = "Node3";
+            treeNode1.Text = "Format";
+            treeNode2.Name = "Node1";
+            treeNode2.Text = "Tab Names";
+            treeNode3.Name = "Node0";
+            treeNode3.Text = "Excel File Options";
+            treeNode4.Name = "Node5";
+            treeNode4.Text = "Sql Server Options";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode7,
-            treeNode8});
+            treeNode3,
+            treeNode4});
             this.treeView1.Size = new System.Drawing.Size(123, 359);
             this.treeView1.TabIndex = 12;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
@@ -529,6 +555,22 @@
             this.button1.Text = "OK";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(9, 99);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(95, 13);
+            this.label10.TabIndex = 14;
+            this.label10.Text = "Dupe key columns";
+            // 
+            // textBox8
+            // 
+            this.textBox8.Location = new System.Drawing.Point(110, 96);
+            this.textBox8.Name = "textBox8";
+            this.textBox8.Size = new System.Drawing.Size(211, 20);
+            this.textBox8.TabIndex = 15;
             // 
             // FormOptions
             // 
@@ -608,5 +650,10 @@
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.TextBox textBox7;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.TextBox textBox8;
+        private System.Windows.Forms.Label label10;
     }
 }

@@ -25,6 +25,19 @@ namespace ExcelXmlWriter.Xlsx
         XlsxWorksheet currentWorksheet;
         List<XlsxWorksheet> worksheets = new List<XlsxWorksheet>();
 
+        public long FileSize
+        {
+            get
+            {
+                long ret = sharedStrings.OutputStream.Length;
+                foreach (var wksht in worksheets)
+                {
+                    ret += wksht.OutputStream.Length;
+                }
+                return ret;
+            }
+        }
+
         public void CreateSheet(int sheetCount, int subSheetCount, string sheetName, DataRowCollection resultHeaders)
         {
             string shtnm = "worksheets/sheet" + sheetCount.ToString() + "_" + subSheetCount.ToString() + ".xml";
@@ -182,6 +195,11 @@ namespace ExcelXmlWriter.Xlsx
             currentWorksheet.writerow(queryReader);
         }
 
+        public string[] WriteRow(IDataReader queryReader, string[] columnValuesToReturn)
+        {
+            return currentWorksheet.writerow(queryReader, columnValuesToReturn);
+        }
+
         #region IDisposable Members
 
         public void Dispose()
@@ -208,5 +226,10 @@ namespace ExcelXmlWriter.Xlsx
         }
 
         #endregion
+
+
+
+        
+
     }
 }

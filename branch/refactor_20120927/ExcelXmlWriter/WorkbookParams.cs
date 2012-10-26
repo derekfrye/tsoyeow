@@ -101,15 +101,16 @@ namespace ExcelXmlWriter
         public bool WriteEmptyResultSetColumns
         { get; set; }
         /// <summary>
-        /// The maximum workbook size in bytes; this value is checked after writing each row.
-        /// Excel refuses to open files larger than 2GiB, so this value defaults to 2,000,000,000 to be safe.
-        /// If this value is met or exceeded, the workbook finishes writing the necessary data to close the workbook and stops processing the query results.
-        /// The recommended action after exceeding this value is to finish writing the remaining query results to a new stream.
+        /// The maximum uncompressed total size of all worksheets, in bytes. If this value is exceeded before starting a new worksheet, writing output stops.
+        /// Empirical evidence suggests the default of around 2,500,000,000 is safe. The recommended action after exceeding this value is to finish writing the remaining query results to a new stream.
         /// </summary>
-        public int MaxWorkBookSize
+        public long MaxWorkBookSize
         { get; set; }
 
         public bool AutoRewriteOverpunch
+        { get; set; }
+
+        public string[] DupeKeysToDelayStartingNewWorksheet
         { get; set; }
 
         public WorkBookParams()
@@ -118,7 +119,7 @@ namespace ExcelXmlWriter
             ResultNames = new Dictionary<int, string>();
             ColumnTypeMappings = new Dictionary<int, ExcelDataType>();
             WriteEmptyResultSetColumns = true;
-            MaxWorkBookSize = 2000000000;
+            MaxWorkBookSize = 2500000000;
             BackendMethod = ExcelBackend.Xlsx;
         }
     }

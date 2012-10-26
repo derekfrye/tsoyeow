@@ -30,7 +30,6 @@ namespace ExcelXmlWriter
         // lock to read/write
         IList<WorkerProgress> workers;
 
-        int fileSize;
         bool firstResult = true;
 
         #endregion
@@ -74,6 +73,10 @@ namespace ExcelXmlWriter
         /// Event raised when an exception has been thrown during query execution.
         /// </summary>
         public event EventHandler<QueryExceptionEvents> QueryException;
+        /// <summary>
+        /// Raised when the workbook has completed reading records, and has begun saving results to output.
+        /// </summary>
+        public event EventHandler<SaveFileEvent> SaveFile;
 
         #endregion
 
@@ -196,7 +199,7 @@ namespace ExcelXmlWriter
                 case ExcelBackend.Xlsx:
                     pts = new XlsxParts(path);
                     break;
-                    // FIXME tghis isnt an xml backend :(
+                // FIXME this isnt an xml backend
                 case ExcelBackend.Xml:
                     pts = new XlsxParts(path);
                     break;
@@ -209,6 +212,10 @@ namespace ExcelXmlWriter
             int sheetSubCount = 1;
             bool worksheetOpen = false;
             bool workbookTooBig = false;
+            string[] prevDupKey = null;
+            string[] newDupKey = null;
+            bool canBreak = true;
+            bool breakWanted=false;
 
         READ:
             if (runParameters.WriteEmptyResultSetColumns)
@@ -236,22 +243,54 @@ namespace ExcelXmlWriter
                     // mark the worksheet as open
                     worksheetOpen = true;
                 }
-                // write the row
-                
-                pts.WriteRow(queryReader);
+
+                // write the row                
+                newDupKey = pts.WriteRow(queryReader, runParameters.DupeKeysToDelayStartingNewWorksheet);
+
+                // first time through, set these values equal
+                if (rowCount == 0)
+                {
+                    prevDupKey = newDupKey;
+                }
+                // otherwise, if the values in the key columns are identical to previous row, then the desire is to keep them together
+                // i.e., cannot split to another sheet or workbook between these rows
+                if (newDupKey != null & prevDupKey != null)
+                {
+                    for (int i = 0; i < newDupKey.Length; i++)
+                    {
+                        if (string.Equals(newDupKey[i], prevDupKey[i], StringComparison.InvariantCulture))
+                        {
+                            canBreak = false;                            
+                        }
+                        else
+                        {
+                            canBreak = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                    canBreak = true;
+
+                // set the prevDupKey for next cycle
+                prevDupKey = newDupKey;
+
                 // increment the row count for this worksheet
                 rowCount++;
 
-                if (fileSize >= runParameters.MaxWorkBookSize)
+                if(rowCount % runParameters.MaxRowsPerSheet == 0)
+                    breakWanted=true;
+
+                if (canBreak && pts.FileSize >= runParameters.MaxWorkBookSize)
                 {
                     workbookTooBig = true;
-                    fileSize = 0;
                     break;
                 }
 
                 // if we've hit the max number of rows per sheet
-                if (rowCount % runParameters.MaxRowsPerSheet == 0)
+                if (canBreak && breakWanted)
                 {
+                    breakWanted = false;
                     // close the worksheet
                     pts.CloseSheet();
                     // mark the worksheet as closed
@@ -260,12 +299,14 @@ namespace ExcelXmlWriter
                     rowCount = 0;
                     // increment the sheet sub count
                     sheetSubCount++;
+
                     // start writing a new worksheet
                     goto READ;
                 }
             }
 
             sheetSubCount = 1;
+            breakWanted = false;
 
             // if the worksheet is still open, close it
             if (worksheetOpen)
@@ -284,15 +325,18 @@ namespace ExcelXmlWriter
                 // otherwise, close the file and release the query
                 else
                 {
+                    OnSave("Saving final result...");
                     pts.Close();
                     QueryClose();
                 }
             }
-            
-            fileSize = 0;
 
             if (workbookTooBig)
+            {
+                OnSave("Saving incremental result...");
+                pts.Close();
                 return WorkBookStatus.OverSize;
+            }
             else
                 return WorkBookStatus.Completed;
         }
@@ -310,6 +354,12 @@ namespace ExcelXmlWriter
         }
 
         #region ProgressMethods
+
+        void OnSave(string message)
+        {
+            if (SaveFile != null)
+                SaveFile(this, new SaveFileEvent(message) );
+        }
 
         void OnReaderFinished()
         {
@@ -380,8 +430,7 @@ namespace ExcelXmlWriter
         {
             if (disposing)
             {
-                queryReader.Dispose();
-                
+                queryReader.Dispose();                
             }
         }
 

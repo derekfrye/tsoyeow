@@ -127,9 +127,7 @@ namespace ExcelXmlWriter.Xlsx
 
         void writeval(string p, ExcelDataType excelDataType)
         {
-            //write(XlsxCell.hdr(excelDataType));
             wx.WriteStartElement("c");
-
 
             switch (excelDataType)
             {
@@ -157,6 +155,7 @@ namespace ExcelXmlWriter.Xlsx
                     wx.WriteString(d.ToString());
                     break;
             }
+
             // </v>
             wx.WriteEndElement();
             // </c>
@@ -164,10 +163,22 @@ namespace ExcelXmlWriter.Xlsx
             wx.WriteEndElement();
         }
 
-        internal void writerow(IDataReader queryReader)
+        internal string[] writerow(IDataReader queryReader, string[] colsToObtainValsFrom)
         {
+            string[] retVal = null;
+            if (colsToObtainValsFrom != null)
+            {
+                retVal = new string[colsToObtainValsFrom.Length];
+                for (int i = 0; i < retVal.Length; i++)
+                {
+                    if (queryReader.GetSchemaTable().Rows.Cast<DataRow>()
+                        .Any(x => string.Equals(x["ColumnName"].ToString(), colsToObtainValsFrom[i], StringComparison.InvariantCultureIgnoreCase)))
+                        retVal[i] = queryReader[colsToObtainValsFrom[i]].ToString();
+                }
+            }
+
             // write row hdr
-            wx.WriteStartElement("row");
+            wx.WriteStartElement("row");            
             wx.WriteWhitespace(Environment.NewLine);
 
             // cycle through the columns, writing the values
@@ -181,6 +192,13 @@ namespace ExcelXmlWriter.Xlsx
             // write row close
             wx.WriteEndElement();
             wx.WriteWhitespace(Environment.NewLine);
+
+            return retVal;
+        }
+
+        internal void writerow(IDataReader queryReader)
+        {
+            writerow(queryReader, null);
         }
 
         internal void Close()
@@ -222,6 +240,11 @@ namespace ExcelXmlWriter.Xlsx
             {
                 if (OutputStream != null)
                     OutputStream.Close();
+                try
+                {
+                    File.Delete(FileAssociatedWithOutputStream);
+                }
+                catch { }
             }
         }
 

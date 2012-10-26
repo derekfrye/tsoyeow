@@ -172,12 +172,15 @@ Otherwise, the first result set will be named Sheet1, the second Sheet2, etc.</v
     <value>Awaiting user action.</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>Query Results to Xlsx Frontend v0.31</value>
+    <value>Query Results to Xlsx Frontend v0.32</value>
   </data>
   <data name="FileTypeXlsx" xml:space="preserve">
     <value>Xlsx</value>
   </data>
   <data name="FileTypeXml" xml:space="preserve">
     <value>Xml</value>
+  </data>
+  <data name="MaxSize" xml:space="preserve">
+    <value>The maximum uncompressed total size of all worksheets, in gigabytes. If this value is exceeded before starting a new worksheet, writing output stops. Empirical evidence suggests the default of around 2.5 is safe.</value>
   </data>
 </root>

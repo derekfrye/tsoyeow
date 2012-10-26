@@ -47,4 +47,14 @@ namespace ExcelXmlWriter
             this.e = e;
         }
     }
+
+    public class SaveFileEvent : EventArgs
+    {
+        public string Message
+        { get; private set; }
+        public SaveFileEvent(string message)
+        {
+            Message = message;
+        }
+    }
 }

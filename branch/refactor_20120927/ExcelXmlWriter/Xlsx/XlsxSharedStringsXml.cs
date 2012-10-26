@@ -10,6 +10,15 @@ using System.Xml.Linq;
 
 namespace ExcelXmlWriter.Xlsx
 {
+
+    class SharedStringResult
+    {
+        public long Item1
+        { get; set; }
+        public string Item2
+        { get; set; }
+    }
+    
     /// <summary>
     /// /xl/sharedStrings.xml
     /// </summary>
@@ -17,8 +26,8 @@ namespace ExcelXmlWriter.Xlsx
     {
         long curentSharedStringPosition = 0;
         XmlWriter xw;
-        
-        Dictionary<int, Tuple<long, string>> sharedStringDictionary = new Dictionary<int, Tuple<long, string>>();
+
+        Dictionary<int, SharedStringResult> sharedStringDictionary = new Dictionary<int, SharedStringResult>();
 
         internal Stream OutputStream
         { get; private set; }
@@ -53,9 +62,9 @@ namespace ExcelXmlWriter.Xlsx
         internal long Write(string value)
         {
 
-            Tuple<long, string> f;
+            SharedStringResult f = new SharedStringResult();
 
-            var p = string.Join(null, value.ToCharArray().Where(x => XmlConvert.IsXmlChar(x)));
+            var p = string.Join(null, value.ToArray().Where(x => XmlConvert.IsXmlChar(x)));
             var hdhdsdafd = p.GetHashCode();
 
             var found = sharedStringDictionary.TryGetValue(hdhdsdafd, out f);
@@ -84,7 +93,7 @@ namespace ExcelXmlWriter.Xlsx
                 // FIXME make this count() test a parameter
                 if (!found && sharedStringDictionary.Count < 500000)
                 {
-                    sharedStringDictionary.Add(hdhdsdafd, new Tuple<long, string>(curentSharedStringPosition, value));
+                    sharedStringDictionary.Add(hdhdsdafd, new SharedStringResult() { Item1 = curentSharedStringPosition, Item2 = value });
                 }
                 curentSharedStringPosition++;
 
@@ -115,6 +124,11 @@ namespace ExcelXmlWriter.Xlsx
             {
                 if (xw != null)
                     xw.Close();
+                try
+                {
+                    File.Delete(FileAssociateWithOutputStream);
+                }
+                catch { }
             }
         }
 
