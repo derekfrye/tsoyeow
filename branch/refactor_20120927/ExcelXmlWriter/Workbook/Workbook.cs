@@ -15,7 +15,7 @@ using System.Xml.Linq;
 using System.Xml;
 using ExcelXmlWriter.Xlsx;
 
-namespace ExcelXmlWriter
+namespace ExcelXmlWriter.Workbook
 {
     public class Workbook:IDisposable
     {
@@ -89,8 +89,8 @@ namespace ExcelXmlWriter
         public Workbook(WorkBookParams p1)
         {
             this.runParameters = p1;
-            // max rows is actually max rows subtract 1, since we're including row headers
-            this.runParameters.MaxRowsPerSheet = this.runParameters.MaxRowsPerSheet - 1;
+            //// max rows is actually max rows subtract 1, since we're including row headers
+            //this.runParameters.MaxRowsPerSheet = this.runParameters.MaxRowsPerSheet - 1;
 
             queryReader = new QueryReader(runParameters.Query, runParameters.QueryTimeout, runParameters.FromFile, runParameters.ConnectionString);
 
@@ -143,7 +143,7 @@ namespace ExcelXmlWriter
         {
             using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
             {
-                WorkBookStatus t = WriteQueryResults(fs, true);
+                WorkBookStatus t = WriteResults(fs);
                 return t;
             }
         }
@@ -153,27 +153,7 @@ namespace ExcelXmlWriter
         /// </summary>
         public WorkBookStatus WriteQueryResults(Stream stream)
         {
-            return WriteQueryResults(stream, true);
-        }
-
-        /// <summary>
-        /// Write the current query result set to the specified filename.
-        /// </summary>
-        public WorkBookStatus WriteQueryResult(string path)
-        {
-            using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None))
-            {
-                WorkBookStatus t = WriteQueryResults(fs, false);
-                return t;
-            }
-        }
-
-        /// <summary>
-        /// Write the current query result set to the specified stream.
-        /// </summary>
-        public WorkBookStatus WriteQueryResult(Stream stream)
-        {
-            return WriteQueryResults(stream, false);
+            return WriteResults(stream);
         }
 
         /// <summary>
@@ -187,7 +167,17 @@ namespace ExcelXmlWriter
 
         #endregion
 
-        WorkBookStatus WriteQueryResults(Stream path, bool multipleSheetsPerStream)
+        void InitSheet(WorkbookTracking w)
+        {
+                pts.CreateSheet(queryReader.CurrentResult
+                    , w.SheetSubCount
+                    , retrieveSheetName(queryReader.CurrentResult, w.SheetSubCount)
+                    , queryReader.GetSchemaTable().Rows
+                    );
+                w.WorksheetOpen = true;
+        }
+
+        WorkBookStatus WriteResults(Stream path)
         {
             if (!queryRan)
             {
@@ -208,139 +198,136 @@ namespace ExcelXmlWriter
                     break;
             }
 
-            int rowCount = 0;
-            int sheetSubCount = 1;
-            bool worksheetOpen = false;
-            bool workbookTooBig = false;
-            string[] prevDupKey = null;
-            string[] newDupKey = null;
-            bool canBreak = true;
-            bool breakWanted=false;
-
-        READ:
-            if (runParameters.WriteEmptyResultSetColumns)
+            WorkbookTracking w = new WorkbookTracking();
+            
+            while (queryReader.MoveToNextResultSet())
             {
-                // create the worksheet
-                pts.CreateSheet(queryReader.CurrentResult
-                    , sheetSubCount
-                    , retrieveSheetName(queryReader.CurrentResult, sheetSubCount)
-                    , queryReader.GetSchemaTable().Rows
-                    );
-                // mark the worksheet as open
-                worksheetOpen = true;
-            }
+                //int rowCount = 0;
+                // write empty columns if requested
 
-            while (queryReader.MoveNext())
-            {
-                if (!worksheetOpen)
+                if (runParameters.WriteEmptyResultSetColumns)
                 {
-                    // create the worksheet
-                    pts.CreateSheet(queryReader.CurrentResult
-                        , sheetSubCount
-                        , retrieveSheetName(queryReader.CurrentResult, sheetSubCount)
-                        , queryReader.GetSchemaTable().Rows
-                        );
-                    // mark the worksheet as open
-                    worksheetOpen = true;
+                    InitSheet(w);
+                    w.WorksheetOpen = true;
                 }
 
-                // write the row                
-                newDupKey = pts.WriteRow(queryReader, runParameters.DupeKeysToDelayStartingNewWorksheet);
-
-                // first time through, set these values equal
-                if (rowCount == 0)
+                // loop through all result sets
+                while (queryReader.MoveNext())
                 {
-                    prevDupKey = newDupKey;
-                }
-                // otherwise, if the values in the key columns are identical to previous row, then the desire is to keep them together
-                // i.e., cannot split to another sheet or workbook between these rows
-                if (newDupKey != null & prevDupKey != null)
-                {
-                    for (int i = 0; i < newDupKey.Length; i++)
+                    if (!w.WorksheetOpen)
                     {
-                        if (string.Equals(newDupKey[i], prevDupKey[i], StringComparison.InvariantCulture))
+                        InitSheet(w);
+                        w.WorksheetOpen = true;
+                    }              
+
+#if DEBUG
+                    int i = 1 + 1;
+                    if (w.RowCount == 4096)
+                        i = 1 + 1;
+#endif
+
+                    this.DetermineIfRowDependsOnPreviousRow(w);
+                    queryReader.Reset();
+
+                    // write the row, or determine why we couldn't write the row
+                    WriteARow(w);                    
+
+                    // if we're over-size, we must return now
+                    // but keep the query open bc the caller may request to write the rest of the results
+                    if (w.Status== WorkBookStatus.OverSize)
+                    {
+                        OnSave("Saving incremental result...");
+                        if (w.WorksheetOpen)
                         {
-                            canBreak = false;                            
+                            pts.CloseSheet();
                         }
-                        else
-                        {
-                            canBreak = true;
-                            break;
-                        }
+                        pts.Close();
+                        return WorkBookStatus.OverSize;
                     }
-                }
-                else
-                    canBreak = true;
-
-                // set the prevDupKey for next cycle
-                prevDupKey = newDupKey;
-
-                // increment the row count for this worksheet
-                rowCount++;
-
-                if(rowCount % runParameters.MaxRowsPerSheet == 0)
-                    breakWanted=true;
-
-                if (canBreak && pts.FileSize >= runParameters.MaxWorkBookSize)
-                {
-                    workbookTooBig = true;
-                    break;
+                    
                 }
 
-                // if we've hit the max number of rows per sheet
-                if (canBreak && breakWanted)
+                if (w.WorksheetOpen)
                 {
-                    breakWanted = false;
-                    // close the worksheet
                     pts.CloseSheet();
-                    // mark the worksheet as closed
-                    worksheetOpen = false;
-                    // reset the rowcount
-                    rowCount = 0;
-                    // increment the sheet sub count
-                    sheetSubCount++;
-
-                    // start writing a new worksheet
-                    goto READ;
+                    w.WorksheetOpen = false;
+                    w.RowCount = 0;
                 }
             }
 
-            sheetSubCount = 1;
-            breakWanted = false;
-
-            // if the worksheet is still open, close it
-            if (worksheetOpen)
-            {
-                pts.CloseSheet();
-                worksheetOpen = false;
-                rowCount = 0;
-            }
-
-            // if we're writing all result sets to the same workbook
-            if (multipleSheetsPerStream && !workbookTooBig)
-            {
-                // if there's another result set, start writing the next sheet
-                if (queryReader.MoveToNextResultSet())
-                    goto READ;
-                // otherwise, close the file and release the query
-                else
-                {
-                    OnSave("Saving final result...");
-                    pts.Close();
-                    QueryClose();
-                }
-            }
-
-            if (workbookTooBig)
-            {
-                OnSave("Saving incremental result...");
-                pts.Close();
-                return WorkBookStatus.OverSize;
-            }
-            else
-                return WorkBookStatus.Completed;
+            OnSave("Saving final result...");
+            pts.Close();
+            QueryClose();
+            return WorkBookStatus.Completed;
         }
 
+        void DetermineIfRowDependsOnPreviousRow(WorkbookTracking w)
+        {
+            w.PreviousAndCurrentRowKeyColumns.CurrentRowDupKey = pts.ReadKeyValues(queryReader, runParameters.DupeKeysToDelayStartingNewWorksheet);
+
+            // first time through, set these values equal
+            if (w.RowCount == 1)
+            {
+                w.PreviousAndCurrentRowKeyColumns.PrevDupKey = w.PreviousAndCurrentRowKeyColumns.CurrentRowDupKey;
+            }
+            // otherwise, if the values in the key columns are identical to previous row, then the desire is to keep them together
+            // i.e., cannot split to another sheet or workbook between these rows
+            if (w.PreviousAndCurrentRowKeyColumns.CurrentRowDupKey != null & w.PreviousAndCurrentRowKeyColumns.PrevDupKey != null)
+            {
+                for (int i = 0; i < w.PreviousAndCurrentRowKeyColumns.CurrentRowDupKey.Length; i++)
+                {
+                    if (string.Equals(w.PreviousAndCurrentRowKeyColumns.CurrentRowDupKey[i], w.PreviousAndCurrentRowKeyColumns.PrevDupKey[i], StringComparison.InvariantCulture))
+                    {
+                        w.PreviousAndCurrentRowKeyColumns.PreviousDiffersFromCurrent = false;
+                    }
+                    else
+                    {
+                        w.PreviousAndCurrentRowKeyColumns.PreviousDiffersFromCurrent = true;
+                        break;
+                    }
+                }
+            }
+            else
+                w.PreviousAndCurrentRowKeyColumns.PreviousDiffersFromCurrent = true;
+
+            // set the prevDupKey for next cycle
+            w.PreviousAndCurrentRowKeyColumns.PrevDupKey = w.PreviousAndCurrentRowKeyColumns.CurrentRowDupKey;
+
+            //return w.keyColumnStatus;
+        }
+
+        void WriteARow( WorkbookTracking w)
+        {
+            if (w.RowCount % runParameters.MaxRowsPerSheet == 0)
+                w.Status = WorkBookStatus.BreakWanted;
+
+            if (w.PreviousAndCurrentRowKeyColumns.PreviousDiffersFromCurrent)
+            {
+                if (w.Status == WorkBookStatus.BreakWanted)
+                {
+                    pts.CloseSheet();
+                    w.SheetSubCount++;
+                    w.WorksheetOpen = false;
+                    w.RowCount = 0;
+                    InitSheet(w);
+                    w.Status= WorkBookStatus.BreakCompleted;
+
+                }
+                else if (pts.FileSize >= runParameters.MaxWorkBookSize)
+                {
+                    w.Status = WorkBookStatus.OverSize;
+                    return;
+                }
+                else
+                    w.Status = WorkBookStatus.Pending;
+            }
+            else
+                w.Status = WorkBookStatus.Pending;
+
+            pts.WriteRow(queryReader, runParameters.DupeKeysToDelayStartingNewWorksheet);
+            w.RowCount++;
+        }
+        
         string retrieveSheetName(int sheetCount, int sheetSubCount)
         {
 
@@ -416,7 +403,6 @@ namespace ExcelXmlWriter
         }
 
         #endregion
-
 
         #region IDisposable Members
 

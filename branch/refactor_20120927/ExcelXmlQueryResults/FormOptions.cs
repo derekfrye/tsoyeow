@@ -13,6 +13,7 @@ using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Reflection;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlQueryResults
 {

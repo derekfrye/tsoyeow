@@ -15,34 +15,9 @@ using System.Xml.Linq;
 using System.Xml;
 using ExcelXmlWriter.Xlsx;
 
-namespace ExcelXmlWriter
+namespace ExcelXmlWriter.Workbook
 {
-    /// <summary>
-    /// An Excel data type. A setting of general forces the workbook to infer each cell's type 
-    /// throughout query execution (without truncating numbers over Excel's length limit). The default is string.
-    /// </summary>
-    public enum ExcelDataType { String, Number, Date, General, OverpunchNumber }
-
-    /// <summary>
-    /// An Excel data type. A setting of general forces the workbook to infer each cell's type 
-    /// throughout query execution (without truncating numbers over Excel's length limit). The default is string.
-    /// </summary>
-    public enum ExcelBackend { Xml, Xlsx }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum WorkBookStatus
-    {
-        /// <summary>
-        /// The WorkBook has written an entire result set to the stream.
-        /// </summary>
-        Completed,
-        /// <summary>
-        /// The WorkBook exceeded the maximum file size before writing the entire result set to the stream.
-        /// </summary>
-        OverSize
-    }
+    
 
     class WorkerProgress
     {

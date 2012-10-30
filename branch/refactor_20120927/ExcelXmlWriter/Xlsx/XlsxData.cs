@@ -4,6 +4,7 @@ using System.Text;
 using ExcelXmlWriter;
 using System.Globalization;
 using System.IO;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlWriter.Xlsx
 {

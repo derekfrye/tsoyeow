@@ -11,10 +11,16 @@ namespace ExcelXmlWriter
     {
         void CreateSheet(int sheetCount, int subSheetCount, string sheetName, DataRowCollection resultHeaders);
         void WriteRow(IDataReader data);
-        string[] WriteRow(IDataReader data, string[] columnValuesToReturn);
+        void WriteRow(IDataReader data, string[] columnValuesToReturn);
+        string[] ReadKeyValues(IDataReader queryReader, string[] colsToObtainValsFrom);
         void CloseSheet();
         void Close();
         long FileSize
         { get; }
     }
+
+   
+
+
+    
 }

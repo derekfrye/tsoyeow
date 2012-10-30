@@ -7,6 +7,7 @@ using System.IO;
 using System.Data;
 using System.Collections;
 using System.Xml;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlWriter.Xlsx
 {
@@ -163,9 +164,9 @@ namespace ExcelXmlWriter.Xlsx
             wx.WriteEndElement();
         }
 
-        internal string[] writerow(IDataReader queryReader, string[] colsToObtainValsFrom)
+        internal string[] ReadKeyValues(IDataReader queryReader, string[] colsToObtainValsFrom)
         {
-            string[] retVal = null;
+        	string[] retVal = null;
             if (colsToObtainValsFrom != null)
             {
                 retVal = new string[colsToObtainValsFrom.Length];
@@ -176,6 +177,23 @@ namespace ExcelXmlWriter.Xlsx
                         retVal[i] = queryReader[colsToObtainValsFrom[i]].ToString();
                 }
             }
+            
+            return retVal;
+        }
+        
+        internal void writerow(IDataReader queryReader, string[] colsToObtainValsFrom)
+        {
+//            string[] retVal = null;
+//            if (colsToObtainValsFrom != null)
+//            {
+//                retVal = new string[colsToObtainValsFrom.Length];
+//                for (int i = 0; i < retVal.Length; i++)
+//                {
+//                    if (queryReader.GetSchemaTable().Rows.Cast<DataRow>()
+//                        .Any(x => string.Equals(x["ColumnName"].ToString(), colsToObtainValsFrom[i], StringComparison.InvariantCultureIgnoreCase)))
+//                        retVal[i] = queryReader[colsToObtainValsFrom[i]].ToString();
+//                }
+//            }
 
             // write row hdr
             wx.WriteStartElement("row");            
@@ -192,8 +210,6 @@ namespace ExcelXmlWriter.Xlsx
             // write row close
             wx.WriteEndElement();
             wx.WriteWhitespace(Environment.NewLine);
-
-            return retVal;
         }
 
         internal void writerow(IDataReader queryReader)

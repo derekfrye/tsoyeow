@@ -13,6 +13,9 @@ namespace ExcelXmlWriter
 {
     class QueryReader : IEnumerator, IDisposable, IDataReader
     {
+
+        #region LocalFields
+
         IDataReader dr;
         bool fromFile;
 
@@ -23,11 +26,20 @@ namespace ExcelXmlWriter
         int tableCount;
 
         readonly object dataReaderLocker = new object();
-        // lock to read/write
+        /// <summary>
+        ///lock to read/write 
+        /// </summary>
         int totalRecordsRead = 0;
         readonly object currentResultLocker = new object();
-        // lock to read/write
+        /// <summary>
+        ///  lock to read/write
+        /// </summary>
         int currentResult = 1;
+
+        bool currentResultSetStillHasRecords;
+        bool rowConsumed;
+
+        #endregion
 
         /// <summary>
         /// 1-based result number maintained separately from the DataReader NextResult() call.
@@ -38,7 +50,7 @@ namespace ExcelXmlWriter
             {
                 lock (currentResultLocker)
                     return currentResult;
-            }
+            }            
         }
 
         internal QueryReader(string query, int queryTimeout, bool queryIsFile, string connStr)
@@ -48,7 +60,9 @@ namespace ExcelXmlWriter
                 this.scc = new SqlConnection(connStr);
                 this.sc = new SqlCommand(query, this.scc);
                 this.sc.CommandType = System.Data.CommandType.Text;
-                this.sc.CommandTimeout = queryTimeout;                
+                this.sc.CommandTimeout = queryTimeout;
+                currentResultSetStillHasRecords = true;
+                rowConsumed = true;
             }
             else
             {
@@ -111,6 +125,9 @@ namespace ExcelXmlWriter
 
         public bool MoveToNextResultSet()
         {
+            if (currentResultSetStillHasRecords)
+                return currentResultSetStillHasRecords;
+
             tableCount++;
             if (fromFile)
             {
@@ -137,16 +154,25 @@ namespace ExcelXmlWriter
 
         public object this[int i]
         {
-            get { return dr[i]; }
+            get
+            {
+                rowConsumed = true;
+                return dr[i];
+            }
         }
 
         public object this[string i]
         {
-            get { return dr[i]; }
+            get
+            {
+                rowConsumed = true;
+                return dr[i];
+            }
         }
 
         public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
         {
+            rowConsumed = true;
             return dr.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
         }
 
@@ -173,19 +199,28 @@ namespace ExcelXmlWriter
         /// <returns></returns>
         public bool MoveNext()
         {
+            if(!rowConsumed)
+                return currentResultSetStillHasRecords;
+
             if (dr.Read())
             {
                 lock (dataReaderLocker)
                     totalRecordsRead++;
-                return true;
+                currentResultSetStillHasRecords = true;
+                rowConsumed = false;
             }
             else
-                return false;
+            {
+                currentResultSetStillHasRecords = false;
+                rowConsumed = true;
+            }
+
+            return currentResultSetStillHasRecords;
         }
 
         public void Reset()
         {
-            throw new NotImplementedException();
+            rowConsumed = false;
         }
 
         #endregion
@@ -340,16 +375,19 @@ namespace ExcelXmlWriter
 
         public object GetValue(int i)
         {
+            rowConsumed = true;
             return dr.GetValue(i);
         }
 
         public int GetValues(object[] values)
         {
+            rowConsumed = true;
             return dr.GetValues(values);
         }
 
         public bool IsDBNull(int i)
         {
+            rowConsumed = true;
             return dr.IsDBNull(i);
         }
 

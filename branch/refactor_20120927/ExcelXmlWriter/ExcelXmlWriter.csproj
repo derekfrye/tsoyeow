@@ -72,12 +72,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WorkbookParams.cs" />
+    <Compile Include="Workbook\Workbook.cs" />
+    <Compile Include="Workbook\WorkbookEvents.cs" />
+    <Compile Include="Workbook\WorkbookParams.cs" />
+    <Compile Include="Workbook\WorkbookTracking.cs" />
     <Compile Include="Xlsx\ContentTypes.cs" />
     <Compile Include="Xlsx\Rels.cs" />
     <Compile Include="Xlsx\StringWriterWithEncoding.cs" />
     <Compile Include="Xlsx\XlsxData.cs" />
-    <Compile Include="WorkbookEvents.cs" />
     <Compile Include="StaticFunctions.cs" />
     <Compile Include="Xlsx\XlsxAppXml.cs" />
     <Compile Include="Xlsx\XlsxSharedStringsXml.cs" />
@@ -97,7 +99,6 @@
       <DependentUpon>Resource1.resx</DependentUpon>
     </Compile>
     <Compile Include="Xml2003Table.cs" />
-    <Compile Include="Workbook.cs" />
     <Compile Include="Xlsx\XlsxWorksheet.cs" />
     <Compile Include="Xlsx\XlsxPart.cs" />
     <Compile Include="Xlsx\XlsxParts.cs" />
@@ -120,6 +121,9 @@
       <Project>{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}</Project>
       <Name>Zip DLL</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Workbook" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

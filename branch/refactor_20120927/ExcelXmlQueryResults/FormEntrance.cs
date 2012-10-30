@@ -13,6 +13,7 @@ using System.Threading;
 using System.Xml.Linq;
 using System.Globalization;
 using ExcelXmlWriter;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlQueryResults
 {
@@ -187,7 +188,7 @@ namespace ExcelXmlQueryResults
             if (String.Equals(p.newResultSetMethod, Resources.NewResultSetWorksheet))
                 t = new Thread(WriteResultsToSeparateTabs);
             else
-                t = new Thread(WriteResultsToSeparateFiles);
+                t = new Thread(WriteResultsToSeparateTabs);
             t.IsBackground = true;
             t.Start(new object[] { p, fileName });
 #endif
@@ -222,58 +223,6 @@ namespace ExcelXmlQueryResults
                 }
             }
         }
-
-        void WriteResultsToSeparateFiles(object p)
-        {
-            object[] p2 = (object[])p;
-            ExcelXmlQueryResultsParams p1 = (ExcelXmlQueryResultsParams)p2[0];
-            string filename = (string)p2[1];
-            string orig_filename = (string)p2[1];
-
-            // open wb
-            Workbook wb = new Workbook(p1.workbookParams);
-
-            // subscribe to progress events
-            wb.ReaderFinished += new EventHandler<ReaderFinishedEvents>(wb_ReaderFinished);
-            wb.QueryStarted += new EventHandler<EventArgs>(wb_QueryStarted);
-            wb.QueryException += new EventHandler<QueryExceptionEvents>(wb_QueryError);
-            wb.QueryRowsOverTime += new EventHandler<QueryRowsOverTimeEvents>(wb_QueryRowsOverTime);
-
-            if (wb.RunQuery())
-            {
-                int currentFile = 1;
-                // if we have a name for this file, retrieve it
-                if (p1.workbookParams.ResultNames.ContainsKey(currentFile))
-                    filename = changeFileNameBaseName(filename, p1.workbookParams.ResultNames[currentFile]);
-                
-                while (wb.NextResult())
-                {
-                    if (currentFile != 1)
-                    {
-                        // if we have a name for this file, retrieve it
-                        if (p1.workbookParams.ResultNames.ContainsKey(currentFile))
-                            filename = changeFileNameBaseName(filename, p1.workbookParams.ResultNames[currentFile]);
-                        // otherwise, get the next filename in sequence
-                        else
-                            filename = Utility.getIncrFileName(currentFile, orig_filename);
-                    }
-                    // write the results
-                    WorkBookStatus status = wb.WriteQueryResult(filename);
-                    int currentResultSet = 1;
-                    // if not all of the results were written (because over max-file size), make a new file and continue writing
-                    while (status != WorkBookStatus.Completed)
-                    {
-                        currentResultSet++;
-                        filename = Utility.getIncrFileName(currentResultSet, filename);
-                        status = wb.WriteQueryResult(filename);
-                    }
-                    currentFile++;
-                }
-                wb.QueryClose();
-            }
-        }
-
-       
 
         /// <summary>
         /// Turn a fully-qualified filename like C:\a.xml into C:\newfile.xml

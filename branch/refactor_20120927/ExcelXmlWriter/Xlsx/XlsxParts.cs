@@ -21,6 +21,7 @@ namespace ExcelXmlWriter.Xlsx
         XlsxWorkbookMetadata workbookXml;
         ContentRelationships workbookXmlPackagePart;
         XlsxSharedStringsXml sharedStrings;
+        bool alreadyClosed = false;
 
         XlsxWorksheet currentWorksheet;
         List<XlsxWorksheet> worksheets = new List<XlsxWorksheet>();
@@ -60,6 +61,9 @@ namespace ExcelXmlWriter.Xlsx
 
         public void Close()
         {
+            if (alreadyClosed)
+                return;
+
             XlsxAppXml a = new XlsxAppXml();
 
             a.SetSheetCount(worksheets);
@@ -90,6 +94,8 @@ namespace ExcelXmlWriter.Xlsx
             sharedStrings.OutputStream.Close();
             if (File.Exists(sharedStrings.FileAssociateWithOutputStream))
                 File.Delete(sharedStrings.FileAssociateWithOutputStream);
+
+            alreadyClosed = true;
         }
 
         public XlsxParts(Stream path)
@@ -195,9 +201,14 @@ namespace ExcelXmlWriter.Xlsx
             currentWorksheet.writerow(queryReader);
         }
 
-        public string[] WriteRow(IDataReader queryReader, string[] columnValuesToReturn)
+        public void WriteRow(IDataReader queryReader, string[] columnValuesToReturn)
         {
-            return currentWorksheet.writerow(queryReader, columnValuesToReturn);
+            currentWorksheet.writerow(queryReader, columnValuesToReturn);
+        }
+        
+        public string[] ReadKeyValues(IDataReader queryReader, string[] colsToObtainValsFrom)
+        {
+        	return currentWorksheet.ReadKeyValues(queryReader, colsToObtainValsFrom);
         }
 
         #region IDisposable Members
