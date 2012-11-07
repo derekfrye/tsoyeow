@@ -298,7 +298,7 @@ namespace ExcelXmlWriter.Workbook
 
         void WriteARow( WorkbookTracking w)
         {
-            if (w.RowCount % runParameters.MaxRowsPerSheet == 0)
+            if (w.RowCount>0&&w.RowCount % runParameters.MaxRowsPerSheet == 0)
                 w.Status = WorkBookStatus.BreakWanted;
 
             if (w.PreviousAndCurrentRowKeyColumns.PreviousDiffersFromCurrent)

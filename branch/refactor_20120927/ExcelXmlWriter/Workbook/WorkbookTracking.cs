@@ -68,6 +68,7 @@ namespace ExcelXmlWriter.Workbook
             SheetSubCount = 1;
             WorksheetOpen = false;
             RowCount = 1;
+            Status = WorkBookStatus.Pending;
             PreviousAndCurrentRowKeyColumns = new DupKeyResults();
         }
     }
