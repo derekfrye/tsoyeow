@@ -146,6 +146,7 @@ namespace ExcelXmlWriter
                 {
                     lock (currentResultLocker)
                         currentResult++;
+                    currentResultSetStillHasRecords = true;
                     return true;
                 }
                 else
@@ -218,6 +219,9 @@ namespace ExcelXmlWriter
             return currentResultSetStillHasRecords;
         }
 
+        /// <summary>
+        /// Call to MoveNext() will consume current row.
+        /// </summary>
         public void Reset()
         {
             rowConsumed = false;

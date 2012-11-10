@@ -88,6 +88,9 @@ namespace ExcelXmlWriter.Workbook
         public string[] DupeKeysToDelayStartingNewWorksheet
         { get; set; }
 
+        public int MaximumResultSetsPerWorkbook
+        { get; set; }
+
         public WorkBookParams()
         {
             QueryTimeout = 30;
@@ -96,6 +99,7 @@ namespace ExcelXmlWriter.Workbook
             WriteEmptyResultSetColumns = true;
             MaxWorkBookSize = 2500000000;
             BackendMethod = ExcelBackend.Xlsx;
+            MaximumResultSetsPerWorkbook = Int32.MaxValue;
         }
     }
 }

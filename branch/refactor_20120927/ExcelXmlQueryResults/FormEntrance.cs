@@ -22,7 +22,7 @@ namespace ExcelXmlQueryResults
         string fileName;
         string connStr;
 
-        ExcelXmlQueryResultsParams p;
+        WorkBookParams p;
         DateTime workbookStart;
 
         delegate void IncrFinishedD(QueryState b, int total, string msg);
@@ -100,7 +100,7 @@ namespace ExcelXmlQueryResults
 #endif
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        void ValidateOutputFile()
         {
             if (string.IsNullOrEmpty(textBox1.Text) || !Path.IsPathRooted(userFileName.Text))
             {
@@ -148,6 +148,50 @@ namespace ExcelXmlQueryResults
             }
 
             fileName = userFileName.Text + textBox1.Text;
+        }
+
+        private void runQueriesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ValidateOutputFile();
+            buildConnStr();
+            var tt=OpenFiles();
+            LockUnlockGUIControls(true);
+            Thread t;
+            t = new Thread(delegate() { this.processBatches(tt); });
+            t.IsBackground=true;
+            t.Start();
+        }
+
+       internal void processBatches(string[] tt)
+        {
+            foreach (var qry in tt)
+            {
+                using (StreamReader sr = new StreamReader(new FileStream(qry, FileMode.Open, FileAccess.Read)))
+                {
+                    p.Query = sr.ReadToEnd();
+                    p.FromFile = false;
+                    p.ConnectionString = connStr;
+                    WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e = p, filenm = fileName });
+                }
+            }
+
+        }
+
+        string[] OpenFiles()
+        {
+            DialogResult result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                return openFileDialog1.FileNames;
+            }
+            else
+                return new string[0];
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            ValidateOutputFile();            
             buildConnStr();
             writeSpreadsheets(); 
         }
@@ -169,10 +213,10 @@ namespace ExcelXmlQueryResults
             p.p.query = path;
             p.p.fromFile = true;
 #else
-            p.workbookParams.Query = richTextBox1.Text;
-            p.workbookParams.FromFile = false;
+            p.Query = richTextBox1.Text;
+            p.FromFile = false;
 #endif
-            p.workbookParams.ConnectionString = connStr;
+            p.ConnectionString = connStr;
 
             // prevent changes while writing data
             LockUnlockGUIControls(true);
@@ -185,23 +229,20 @@ namespace ExcelXmlQueryResults
                 work1(new object[] { p, fileName });
 #else
             Thread t;
-            if (String.Equals(p.newResultSetMethod, Resources.NewResultSetWorksheet))
-                t = new Thread(WriteResultsToSeparateTabs);
-            else
-                t = new Thread(WriteResultsToSeparateTabs);
+            t = new Thread(delegate() { WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e = p, filenm = fileName }); });
             t.IsBackground = true;
-            t.Start(new object[] { p, fileName });
+            t.Start();
 #endif
         }
 
-        void WriteResultsToSeparateTabs(object p)
+        void WriteResultsToSeparateTabs(ExcelXmlQueryResultsParams p)
         {
-            object[] parameters = (object[])p;
-            ExcelXmlQueryResultsParams workbookParams = (ExcelXmlQueryResultsParams)parameters[0];
-            string destinationFileName = (string)parameters[1];
+
+            WorkBookParams workbookParams = p.e;
+            string destinationFileName = p.filenm;
 
             // open wb
-            Workbook wb = new Workbook(workbookParams.workbookParams);
+            Workbook wb = new Workbook(workbookParams);
 
             // subscribe to progress events
             wb.ReaderFinished += new EventHandler<ReaderFinishedEvents>(wb_ReaderFinished);
@@ -273,9 +314,6 @@ namespace ExcelXmlQueryResults
             menuStrip1.Enabled = !lockControls;
             richTextBox1.ReadOnly = lockControls;
         }
-
-        enum QueryState { Running, 
-            Finished, Saving }
 
         void IncrFinished(QueryState b, int totalRows, string msg)
         {
@@ -376,25 +414,8 @@ namespace ExcelXmlQueryResults
             this.Close();
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void openConfigurationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
+        
     }
 
-    public class Utility
-    {
-        public static string getIncrFileName(int i, string p3)
-        {
-            return Path.Combine(Path.GetDirectoryName(p3)
-                , Path.GetFileNameWithoutExtension(p3)
-                + "_" + i.ToString()
-                + Path.GetExtension(p3));
-        }
-    }
+    
 }

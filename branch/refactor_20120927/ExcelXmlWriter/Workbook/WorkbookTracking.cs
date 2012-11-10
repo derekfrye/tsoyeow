@@ -62,6 +62,7 @@ namespace ExcelXmlWriter.Workbook
         { get; set; }
         public DupKeyResults PreviousAndCurrentRowKeyColumns
         { get; set; }
+        
 
         public WorkbookTracking()
         {

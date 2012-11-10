@@ -199,12 +199,21 @@ namespace ExcelXmlWriter.Workbook
             }
 
             WorkbookTracking w = new WorkbookTracking();
-            
+            int resultSetTotal = 1;
+
             while (queryReader.MoveToNextResultSet())
             {
-                //int rowCount = 0;
-                // write empty columns if requested
 
+                if (resultSetTotal > runParameters.MaximumResultSetsPerWorkbook)
+                {
+                    OnSave("Saving incremental result...");
+                    pts.Close();
+                    return WorkBookStatus.BreakCompleted;
+                }
+
+                resultSetTotal++;
+
+                // write empty columns if requested
                 if (runParameters.WriteEmptyResultSetColumns)
                 {
                     InitSheet(w);
@@ -218,23 +227,17 @@ namespace ExcelXmlWriter.Workbook
                     {
                         InitSheet(w);
                         w.WorksheetOpen = true;
-                    }              
-
-#if DEBUG
-                    int i = 1 + 1;
-                    if (w.RowCount == 4096)
-                        i = 1 + 1;
-#endif
+                    }
 
                     this.DetermineIfRowDependsOnPreviousRow(w);
                     queryReader.Reset();
 
                     // write the row, or determine why we couldn't write the row
-                    WriteARow(w);                    
+                    WriteARow(w);
 
                     // if we're over-size, we must return now
                     // but keep the query open bc the caller may request to write the rest of the results
-                    if (w.Status== WorkBookStatus.OverSize)
+                    if (w.Status == WorkBookStatus.OverSize)
                     {
                         OnSave("Saving incremental result...");
                         if (w.WorksheetOpen)
@@ -242,9 +245,9 @@ namespace ExcelXmlWriter.Workbook
                             pts.CloseSheet();
                         }
                         pts.Close();
-                        return WorkBookStatus.OverSize;
+                        return w.Status;
                     }
-                    
+
                 }
 
                 if (w.WorksheetOpen)
@@ -253,6 +256,8 @@ namespace ExcelXmlWriter.Workbook
                     w.WorksheetOpen = false;
                     w.RowCount = 0;
                 }
+
+                
             }
 
             OnSave("Saving final result...");

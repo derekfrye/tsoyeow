@@ -48,6 +48,8 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.excelformatpanel = new System.Windows.Forms.Panel();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBox8 = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
@@ -79,8 +81,8 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label10 = new System.Windows.Forms.Label();
-            this.textBox8 = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.textBox9 = new System.Windows.Forms.TextBox();
             this.tabPage2.SuspendLayout();
             this.excelformatpanel.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -211,6 +213,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.textBox9);
+            this.groupBox3.Controls.Add(this.label11);
             this.groupBox3.Controls.Add(this.textBox8);
             this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Controls.Add(this.textBox7);
@@ -223,10 +227,26 @@
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Location = new System.Drawing.Point(3, 3);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(337, 168);
+            this.groupBox3.Size = new System.Drawing.Size(337, 205);
             this.groupBox3.TabIndex = 7;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Workbook options";
+            // 
+            // textBox8
+            // 
+            this.textBox8.Location = new System.Drawing.Point(110, 96);
+            this.textBox8.Name = "textBox8";
+            this.textBox8.Size = new System.Drawing.Size(211, 20);
+            this.textBox8.TabIndex = 15;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(9, 99);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(95, 13);
+            this.label10.TabIndex = 14;
+            this.label10.Text = "Dupe key columns";
             // 
             // textBox7
             // 
@@ -248,7 +268,7 @@
             // 
             this.checkBox2.AutoSize = true;
             this.checkBox2.Enabled = false;
-            this.checkBox2.Location = new System.Drawing.Point(12, 145);
+            this.checkBox2.Location = new System.Drawing.Point(12, 177);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(136, 17);
             this.checkBox2.TabIndex = 11;
@@ -290,7 +310,7 @@
             this.checkBox1.AutoSize = true;
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(12, 126);
+            this.checkBox1.Location = new System.Drawing.Point(12, 158);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(188, 17);
             this.checkBox1.TabIndex = 7;
@@ -309,7 +329,7 @@
             // panel6
             // 
             this.panel6.Controls.Add(this.groupBox1);
-            this.panel6.Location = new System.Drawing.Point(3, 177);
+            this.panel6.Location = new System.Drawing.Point(3, 224);
             this.panel6.Name = "panel6";
             this.panel6.Size = new System.Drawing.Size(337, 88);
             this.panel6.TabIndex = 6;
@@ -556,21 +576,21 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label10
+            // label11
             // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(9, 99);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(95, 13);
-            this.label10.TabIndex = 14;
-            this.label10.Text = "Dupe key columns";
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(9, 125);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(153, 13);
+            this.label11.TabIndex = 16;
+            this.label11.Text = "Maximum result sets/workbook";
             // 
-            // textBox8
+            // textBox9
             // 
-            this.textBox8.Location = new System.Drawing.Point(110, 96);
-            this.textBox8.Name = "textBox8";
-            this.textBox8.Size = new System.Drawing.Size(211, 20);
-            this.textBox8.TabIndex = 15;
+            this.textBox9.Location = new System.Drawing.Point(177, 122);
+            this.textBox9.Name = "textBox9";
+            this.textBox9.Size = new System.Drawing.Size(144, 20);
+            this.textBox9.TabIndex = 17;
             // 
             // FormOptions
             // 
@@ -655,5 +675,7 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.TextBox textBox8;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox textBox9;
+        private System.Windows.Forms.Label label11;
     }
 }

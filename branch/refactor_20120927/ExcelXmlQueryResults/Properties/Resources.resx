@@ -172,7 +172,7 @@ Otherwise, the first result set will be named Sheet1, the second Sheet2, etc.</v
     <value>Awaiting user action.</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>Query Results to Xlsx Frontend v0.32</value>
+    <value>Query Results to Xlsx Frontend v0.33</value>
   </data>
   <data name="FileTypeXlsx" xml:space="preserve">
     <value>Xlsx</value>

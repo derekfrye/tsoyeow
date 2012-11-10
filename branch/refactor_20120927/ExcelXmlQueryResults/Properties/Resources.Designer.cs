@@ -235,7 +235,7 @@ namespace ExcelXmlQueryResults.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Query Results to Xlsx Frontend v0.32.
+        ///   Looks up a localized string similar to Query Results to Xlsx Frontend v0.33.
         /// </summary>
         internal static string Version {
             get {
