@@ -155,11 +155,14 @@ namespace ExcelXmlQueryResults
             ValidateOutputFile();
             buildConnStr();
             var tt=OpenFiles();
-            LockUnlockGUIControls(true);
-            Thread t;
-            t = new Thread(delegate() { this.processBatches(tt); });
-            t.IsBackground=true;
-            t.Start();
+            if (tt.Length > 0)
+            {
+                LockUnlockGUIControls(true);
+                Thread t;
+                t = new Thread(delegate() { this.processBatches(tt); });
+                t.IsBackground = true;
+                t.Start();
+            }
         }
 
        internal void processBatches(string[] tt)

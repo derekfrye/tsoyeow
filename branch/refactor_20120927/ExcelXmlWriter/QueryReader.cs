@@ -184,7 +184,8 @@ namespace ExcelXmlWriter
 
         public DataTable GetSchemaTable()
         {
-            return dr.GetSchemaTable();
+            var t=dr.GetSchemaTable();
+            return t;
         }
 
         #region IEnumerator Members

@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Format");
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Tab Names");
-            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Excel File Options", new System.Windows.Forms.TreeNode[] {
-            treeNode1,
-            treeNode2});
-            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Sql Server Options");
+            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Format");
+            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Tab Names");
+            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Excel File Options", new System.Windows.Forms.TreeNode[] {
+            treeNode5,
+            treeNode6});
+            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("Sql Server Options");
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -48,6 +48,8 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.excelformatpanel = new System.Windows.Forms.Panel();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBox9 = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
             this.textBox8 = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.textBox7 = new System.Windows.Forms.TextBox();
@@ -81,8 +83,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label11 = new System.Windows.Forms.Label();
-            this.textBox9 = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
             this.tabPage2.SuspendLayout();
             this.excelformatpanel.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -232,6 +233,22 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Workbook options";
             // 
+            // textBox9
+            // 
+            this.textBox9.Location = new System.Drawing.Point(177, 122);
+            this.textBox9.Name = "textBox9";
+            this.textBox9.Size = new System.Drawing.Size(144, 20);
+            this.textBox9.TabIndex = 17;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(9, 125);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(153, 13);
+            this.label11.TabIndex = 16;
+            this.label11.Text = "Maximum result sets/workbook";
+            // 
             // textBox8
             // 
             this.textBox8.Location = new System.Drawing.Point(110, 96);
@@ -373,11 +390,13 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.resultSetNamesGrid);
-            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox2.Location = new System.Drawing.Point(0, 0);
+            this.groupBox2.Location = new System.Drawing.Point(3, 25);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(465, 317);
+            this.groupBox2.Size = new System.Drawing.Size(459, 281);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Excel Tab Names";
@@ -391,7 +410,7 @@
             this.resultSetNamesGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.resultSetNamesGrid.Location = new System.Drawing.Point(3, 16);
             this.resultSetNamesGrid.Name = "resultSetNamesGrid";
-            this.resultSetNamesGrid.Size = new System.Drawing.Size(459, 298);
+            this.resultSetNamesGrid.Size = new System.Drawing.Size(453, 262);
             this.resultSetNamesGrid.TabIndex = 1;
             this.resultSetNamesGrid.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView2_CellEndEdit);
             this.resultSetNamesGrid.CellValidating += new System.Windows.Forms.DataGridViewCellValidatingEventHandler(this.dataGridView2_CellValidating);
@@ -489,10 +508,11 @@
             this.tabnamepanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabnamepanel.Controls.Add(this.label12);
             this.tabnamepanel.Controls.Add(this.groupBox2);
             this.tabnamepanel.Location = new System.Drawing.Point(6, 6);
             this.tabnamepanel.Name = "tabnamepanel";
-            this.tabnamepanel.Size = new System.Drawing.Size(465, 317);
+            this.tabnamepanel.Size = new System.Drawing.Size(465, 353);
             this.tabnamepanel.TabIndex = 9;
             // 
             // statusStrip1
@@ -540,17 +560,17 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.treeView1.Location = new System.Drawing.Point(3, 3);
             this.treeView1.Name = "treeView1";
-            treeNode1.Name = "Node3";
-            treeNode1.Text = "Format";
-            treeNode2.Name = "Node1";
-            treeNode2.Text = "Tab Names";
-            treeNode3.Name = "Node0";
-            treeNode3.Text = "Excel File Options";
-            treeNode4.Name = "Node5";
-            treeNode4.Text = "Sql Server Options";
+            treeNode5.Name = "Node3";
+            treeNode5.Text = "Format";
+            treeNode6.Name = "Node1";
+            treeNode6.Text = "Tab Names";
+            treeNode7.Name = "Node0";
+            treeNode7.Text = "Excel File Options";
+            treeNode8.Name = "Node5";
+            treeNode8.Text = "Sql Server Options";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode3,
-            treeNode4});
+            treeNode7,
+            treeNode8});
             this.treeView1.Size = new System.Drawing.Size(123, 359);
             this.treeView1.TabIndex = 12;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
@@ -576,21 +596,15 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label11
+            // label12
             // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(9, 125);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(153, 13);
-            this.label11.TabIndex = 16;
-            this.label11.Text = "Maximum result sets/workbook";
-            // 
-            // textBox9
-            // 
-            this.textBox9.Location = new System.Drawing.Point(177, 122);
-            this.textBox9.Name = "textBox9";
-            this.textBox9.Size = new System.Drawing.Size(144, 20);
-            this.textBox9.TabIndex = 17;
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(3, 9);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(63, 13);
+            this.label12.TabIndex = 9;
+            this.label12.Text = "* Optional";
             // 
             // FormOptions
             // 
@@ -617,6 +631,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabnamepanel.ResumeLayout(false);
+            this.tabnamepanel.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.panel7.ResumeLayout(false);
@@ -677,5 +692,6 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label12;
     }
 }

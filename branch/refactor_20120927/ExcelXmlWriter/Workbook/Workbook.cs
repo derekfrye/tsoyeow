@@ -169,12 +169,16 @@ namespace ExcelXmlWriter.Workbook
 
         void InitSheet(WorkbookTracking w)
         {
+            var t = queryReader.GetSchemaTable();
+            if (t != null)
+            {
                 pts.CreateSheet(queryReader.CurrentResult
                     , w.SheetSubCount
                     , retrieveSheetName(queryReader.CurrentResult, w.SheetSubCount)
                     , queryReader.GetSchemaTable().Rows
                     );
                 w.WorksheetOpen = true;
+            }
         }
 
         WorkBookStatus WriteResults(Stream path)
@@ -217,7 +221,6 @@ namespace ExcelXmlWriter.Workbook
                 if (runParameters.WriteEmptyResultSetColumns)
                 {
                     InitSheet(w);
-                    w.WorksheetOpen = true;
                 }
 
                 // loop through all result sets
@@ -226,28 +229,28 @@ namespace ExcelXmlWriter.Workbook
                     if (!w.WorksheetOpen)
                     {
                         InitSheet(w);
-                        w.WorksheetOpen = true;
                     }
-
-                    this.DetermineIfRowDependsOnPreviousRow(w);
-                    queryReader.Reset();
-
-                    // write the row, or determine why we couldn't write the row
-                    WriteARow(w);
-
-                    // if we're over-size, we must return now
-                    // but keep the query open bc the caller may request to write the rest of the results
-                    if (w.Status == WorkBookStatus.OverSize)
+                    if (w.WorksheetOpen)
                     {
-                        OnSave("Saving incremental result...");
-                        if (w.WorksheetOpen)
-                        {
-                            pts.CloseSheet();
-                        }
-                        pts.Close();
-                        return w.Status;
-                    }
+                        this.DetermineIfRowDependsOnPreviousRow(w);
+                        queryReader.Reset();
 
+                        // write the row, or determine why we couldn't write the row
+                        WriteARow(w);
+
+                        // if we're over-size, we must return now
+                        // but keep the query open bc the caller may request to write the rest of the results
+                        if (w.Status == WorkBookStatus.OverSize)
+                        {
+                            OnSave("Saving incremental result...");
+                            if (w.WorksheetOpen)
+                            {
+                                pts.CloseSheet();
+                            }
+                            pts.Close();
+                            return w.Status;
+                        }
+                    }
                 }
 
                 if (w.WorksheetOpen)

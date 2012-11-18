@@ -69,7 +69,7 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(161, 0);
+            this.button1.Location = new System.Drawing.Point(214, 0);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 1;
@@ -80,7 +80,7 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(129, 0);
+            this.button2.Location = new System.Drawing.Point(182, 0);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(26, 23);
             this.button2.TabIndex = 2;
@@ -94,7 +94,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.userFileName.Location = new System.Drawing.Point(57, 2);
             this.userFileName.Name = "userFileName";
-            this.userFileName.Size = new System.Drawing.Size(366, 20);
+            this.userFileName.Size = new System.Drawing.Size(309, 20);
             this.userFileName.TabIndex = 6;
             // 
             // label1
@@ -149,7 +149,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.button2);
             this.splitContainer1.Panel2.Controls.Add(this.textBox1);
             this.splitContainer1.Size = new System.Drawing.Size(677, 27);
-            this.splitContainer1.SplitterDistance = 426;
+            this.splitContainer1.SplitterDistance = 369;
             this.splitContainer1.SplitterWidth = 8;
             this.splitContainer1.TabIndex = 9;
             // 
@@ -168,7 +168,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox1.Location = new System.Drawing.Point(61, 2);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(62, 20);
+            this.textBox1.Size = new System.Drawing.Size(115, 20);
             this.textBox1.TabIndex = 8;
             // 
             // panel5
@@ -236,14 +236,14 @@
             // runQueriesToolStripMenuItem
             // 
             this.runQueriesToolStripMenuItem.Name = "runQueriesToolStripMenuItem";
-            this.runQueriesToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.runQueriesToolStripMenuItem.Text = "Run queries...";
+            this.runQueriesToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.runQueriesToolStripMenuItem.Text = "Run multiple queries...";
             this.runQueriesToolStripMenuItem.Click += new System.EventHandler(this.runQueriesToolStripMenuItem_Click);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -287,8 +287,8 @@
             // 
             // openFileDialog1
             // 
-            this.openFileDialog1.FileName = "openFileDialog1";
             this.openFileDialog1.Multiselect = true;
+            this.openFileDialog1.Title = "Open multiple queries...";
             // 
             // FormEntrance
             // 
