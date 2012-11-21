@@ -24,10 +24,20 @@ namespace ExcelXmlQueryResults
     {
         public static string getIncrFileName(int i, string p3)
         {
-            return Path.Combine(Path.GetDirectoryName(p3)
+            string a =Path.Combine(Path.GetDirectoryName(p3)
                 , Path.GetFileNameWithoutExtension(p3)
                 + "_" + i.ToString()
                 + Path.GetExtension(p3));
+            while (File.Exists(a))
+            {
+                i++;
+                a = Path.Combine(Path.GetDirectoryName(p3)
+                , Path.GetFileNameWithoutExtension(p3)
+                + "_" + i.ToString()
+                + Path.GetExtension(p3));
+            }
+
+            return a;
         }
     }
 }

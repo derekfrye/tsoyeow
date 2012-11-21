@@ -11,6 +11,7 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using ExcelXmlQueryResults;
 using ExcelXmlWriter.Workbook;
+using ExcelXmlWriterNTest.Properties;
 
 namespace ExcelXmlWriterTest
 {
@@ -69,8 +70,8 @@ namespace ExcelXmlWriterTest
                     p.Query = sr.ReadToEnd();
                     p.FromFile = false;
                     SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
-                    sb.DataSource = @".";
-                    sb.InitialCatalog = "master";
+                    sb.DataSource = Settings.Default.datasource;
+                    sb.InitialCatalog = Settings.Default.database;
                     sb.IntegratedSecurity = true;
                     p.ConnectionString = sb.ConnectionString;
                     p.MaxRowsPerSheet = 150000;
@@ -209,8 +210,8 @@ namespace ExcelXmlWriterTest
             p.FromFile = false;
 
             SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
-            sb.DataSource = @".";
-            sb.InitialCatalog = "master";
+            sb.DataSource = Settings.Default.datasource;
+            sb.InitialCatalog = Settings.Default.database;
             sb.IntegratedSecurity = true;
             p.ConnectionString = sb.ConnectionString;
             //p.columnTypeMappings = columnTypeMappings;
@@ -409,8 +410,8 @@ namespace ExcelXmlWriterTest
             p.FromFile = false;
 
             SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
-            sb.DataSource = @".";
-            sb.InitialCatalog = "master";
+            sb.DataSource = Settings.Default.datasource;
+            sb.InitialCatalog = Settings.Default.database;
             sb.IntegratedSecurity = true;
             p.ConnectionString = sb.ConnectionString;
             //p.columnTypeMappings = columnTypeMappings;

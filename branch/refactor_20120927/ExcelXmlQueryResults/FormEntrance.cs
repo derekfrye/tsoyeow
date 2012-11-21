@@ -167,6 +167,7 @@ namespace ExcelXmlQueryResults
 
        internal void processBatches(string[] tt)
         {
+            int currentFileCount = 1;
             foreach (var qry in tt)
             {
                 using (StreamReader sr = new StreamReader(new FileStream(qry, FileMode.Open, FileAccess.Read)))
@@ -174,7 +175,9 @@ namespace ExcelXmlQueryResults
                     p.Query = sr.ReadToEnd();
                     p.FromFile = false;
                     p.ConnectionString = connStr;
-                    WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e = p, filenm = fileName });
+                    string a = Utility.getIncrFileName(currentFileCount, fileName);
+                    WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e = p, filenm = a });
+                    currentFileCount = currentFileCount + 1;                    
                 }
             }
 

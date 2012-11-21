@@ -22,5 +22,29 @@ namespace ExcelXmlWriterNTest.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute(".")]
+        public string datasource {
+            get {
+                return ((string)(this["datasource"]));
+            }
+            set {
+                this["datasource"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("master")]
+        public string database {
+            get {
+                return ((string)(this["database"]));
+            }
+            set {
+                this["database"] = value;
+            }
+        }
     }
 }
