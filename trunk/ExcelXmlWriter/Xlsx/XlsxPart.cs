@@ -2,47 +2,50 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO.Packaging;
 using System.Xml.Linq;
 using System.IO;
 using System.Xml;
 
-namespace ExcelXmlWriter
+namespace ExcelXmlWriter.Xlsx
 {
     class XlsxPart
     {
-
-        protected PackagePart p3;
-        protected XDocument appXml = new XDocument();
+        protected XDocument appXml = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
 
         internal XlsxPart()
         {
         }
 
-        internal XlsxPart(XmlDocument x)
+        internal XlsxPart(XmlDocument inputDocument)
         {
-            appXml = XDocument.Parse(x.OuterXml);
+            appXml = XDocument.Parse(inputDocument.OuterXml);
         }
 
-        internal PackagePart LinkToPackage(Package p, Uri u, string contentType, string relationshipType)
+        internal static ContentRelationships LinkToPackage(string relationshipType, string packagePath)
         {
-            p3 = p.CreatePart(u, contentType, CompressionOption.SuperFast);
-            p.CreateRelationship(u, TargetMode.Internal, relationshipType);
-            return p3;
+            return new ContentRelationships() { PackagePath = packagePath, RelationshipType = relationshipType };
         }
 
-        internal void close()
+        internal static string Write(XDocument appXml)
         {
-            using (MemoryStream fs = new MemoryStream())
+            using (StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8))
             {
-                XmlWriter xxx = XmlWriter.Create(fs);
-                appXml.Save(xxx);
-                xxx.Flush();
-                fs.Flush();
-                fs.Seek(0, SeekOrigin.Begin);
+                var za = new XmlWriterSettings();
+                za.Encoding = Encoding.UTF8;
 
-                StaticFunctions.copyStream(fs, p3.GetStream());
+                using (XmlWriter apo = XmlWriter.Create(sb, za))
+                {
+                    appXml.Save(apo);
+                    apo.Close();
+                    return sb.ToString();
+                }
+
             }
+        }
+
+        internal string Write()
+        {
+            return Write(appXml);
         }
     }
 }

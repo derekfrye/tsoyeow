@@ -8,6 +8,7 @@ namespace ExcelXmlWriter
 {
     static class Xml2003Table
     {
+    	// FIXME use XmlWriter
         internal static string hdr(int colCount)
         {
             StringBuilder sb = new StringBuilder();
@@ -17,6 +18,7 @@ namespace ExcelXmlWriter
             sb.Append(Environment.NewLine);
             return sb.ToString();
         }
+        // FIXME use XmlWriter
         internal static string hdrclose
         {
             get

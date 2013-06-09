@@ -12,21 +12,28 @@ using ExcelXmlWriter;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Reflection;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlQueryResults
 {
 
-    struct ExcelXmlQueryResultsParams
-    {
-        public WorkBookParams p;
-        public string newResultSetMethod;
-    }
+    
 
     internal partial class FormOptions : Form
     {
 
+        #region Properties
+
+        internal WorkBookParams ExcelXmlQueryResultsParams
+        {
+            get { return p; }
+        }
+
+        #endregion
+
         internal Exceptions.ConfigFileBroken c1;
-        ExcelXmlQueryResultsParams p;
+        WorkBookParams p;
 
         internal FormOptions()
         {
@@ -50,6 +57,9 @@ namespace ExcelXmlQueryResults
 
             toolStripStatusLabel1.Text = string.Empty;
 
+            toolTip1.SetToolTip(label9, Resources.MaxSize);
+            toolTip1.SetToolTip(textBox7, Resources.MaxSize);
+
             ConfigManipulator c = new ConfigManipulator();
 
             try
@@ -61,13 +71,14 @@ namespace ExcelXmlQueryResults
                 textBox3.Text = c.GetValue("ConnectionUsername");
                 textBox4.Text = c.GetValue("ConnectionPassword");
 
-                checkBox1.Checked = p.p.writeEmptyResultSetColumns;
-                checkBox2.Checked = p.p.AutoRewriteOverpunch;
+                checkBox1.Checked = p.WriteEmptyResultSetColumns;
+                checkBox2.Checked = p.AutoRewriteOverpunch;
 
-                textBox5.Text = p.p.queryTimeout.ToString();
-                textBox6.Text = p.p.maxRowsPerSheet.ToString();
+                textBox5.Text = p.QueryTimeout.ToString();
+                textBox6.Text = p.MaxRowsPerSheet.ToString();
+                textBox9.Text = p.MaximumResultSetsPerWorkbook.ToString();
 
-                var p1 = p.p.resultNames;
+                var p1 = p.ResultNames;
                 int count = 0;
                 foreach (object o in p1.Keys)
                 {
@@ -98,6 +109,11 @@ namespace ExcelXmlQueryResults
                     radioButton1.Checked = false;
                     radioButton2.Checked = true;
                 }
+
+                textBox7.Text = Math.Round((double)p.MaxWorkBookSize / 1024 / 1024 / 1024, 3, MidpointRounding.AwayFromZero).ToString();
+
+                if (p.DupeKeysToDelayStartingNewWorksheet != null && p.DupeKeysToDelayStartingNewWorksheet.Length > 0)
+                    textBox8.Text = string.Join(",", p.DupeKeysToDelayStartingNewWorksheet);
             }
             catch (Exceptions.ConfigFileBroken e)
             {
@@ -111,44 +127,55 @@ namespace ExcelXmlQueryResults
             }
         }
 
-        internal static ExcelXmlQueryResultsParams LoadOpts()
+        internal static WorkBookParams LoadOpts()
         {
             ConfigManipulator c = new ConfigManipulator();
-            ExcelXmlQueryResultsParams a = new ExcelXmlQueryResultsParams();
-            a.p = new WorkBookParams();
-            a.newResultSetMethod = c.GetValue("NewResultSet");
-            a.p.writeEmptyResultSetColumns = Convert.ToBoolean(c.GetValue("WriteEmptyResultColumnHeaders"));
-            a.p.AutoRewriteOverpunch = Convert.ToBoolean(c.GetValue("AutoRewriteOverpunch"));
-            a.p.backendMethod = Enum.GetValues(typeof(ExcelBackend))
+            WorkBookParams a = new WorkBookParams();
+            
+            
+            a.WriteEmptyResultSetColumns = Convert.ToBoolean(c.GetValue("WriteEmptyResultColumnHeaders"));
+            a.AutoRewriteOverpunch = Convert.ToBoolean(c.GetValue("AutoRewriteOverpunch"));
+            a.BackendMethod = Enum.GetValues(typeof(ExcelBackend))
                             .Cast<ExcelBackend>()
                             .Where(x => String.Equals(x.ToString(), c.GetValue("ExcelFileType"))).First();
 
             int res = 0;
             if (!Int32.TryParse(c.GetValue("MaxRowsPerSheet"), out res))
-                a.p.maxRowsPerSheet = Convert.ToInt32(Resources.DefaultMaxRowsPerSheet);
+                a.MaxRowsPerSheet = Convert.ToInt32(Resources.DefaultMaxRowsPerSheet);
             else
-                a.p.maxRowsPerSheet = Convert.ToInt32(c.GetValue("MaxRowsPerSheet"));
+                a.MaxRowsPerSheet = Convert.ToInt32(c.GetValue("MaxRowsPerSheet"));
             if (Int32.TryParse(c.GetValue("QueryTimeout"), out res))
-                a.p.queryTimeout = Convert.ToInt32(c.GetValue("QueryTimeout"));
-            
+                a.QueryTimeout = Convert.ToInt32(c.GetValue("QueryTimeout"));
+
             var p1 = c.GetDictionary("ResultNames", typeof(int), typeof(string));
             foreach (object o in p1.Keys)
             {
-                a.p.resultNames.Add(Convert.ToInt32(o)
+                a.ResultNames.Add(Convert.ToInt32(o)
                     , p1[o].ToString());
             }
 
+            var p2 = c.GetDictionary("ColumnsThatPreventNewWorksheets", typeof(string), typeof(string));
+            string[] aa = null;
+            if (p2.Values.Count > 0)
+            {
+                aa = new string[p2.Values.Count];
+                a.DupeKeysToDelayStartingNewWorksheet = new string[aa.Length];
+                for (int i = 0; i < aa.Length; i++)
+                {
+                    a.DupeKeysToDelayStartingNewWorksheet[i] = p2.Values.ElementAt(i).ToString();
+                }
+            }
+
+            long res2 = 0;
+            if (long.TryParse(c.GetValue("MaximumWorkbookSizeInBytes"), out res2))
+                a.MaxWorkBookSize = res2;
+
+            int res3 = 0;
+            if (Int32.TryParse(c.GetValue("MaximumResultSetsPerWorkbook"), out res3))
+                a.MaximumResultSetsPerWorkbook = res3;
+
             return a;
         }
-
-        #region Properties
-
-        internal ExcelXmlQueryResultsParams ExcelXmlQueryResultsParams
-        {
-            get { return p; }
-        }
-
-        #endregion
 
         /// <summary>
         /// Save values to form state and app.config.
@@ -157,6 +184,14 @@ namespace ExcelXmlQueryResults
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
+            double dd;
+            if (!double.TryParse(textBox7.Text, out dd))
+            {
+                MessageBox.Show("Error: Maximum workbook filesize must be a numeric entry.");
+                return;
+            }
+            dd = Math.Round(Convert.ToDouble(textBox7.Text) * Math.Pow(1024,3), 0, MidpointRounding.AwayFromZero);
+
             ConfigManipulator c = new ConfigManipulator();
 
             Dictionary<string, string> h = new Dictionary<string, string>();
@@ -170,6 +205,9 @@ namespace ExcelXmlQueryResults
             h.Add("ConnectionPassword", textBox4.Text);
             h.Add("QueryTimeout", textBox5.Text);
             h.Add("MaxRowsPerSheet", textBox6.Text);
+
+            h.Add("MaximumWorkbookSizeInBytes", dd.ToString());
+            h.Add("MaximumResultSetsPerWorkbook", textBox9.Text);
             
             if (Regex.IsMatch(comboBox3.SelectedItem.ToString(), Resources.FileTypeXml, RegexOptions.IgnoreCase))
                 h.Add("ExcelFileType", Resources.FileTypeXml);
@@ -178,7 +216,23 @@ namespace ExcelXmlQueryResults
             h.Add("WriteEmptyResultColumnHeaders", checkBox1.Checked.ToString());
             h.Add("AutoRewriteOverpunch", checkBox2.Checked.ToString());
 
-            Dictionary<object, object> d1 = new Dictionary<object, object>();
+            string[] a=null;
+            if (!string.IsNullOrEmpty(textBox8.Text))
+            {
+                a = textBox8.Text.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                Dictionary<object, object> d1a = new Dictionary<object, object>();
+                int i = 1;
+                foreach (var entry in a)
+                {
+                    if (!string.IsNullOrWhiteSpace(entry))
+                    {
+                        d1a.Add("column" + i.ToString(), entry);
+                        i++;
+                    }
+                }
+                if (d1a.Count > 0)
+                    c.SaveValue(d1a, "ColumnsThatPreventNewWorksheets");
+            }
 
             Dictionary<object, object> d2 = new Dictionary<object, object>();
             foreach (DataGridViewRow d in resultSetNamesGrid.Rows.Cast<DataGridViewRow>().Where(x => x.Cells[0].Value != null))

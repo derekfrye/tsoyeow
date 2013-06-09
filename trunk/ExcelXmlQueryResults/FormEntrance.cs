@@ -13,6 +13,7 @@ using System.Threading;
 using System.Xml.Linq;
 using System.Globalization;
 using ExcelXmlWriter;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlQueryResults
 {
@@ -21,8 +22,13 @@ namespace ExcelXmlQueryResults
         string fileName;
         string connStr;
 
-        ExcelXmlQueryResultsParams p;
+        WorkBookParams p;
         DateTime workbookStart;
+
+        delegate void IncrFinishedD(QueryState b, int total, string msg);
+        delegate void IncrSomeResultsD(decimal a, int rowsProcessed);
+        delegate void CatchQueryExceptionD(QueryExceptionEvents e);
+        delegate void DSaveFileBegan(QueryState b, int total, string msg);
 
         public FormEntrance()
         {
@@ -94,7 +100,7 @@ namespace ExcelXmlQueryResults
 #endif
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        void ValidateOutputFile()
         {
             if (string.IsNullOrEmpty(textBox1.Text) || !Path.IsPathRooted(userFileName.Text))
             {
@@ -142,8 +148,58 @@ namespace ExcelXmlQueryResults
             }
 
             fileName = userFileName.Text + textBox1.Text;
+        }
+
+        private void runQueriesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ValidateOutputFile();
             buildConnStr();
-            writeSpreadsheets();
+            var tt=OpenFiles();
+            if (tt.Length > 0)
+            {
+                LockUnlockGUIControls(true);
+                Thread t;
+                t = new Thread(delegate() { this.processBatches(tt); });
+                t.IsBackground = true;
+                t.Start();
+            }
+        }
+
+       internal void processBatches(string[] tt)
+        {
+            int currentFileCount = 1;
+            foreach (var qry in tt)
+            {
+                using (StreamReader sr = new StreamReader(new FileStream(qry, FileMode.Open, FileAccess.Read)))
+                {
+                    p.Query = sr.ReadToEnd();
+                    p.FromFile = false;
+                    p.ConnectionString = connStr;
+                    string a = Utility.getIncrFileName(currentFileCount, fileName);
+                    WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e = p, filenm = a });
+                    currentFileCount = currentFileCount + 1;                    
+                }
+            }
+
+        }
+
+        string[] OpenFiles()
+        {
+            DialogResult result = openFileDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                return openFileDialog1.FileNames;
+            }
+            else
+                return new string[0];
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            ValidateOutputFile();            
+            buildConnStr();
+            writeSpreadsheets(); 
         }
 
         void writeSpreadsheets()
@@ -163,10 +219,10 @@ namespace ExcelXmlQueryResults
             p.p.query = path;
             p.p.fromFile = true;
 #else
-            p.p.query = richTextBox1.Text;
-            p.p.fromFile = false;
+            p.Query = richTextBox1.Text;
+            p.FromFile = false;
 #endif
-            p.p.connStr = connStr;
+            p.ConnectionString = connStr;
 
             // prevent changes while writing data
             LockUnlockGUIControls(true);
@@ -179,101 +235,40 @@ namespace ExcelXmlQueryResults
                 work1(new object[] { p, fileName });
 #else
             Thread t;
-            if (String.Equals(p.newResultSetMethod, Resources.NewResultSetWorksheet))
-                t = new Thread(WriteResultsToSeparateTabs);
-            else
-                t = new Thread(WriteResultsToSeparateFiles);
+            t = new Thread(delegate() { WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e = p, filenm = fileName }); });
             t.IsBackground = true;
-            t.Start(new object[] { p, fileName });
+            t.Start();
 #endif
         }
 
-        void WriteResultsToSeparateTabs(object p)
+        void WriteResultsToSeparateTabs(ExcelXmlQueryResultsParams p)
         {
-            object[] p2 = (object[])p;
-            ExcelXmlQueryResultsParams p1 = (ExcelXmlQueryResultsParams)p2[0];
-            string p3 = (string)p2[1];
+
+            WorkBookParams workbookParams = p.e;
+            string destinationFileName = p.filenm;
 
             // open wb
-            Workbook wb = new Workbook(p1.p);
+            Workbook wb = new Workbook(workbookParams);
 
             // subscribe to progress events
             wb.ReaderFinished += new EventHandler<ReaderFinishedEvents>(wb_ReaderFinished);
             wb.QueryStarted += new EventHandler<EventArgs>(wb_QueryStarted);
             wb.QueryException += new EventHandler<QueryExceptionEvents>(wb_QueryError);
             wb.QueryRowsOverTime += new EventHandler<QueryRowsOverTimeEvents>(wb_QueryRowsOverTime);
+            wb.SaveFile+=new EventHandler<SaveFileEvent>(wb_SaveBegan);
 
             if (wb.RunQuery())
             {
-                int currentFile = 1;
+                int currentFileCount = 1;
                 
-                WorkBookStatus status = wb.WriteQueryResults(p3);
+                WorkBookStatus status = wb.WriteQueryResults(destinationFileName);
                 while (status != WorkBookStatus.Completed)
                 {
-                    currentFile++;
-                    string a = getIncrFileName(currentFile, p3);
+                    currentFileCount = currentFileCount + 1;
+                    string a = Utility.getIncrFileName(currentFileCount, destinationFileName);
                     status = wb.WriteQueryResults(a);
                 }
             }
-        }
-
-        void WriteResultsToSeparateFiles(object p)
-        {
-            object[] p2 = (object[])p;
-            ExcelXmlQueryResultsParams p1 = (ExcelXmlQueryResultsParams)p2[0];
-            string filename = (string)p2[1];
-            string orig_filename = (string)p2[1];
-
-            // open wb
-            Workbook wb = new Workbook(p1.p);
-
-            // subscribe to progress events
-            wb.ReaderFinished += new EventHandler<ReaderFinishedEvents>(wb_ReaderFinished);
-            wb.QueryStarted += new EventHandler<EventArgs>(wb_QueryStarted);
-            wb.QueryException += new EventHandler<QueryExceptionEvents>(wb_QueryError);
-            wb.QueryRowsOverTime += new EventHandler<QueryRowsOverTimeEvents>(wb_QueryRowsOverTime);
-
-            if (wb.RunQuery())
-            {
-                int currentFile = 1;
-                // if we have a name for this file, retrieve it
-                if (p1.p.resultNames.ContainsKey(currentFile))
-                    filename = changeFileNameBaseName(filename, p1.p.resultNames[currentFile]);
-                
-                while (wb.NextResult())
-                {
-                    if (currentFile != 1)
-                    {
-                        // if we have a name for this file, retrieve it
-                        if (p1.p.resultNames.ContainsKey(currentFile))
-                            filename = changeFileNameBaseName(filename, p1.p.resultNames[currentFile]);
-                        // otherwise, get the next filename in sequence
-                        else
-                            filename = getIncrFileName(currentFile, orig_filename);
-                    }
-                    // write the results
-                    WorkBookStatus status = wb.WriteQueryResult(filename);
-                    int currentResultSet = 1;
-                    // if not all of the results were written (because over max-file size), make a new file and continue writing
-                    while (status != WorkBookStatus.Completed)
-                    {
-                        currentResultSet++;
-                        filename = getIncrFileName(currentResultSet, filename);
-                        status = wb.WriteQueryResult(filename);
-                    }
-                    currentFile++;
-                }
-                wb.QueryClose();
-            }
-        }
-
-        static string getIncrFileName(int i, string p3)
-        {
-            return Path.GetDirectoryName(p3)
-                + Path.DirectorySeparatorChar.ToString()
-                + Path.GetFileNameWithoutExtension(p3)
-                + "_"+i.ToString()
-                + Path.GetExtension(p3);
         }
 
         /// <summary>
@@ -302,17 +297,18 @@ namespace ExcelXmlQueryResults
 
         void wb_QueryStarted(object sender, EventArgs e)
         {
-            this.Invoke(new IncrFinishedD(this.IncrFinished), new object[] { QueryState.Running, null });
+            this.Invoke(new IncrFinishedD(this.IncrFinished), new object[] { QueryState.Running, null, null });
         }
 
         void wb_ReaderFinished(object sender, ReaderFinishedEvents a)
         {
-            this.Invoke(new IncrFinishedD(this.IncrFinished), new object[] { QueryState.Finished, a.totalRecordsRead });
+            this.Invoke(new IncrFinishedD(this.IncrFinished), new object[] { QueryState.Finished, a.totalRecordsRead, null });
         }
 
-        delegate void IncrFinishedD(QueryState b, int total);
-        delegate void IncrSomeResultsD(decimal a, int rowsProcessed);
-        delegate void CatchQueryExceptionD(QueryExceptionEvents e);
+        void wb_SaveBegan(object sender, SaveFileEvent s)
+        {
+            this.Invoke(new DSaveFileBegan(this.IncrFinished), new object[] { QueryState.Saving, 0, s.Message });
+        }
 
         /// <summary>
         /// Prevent GUI from updates during execution.
@@ -325,17 +321,19 @@ namespace ExcelXmlQueryResults
             richTextBox1.ReadOnly = lockControls;
         }
 
-        enum QueryState { Running, Finished }
-
-        void IncrFinished(QueryState b, int totalRows)
+        void IncrFinished(QueryState b, int totalRows, string msg)
         {
             if (b == QueryState.Finished)
             {
                 DateTime d = DateTime.Now;
                 TimeSpan t = d - workbookStart;
                 toolStripStatusLabel2.Text = Resources.Finished + " Wrote " + totalRows.ToString("N")
-                    + " total rows in " + t.TotalSeconds.ToString() + " seconds.";
+                    + " total rows in " + Math.Round(t.TotalSeconds, 3, MidpointRounding.AwayFromZero).ToString() + " seconds.";
                 LockUnlockGUIControls(false);
+            }
+            else if (b == QueryState.Saving && !string.IsNullOrEmpty(msg))
+            {
+                toolStripStatusLabel2.Text = msg;
             }
             else
                 toolStripStatusLabel2.Text = Resources.RunningNoResults;
@@ -422,14 +420,8 @@ namespace ExcelXmlQueryResults
             this.Close();
         }
 
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void openConfigurationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
+        
     }
+
+    
 }

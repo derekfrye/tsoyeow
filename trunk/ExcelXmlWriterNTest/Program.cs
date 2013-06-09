@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.IO;
+using System.Reflection;
 
 namespace ExcelXmlWriterNTest
 {
@@ -13,7 +15,8 @@ namespace ExcelXmlWriterNTest
         [STAThread]
         static void Main(string[] args)
         {
-            NUnit.Gui.AppEntry.Main(args);
+            string[] a = new[] { Assembly.GetExecutingAssembly().Location };
+            NUnit.Gui.AppEntry.Main(a);
         }
     }
 }

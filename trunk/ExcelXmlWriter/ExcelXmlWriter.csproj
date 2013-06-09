@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ExcelXmlWriter</RootNamespace>
     <AssemblyName>ExcelXmlWriter</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -55,6 +56,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -68,9 +72,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Xlsx\XlsxCell.cs" />
+    <Compile Include="Workbook\Workbook.cs" />
+    <Compile Include="Workbook\WorkbookEvents.cs" />
+    <Compile Include="Workbook\WorkbookParams.cs" />
+    <Compile Include="Workbook\WorkbookTracking.cs" />
+    <Compile Include="Xlsx\ContentTypes.cs" />
+    <Compile Include="Xlsx\Rels.cs" />
+    <Compile Include="Xlsx\StringWriterWithEncoding.cs" />
     <Compile Include="Xlsx\XlsxData.cs" />
-    <Compile Include="WorkbookEvents.cs" />
     <Compile Include="StaticFunctions.cs" />
     <Compile Include="Xlsx\XlsxAppXml.cs" />
     <Compile Include="Xlsx\XlsxSharedStringsXml.cs" />
@@ -89,11 +98,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource1.resx</DependentUpon>
     </Compile>
-    <Compile Include="Xlsx\XlsxRow.cs" />
     <Compile Include="Xml2003Table.cs" />
-    <Compile Include="Workbook.cs" />
     <Compile Include="Xlsx\XlsxWorksheet.cs" />
-    <Compile Include="Xlsx\XlsxWorksheetPart.cs" />
     <Compile Include="Xlsx\XlsxPart.cs" />
     <Compile Include="Xlsx\XlsxParts.cs" />
   </ItemGroup>
@@ -109,6 +115,15 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetZip\Zip\Zip DLL.csproj">
+      <Project>{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}</Project>
+      <Name>Zip DLL</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Workbook" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
