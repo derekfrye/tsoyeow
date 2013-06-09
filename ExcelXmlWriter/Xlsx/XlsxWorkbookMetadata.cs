@@ -5,9 +5,9 @@ using System.Text;
 using System.Xml.Linq;
 using System.IO;
 using System.Xml;
-using System.IO.Packaging;
+using ExcelXmlWriter.Xlsx;
 
-namespace ExcelXmlWriter
+namespace ExcelXmlWriter.Xlsx
 {
     /// <summary>
     /// /xl/workbook.xml
@@ -18,14 +18,6 @@ namespace ExcelXmlWriter
         XNamespace xn1 = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
         XNamespace xn11 = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
 
-        internal PackagePart LinkToPackage(Package p)
-        {
-            return base.LinkToPackage(p, new Uri("/xl/workbook.xml", UriKind.Relative)
-                , "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
-                , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"
-                );
-        }
-
         internal void SetSheetCount(IList<XlsxWorksheet> sheets)
         {
             int order = 1;
@@ -33,15 +25,13 @@ namespace ExcelXmlWriter
             {
                 appXml.Element(xn11 + "workbook").Element(xn11 + "sheets").Add(
                     new XElement(xn11 + "sheet"
-                        , new XAttribute("name", lk.sheetname)
+                        , new XAttribute("name", lk.Sheetname)
                         , new XAttribute("sheetId", order)
-                        , new XAttribute(xn1 + "id", lk.Id)
+                        , new XAttribute(xn1 + "id", lk.RelationshipId)
                     )
                 );
                 order++;
             }
-
-            base.close();
         }
 
         internal XlsxWorkbookMetadata()

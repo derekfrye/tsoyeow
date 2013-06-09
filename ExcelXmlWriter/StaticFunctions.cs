@@ -5,6 +5,7 @@ using System.Text;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlWriter
 {
@@ -66,16 +67,6 @@ namespace ExcelXmlWriter
 
         static readonly int excelMaxNumberLength = Convert.ToInt32(Resource1.ExcelMaximumNumberLength, CultureInfo.InvariantCulture);
 
-        // move to static helper class
-        internal static void copyStream(Stream input, Stream output)
-        {
-            const int bufSize = 0x1000;
-            byte[] buf = new byte[bufSize];
-            int bytesRead = 0;
-            while ((bytesRead = input.Read(buf, 0, bufSize)) > 0)
-                output.Write(buf, 0, bytesRead);
-        }
-
         internal static Overpunch applyOverPunch(string stringToOverpunch, double significantDigits)
         {
             if (!string.IsNullOrEmpty(stringToOverpunch))
@@ -114,7 +105,7 @@ namespace ExcelXmlWriter
                 return new Overpunch() { val = 0.0, IsOverpunchable = false };
         }
 
-        internal static ExcelDataType ResolveDataType(string dataValue, double significantDigits)
+        internal static ExcelDataType ResolveDataType(string dataValue)
         {
             decimal throwaway = new decimal();
             DateTime d = new DateTime();

@@ -2,86 +2,136 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO.Packaging;
 using System.IO;
 using System.Collections;
 using System.Security.Cryptography;
+using System.Xml;
+using System.Xml.Linq;
 
-namespace ExcelXmlWriter
+namespace ExcelXmlWriter.Xlsx
 {
-    class XlsxSharedStringsXml
+
+    class SharedStringResult
     {
-        PackagePart sharedStringsPt;
-        long ss = 0;
-        FileStream fs;
-        Crc32 c = new Crc32();
-        Dictionary<string, long> a = new Dictionary<string, long>();
-        readonly byte[] openString = Encoding.UTF8.GetBytes("<si><t>");
-        readonly byte[] closeString = Encoding.UTF8.GetBytes("</t></si>" + Environment.NewLine);
+        public long Item1
+        { get; set; }
+        public string Item2
+        { get; set; }
+    }
+    
+    /// <summary>
+    /// /xl/sharedStrings.xml
+    /// </summary>
+    class XlsxSharedStringsXml : IDisposable
+    {
+        long curentSharedStringPosition = 0;
+        XmlWriter xw;
 
-        internal XlsxSharedStringsXml(Package p, PackagePart p1)
+        Dictionary<int, SharedStringResult> sharedStringDictionary = new Dictionary<int, SharedStringResult>();
+
+        internal Stream OutputStream
+        { get; private set; }
+
+        internal string FileAssociateWithOutputStream
+        { get; private set; }
+
+        internal XlsxSharedStringsXml(Stream outputStream, string fileAssociatedWithOutputStream)
         {
-            fs = new FileStream(Path.GetTempFileName(), FileMode.Create);
-            Uri u9 = new Uri("/xl/sharedStrings.xml", UriKind.Relative);
-            sharedStringsPt = p.CreatePart(u9, "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml", CompressionOption.Normal);
+            this.FileAssociateWithOutputStream = fileAssociatedWithOutputStream;
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append(@"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>");
-            sb.Append(Environment.NewLine);
-            sb.Append(@"<sst xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"" >");
-            sb.Append(Environment.NewLine);
+            OutputStream = outputStream;
 
-            byte[] b = Encoding.UTF8.GetBytes(sb.ToString());
-            fs.Write(b, 0, b.Length);
+            xw = XmlWriter.Create(OutputStream);
+            xw.WriteStartDocument(true);
 
-            p1.CreateRelationship(new Uri("sharedStrings.xml", UriKind.Relative), TargetMode.Internal
-                , "http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings");
+            xw.WriteStartElement("sst", "http://schemas.openxmlformats.org/spreadsheetml/2006/main");
+            xw.WriteWhitespace(Environment.NewLine);
+        }
+
+
+        internal static ContentRelationships LinkToPackage(string reltp, string pth)
+        {
+            return new ContentRelationships() { PackagePath = pth, RelationshipType = reltp };
         }
 
         /// <summary>
         /// Write a string value to the sharedStrings.xml file, and write the sharedStrings array entry in the current worksheet stream.
         /// </summary>
-        /// <param name="s"></param>
+        /// <param name="value"></param>
         /// <returns></returns>
-        internal long write(string s)
+        internal long Write(string value)
         {
-            Crc32 cc = new Crc32();
 
-            byte[] ba = Encoding.UTF8.GetBytes(s);
-            string res = string.Empty;
-            foreach (byte w in cc.ComputeHash(ba))
-                res += w.ToString("x2").ToLower();
-            //byte[] b = cc.ComputeHash(ba);
+            SharedStringResult f = new SharedStringResult();
 
-            long f=0;
-            a.TryGetValue(res, out f);
+            var p = string.Join(null, value.ToArray().Where(x => XmlConvert.IsXmlChar(x)));
+            var hdhdsdafd = p.GetHashCode();
 
-            //bool cn = a.Keys.Where(x => x[0] == b[0] && x[1] == b[1] && x[2] == b[2] && x[3] == b[3]).Any();
+            var found = sharedStringDictionary.TryGetValue(hdhdsdafd, out f);
 
-            if (a.Count == 0 || (f == 0 && !a.ContainsKey(res)))
+            // if there was a match on hashcode, also determine if the string is identical
+            // if so, return the pointer to the correct sharedstirng position
+            if (found && string.Equals(f.Item2, value, StringComparison.InvariantCulture))
             {
-                //byte[] ba = Encoding.UTF8.GetBytes(s);
-                // fixme, xml:space="preserve"
-                fs.Write(openString, 0, openString.Length);
-                fs.Write(ba, 0, ba.Length);
-                fs.Write(closeString, 0, closeString.Length);
-                a.Add(res, ss); 
-                return ss++;
+                return f.Item1;
             }
+            // if there isn't a hashcode match OR the string isnt identical, write it to sharedstrings
+
             else
-                return f;
+            {
+                xw.WriteStartElement("si");
+                xw.WriteStartElement("t");
+
+                xw.WriteString(p);
+
+                xw.WriteEndElement();
+                xw.WriteEndElement();
+                xw.WriteWhitespace(Environment.NewLine);
+
+                // if we can't find the value (as opposed to a hashcode collision)
+                // we need to write it to sharedstrings, and add it to the lookup array
+                // FIXME make this count() test a parameter
+                if (!found && sharedStringDictionary.Count < 500000)
+                {
+                    sharedStringDictionary.Add(hdhdsdafd, new SharedStringResult() { Item1 = curentSharedStringPosition, Item2 = value });
+                }
+                curentSharedStringPosition++;
+
+                // return the sharedstringposition we wrote
+                return curentSharedStringPosition - 1;
+            }
         }
 
-        internal void close()
+        internal void Close()
         {
-            byte[] b = Encoding.UTF8.GetBytes("</sst>");
-            fs.Write(b, 0, b.Length);
-
-            fs.Flush();
-            fs.Seek(0, SeekOrigin.Begin);
-            StaticFunctions.copyStream(fs, sharedStringsPt.GetStream());
-            fs.Close();
-            File.Delete(fs.Name);
+            xw.WriteEndElement();
+            xw.Close();
+            OutputStream.Flush();
+            OutputStream.Seek(0, SeekOrigin.Begin);
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (xw != null)
+                    xw.Close();
+                try
+                {
+                    File.Delete(FileAssociateWithOutputStream);
+                }
+                catch { }
+            }
+        }
+
+        #endregion
     }
 }

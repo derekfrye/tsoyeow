@@ -1,6 +1,6 @@
 ﻿create table #a (a int identity(1,1), a1 int, b uniqueidentifier, c datetime, d uniqueidentifier
 	, e uniqueidentifier, f uniqueidentifier, g uniqueidentifier, h uniqueidentifier
-	, i uniqueidentifier, j uniqueidentifier, k uniqueidentifier
+	, i uniqueidentifier, j uniqueidentifier, k nvarchar(100)
 )
 insert into #a values (
 		1
@@ -13,7 +13,7 @@ insert into #a values (
 		, 'DF58E6E9-C694-4BD6-A8CE-2FF4778A9A38'
 		, '8BCE720A-FDF3-46BA-9C58-1261CC1D5DEB'
 		, 'C6EFE501-3D93-4515-A754-6AF87730FB4D'
-		, 'CB4ABB09-8043-42CF-873C-5A17708AD634'
+		, nchar(0x001F)+nchar(0x000A)+nchar(0x001B)+'a'
 	)
 
 set nocount on
