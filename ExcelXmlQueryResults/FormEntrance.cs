@@ -100,6 +100,9 @@ namespace ExcelXmlQueryResults
 #endif
         }
 
+        /// <summary>
+        /// Make sure the filename specified is valid and we can write to that directory.
+        /// </summary>
         void ValidateOutputFile()
         {
             if (string.IsNullOrEmpty(textBox1.Text) || !Path.IsPathRooted(userFileName.Text))
@@ -240,6 +243,8 @@ namespace ExcelXmlQueryResults
             t.Start();
 #endif
         }
+
+     
 
         void WriteResultsToSeparateTabs(ExcelXmlQueryResultsParams p)
         {

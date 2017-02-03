@@ -19,11 +19,13 @@ namespace ExcelXmlWriterTest
     ///This is a test class for WorkbookTest and is intended
     ///to contain all WorkbookTest Unit Tests
     ///</summary>
+    //[TestClass()]
     [TestFixture()]
     public class WorkbookTest
     {
 
         [Test()]
+        [TestCase(1,1)]
         public void WorkbookProcessBatchesTest()
         {
 

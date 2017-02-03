@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{699CBD61-CF03-415E-8D00-EC82A1839252}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
@@ -12,8 +14,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlQueryResults", "Exc
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlWriter", "ExcelXmlWriter\ExcelXmlWriter.csproj", "{3A145151-9621-4D4E-A22F-06BB35157022}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zip DLL", "DotNetZip\Zip\Zip DLL.csproj", "{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlWriterNTest", "ExcelXmlWriterNTest\ExcelXmlWriterNTest.csproj", "{0ED1786A-C42C-4FBC-BEB3-7F332071AD93}"
 EndProject
@@ -86,31 +86,6 @@ Global
 		{3A145151-9621-4D4E-A22F-06BB35157022}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3A145151-9621-4D4E-A22F-06BB35157022}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{3A145151-9621-4D4E-A22F-06BB35157022}.Release|x86.ActiveCfg = Release|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFile|Any CPU.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFile|Any CPU.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFile|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFile|Mixed Platforms.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFile|x86.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFileNoThread|Any CPU.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFileNoThread|Any CPU.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFileNoThread|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFileNoThread|Mixed Platforms.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugFromFileNoThread|x86.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugNoThread|Any CPU.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugNoThread|Any CPU.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugNoThread|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugNoThread|Mixed Platforms.Build.0 = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.DebugNoThread|x86.ActiveCfg = Debug|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{D3B0AD67-44D8-4B3D-BED9-CE1FD6DE2C5A}.Release|x86.ActiveCfg = Release|Any CPU
 		{0ED1786A-C42C-4FBC-BEB3-7F332071AD93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0ED1786A-C42C-4FBC-BEB3-7F332071AD93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ED1786A-C42C-4FBC-BEB3-7F332071AD93}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

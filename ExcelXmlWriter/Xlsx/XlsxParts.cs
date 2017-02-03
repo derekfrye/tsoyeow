@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using ExcelXmlWriter.Properties;
 using System.Data;
-using Ionic.Zip;
-using ExcelXmlWriter.Xlsx;
 using System.Xml.Linq;
 using System.Xml;
+using Ionic.Zip; 
 
 namespace ExcelXmlWriter.Xlsx
 {

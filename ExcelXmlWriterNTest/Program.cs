@@ -16,7 +16,8 @@ namespace ExcelXmlWriterNTest
         static void Main(string[] args)
         {
             string[] a = new[] { Assembly.GetExecutingAssembly().Location };
-            NUnit.Gui.AppEntry.Main(a);
+            //NUnit.Gui.AppEntry.Main(a);
+            
         }
     }
 }

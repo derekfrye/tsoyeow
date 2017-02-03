@@ -4,6 +4,7 @@ using System.Xml;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace ExcelXmlWriterTest
 {
@@ -16,23 +17,24 @@ namespace ExcelXmlWriterTest
     public class ConfigManipulatorTest
     {
 
-        string originalAppConfigPath = Environment.CurrentDirectory;
-        string testAppConfigPath = Environment.CurrentDirectory;
+        string originalAppConfigPath = Assembly.GetExecutingAssembly().Location;
+        string testAppConfigPath = Path.GetTempPath();
 
         #region Test Setup/Teardown
 
         [SetUp()]
         public void MyClassInitialize()
         {
-            originalAppConfigPath = Path.GetDirectoryName(Environment.CurrentDirectory);
+            originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
+            originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
             originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
             originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
             originalAppConfigPath = originalAppConfigPath + Path.DirectorySeparatorChar.ToString()
                 + "ExcelXmlQueryResults" + Path.DirectorySeparatorChar.ToString()
                 + "App.config";
 
-            testAppConfigPath = Environment.CurrentDirectory + Path.DirectorySeparatorChar.ToString() + "App.config";
-            System.IO.File.Copy(originalAppConfigPath, testAppConfigPath);
+            testAppConfigPath = Path.GetTempFileName();
+            System.IO.File.Copy(originalAppConfigPath, testAppConfigPath, true);
 
         }
 

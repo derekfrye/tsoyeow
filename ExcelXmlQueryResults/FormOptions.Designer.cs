@@ -47,6 +47,7 @@
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.excelformatpanel = new System.Windows.Forms.Panel();
+            this.label13 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.textBox9 = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
@@ -75,6 +76,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabnamepanel = new System.Windows.Forms.Panel();
+            this.label12 = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel7 = new System.Windows.Forms.Panel();
@@ -83,7 +85,6 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label12 = new System.Windows.Forms.Label();
             this.tabPage2.SuspendLayout();
             this.excelformatpanel.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -196,7 +197,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(477, 327);
+            this.tabPage2.Size = new System.Drawing.Size(815, 327);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Excel File Options";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -205,12 +206,22 @@
             // 
             this.excelformatpanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.excelformatpanel.Controls.Add(this.label13);
             this.excelformatpanel.Controls.Add(this.groupBox3);
             this.excelformatpanel.Controls.Add(this.panel6);
             this.excelformatpanel.Location = new System.Drawing.Point(6, 6);
             this.excelformatpanel.Name = "excelformatpanel";
-            this.excelformatpanel.Size = new System.Drawing.Size(465, 315);
+            this.excelformatpanel.Size = new System.Drawing.Size(803, 315);
             this.excelformatpanel.TabIndex = 10;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(347, 105);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(257, 13);
+            this.label13.TabIndex = 8;
+            this.label13.Text = "Leave \"dupe key\" field blank if not sure how to use it";
             // 
             // groupBox3
             // 
@@ -489,7 +500,7 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(485, 353);
+            this.tabControl1.Size = new System.Drawing.Size(823, 353);
             this.tabControl1.TabIndex = 11;
             // 
             // tabPage3
@@ -515,13 +526,23 @@
             this.tabnamepanel.Size = new System.Drawing.Size(465, 353);
             this.tabnamepanel.TabIndex = 9;
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(3, 9);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(63, 13);
+            this.label12.TabIndex = 9;
+            this.label12.Text = "* Optional";
+            // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 404);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(626, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(964, 22);
             this.statusStrip1.TabIndex = 14;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -540,7 +561,7 @@
             this.panel7.Controls.Add(this.treeView1);
             this.panel7.Location = new System.Drawing.Point(0, 0);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(626, 369);
+            this.panel7.Size = new System.Drawing.Size(964, 369);
             this.panel7.TabIndex = 15;
             // 
             // panel1
@@ -551,7 +572,7 @@
             this.panel1.Controls.Add(this.tabControl1);
             this.panel1.Location = new System.Drawing.Point(132, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(491, 359);
+            this.panel1.Size = new System.Drawing.Size(829, 359);
             this.panel1.TabIndex = 7;
             // 
             // treeView1
@@ -582,13 +603,13 @@
             this.panel2.Controls.Add(this.button1);
             this.panel2.Location = new System.Drawing.Point(0, 371);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(626, 30);
+            this.panel2.Size = new System.Drawing.Size(964, 30);
             this.panel2.TabIndex = 16;
             // 
             // button1
             // 
             this.button1.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.button1.Location = new System.Drawing.Point(548, 3);
+            this.button1.Location = new System.Drawing.Point(886, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -596,21 +617,11 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(3, 9);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(63, 13);
-            this.label12.TabIndex = 9;
-            this.label12.Text = "* Optional";
-            // 
             // FormOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(626, 426);
+            this.ClientSize = new System.Drawing.Size(964, 426);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel7);
             this.Controls.Add(this.statusStrip1);
@@ -618,6 +629,7 @@
             this.Text = "Options";
             this.tabPage2.ResumeLayout(false);
             this.excelformatpanel.ResumeLayout(false);
+            this.excelformatpanel.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.panel6.ResumeLayout(false);
@@ -693,5 +705,6 @@
         private System.Windows.Forms.TextBox textBox9;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label13;
     }
 }
