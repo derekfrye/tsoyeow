@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Format");
-            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Tab Names");
-            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode("Excel File Options", new System.Windows.Forms.TreeNode[] {
-            treeNode5,
-            treeNode6});
-            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode("Sql Server Options");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Format");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Tab Names");
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode("Excel File Options", new System.Windows.Forms.TreeNode[] {
+            treeNode1,
+            treeNode2});
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode("Sql Server Options");
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -47,6 +47,9 @@
             this.textBox4 = new System.Windows.Forms.TextBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.excelformatpanel = new System.Windows.Forms.Panel();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.textBox9 = new System.Windows.Forms.TextBox();
@@ -85,6 +88,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.toolTip2 = new System.Windows.Forms.ToolTip(this.components);
             this.tabPage2.SuspendLayout();
             this.excelformatpanel.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -197,7 +201,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(815, 327);
+            this.tabPage2.Size = new System.Drawing.Size(832, 327);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Excel File Options";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -206,22 +210,54 @@
             // 
             this.excelformatpanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.excelformatpanel.Controls.Add(this.label16);
+            this.excelformatpanel.Controls.Add(this.label15);
+            this.excelformatpanel.Controls.Add(this.label14);
             this.excelformatpanel.Controls.Add(this.label13);
             this.excelformatpanel.Controls.Add(this.groupBox3);
             this.excelformatpanel.Controls.Add(this.panel6);
             this.excelformatpanel.Location = new System.Drawing.Point(6, 6);
             this.excelformatpanel.Name = "excelformatpanel";
-            this.excelformatpanel.Size = new System.Drawing.Size(803, 315);
+            this.excelformatpanel.Size = new System.Drawing.Size(820, 315);
             this.excelformatpanel.TabIndex = 10;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(347, 132);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(363, 13);
+            this.label16.TabIndex = 11;
+            this.label16.Text = "A new output file will be auto-created before we write this many worksheets.";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(347, 47);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(406, 13);
+            this.label15.TabIndex = 10;
+            this.label15.Text = "A new worksheet will be auto-created before we write more rows than this to a she" +
+    "et.";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(347, 74);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(457, 13);
+            this.label14.TabIndex = 9;
+            this.label14.Text = "A new output will be created before the current file exceeds this. E.g., file_1.x" +
+    "lsx, file_2.xlsx, etc.";
             // 
             // label13
             // 
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(347, 105);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(257, 13);
+            this.label13.Size = new System.Drawing.Size(134, 13);
             this.label13.TabIndex = 8;
-            this.label13.Text = "Leave \"dupe key\" field blank if not sure how to use it";
+            this.label13.Text = "Leave blank if not needed.";
             // 
             // groupBox3
             // 
@@ -445,7 +481,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(477, 327);
+            this.tabPage1.Size = new System.Drawing.Size(832, 327);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Sql Server Options";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -500,7 +536,7 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(823, 353);
+            this.tabControl1.Size = new System.Drawing.Size(840, 353);
             this.tabControl1.TabIndex = 11;
             // 
             // tabPage3
@@ -509,7 +545,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(477, 327);
+            this.tabPage3.Size = new System.Drawing.Size(832, 327);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "tabPage3";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -542,7 +578,7 @@
             this.toolStripStatusLabel1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 404);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(964, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(981, 22);
             this.statusStrip1.TabIndex = 14;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -561,7 +597,7 @@
             this.panel7.Controls.Add(this.treeView1);
             this.panel7.Location = new System.Drawing.Point(0, 0);
             this.panel7.Name = "panel7";
-            this.panel7.Size = new System.Drawing.Size(964, 369);
+            this.panel7.Size = new System.Drawing.Size(981, 369);
             this.panel7.TabIndex = 15;
             // 
             // panel1
@@ -572,7 +608,7 @@
             this.panel1.Controls.Add(this.tabControl1);
             this.panel1.Location = new System.Drawing.Point(132, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(829, 359);
+            this.panel1.Size = new System.Drawing.Size(846, 359);
             this.panel1.TabIndex = 7;
             // 
             // treeView1
@@ -581,17 +617,17 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.treeView1.Location = new System.Drawing.Point(3, 3);
             this.treeView1.Name = "treeView1";
-            treeNode5.Name = "Node3";
-            treeNode5.Text = "Format";
-            treeNode6.Name = "Node1";
-            treeNode6.Text = "Tab Names";
-            treeNode7.Name = "Node0";
-            treeNode7.Text = "Excel File Options";
-            treeNode8.Name = "Node5";
-            treeNode8.Text = "Sql Server Options";
+            treeNode1.Name = "Node3";
+            treeNode1.Text = "Format";
+            treeNode2.Name = "Node1";
+            treeNode2.Text = "Tab Names";
+            treeNode3.Name = "Node0";
+            treeNode3.Text = "Excel File Options";
+            treeNode4.Name = "Node5";
+            treeNode4.Text = "Sql Server Options";
             this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode7,
-            treeNode8});
+            treeNode3,
+            treeNode4});
             this.treeView1.Size = new System.Drawing.Size(123, 359);
             this.treeView1.TabIndex = 12;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
@@ -603,13 +639,13 @@
             this.panel2.Controls.Add(this.button1);
             this.panel2.Location = new System.Drawing.Point(0, 371);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(964, 30);
+            this.panel2.Size = new System.Drawing.Size(981, 30);
             this.panel2.TabIndex = 16;
             // 
             // button1
             // 
             this.button1.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.button1.Location = new System.Drawing.Point(886, 3);
+            this.button1.Location = new System.Drawing.Point(903, 3);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -621,7 +657,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(964, 426);
+            this.ClientSize = new System.Drawing.Size(981, 426);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel7);
             this.Controls.Add(this.statusStrip1);
@@ -706,5 +742,9 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.ToolTip toolTip2;
     }
 }

@@ -60,6 +60,10 @@ namespace ExcelXmlQueryResults
             toolTip1.SetToolTip(label9, Resources.MaxSize);
             toolTip1.SetToolTip(textBox7, Resources.MaxSize);
 
+            toolTip2.SetToolTip(label10, Resources.DupeKeyColumnsToolTip);
+            toolTip2.AutoPopDelay = Settings1.Default.toolTipDelayBeforeFade;
+            toolTip2.SetToolTip(textBox8, Resources.DupeKeyColumnsToolTip);
+
             ConfigManipulator c = new ConfigManipulator();
 
             try

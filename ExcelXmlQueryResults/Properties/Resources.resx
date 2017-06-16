@@ -157,9 +157,7 @@
     <value>ExcelXmlWriterStateSettings</value>
   </data>
   <data name="TooltipInitialFilename" xml:space="preserve">
-    <value>The initial filename to write the XML data to.
-If new result sets are written to new workbooks, the second result set will be written to a filename with a "2" appended.
-Then, the third result set will be written to a filename with a "3" appended, etc.</value>
+    <value>The initial filename to write the data to.</value>
   </data>
   <data name="TooltipResultNames" xml:space="preserve">
     <value>Here you can name the worksheet of the corresponding result set.
@@ -172,7 +170,7 @@ Otherwise, the first result set will be named Sheet1, the second Sheet2, etc.</v
     <value>Awaiting user action.</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>Query Results to Xlsx Frontend v0.33</value>
+    <value>Query Results to Xlsx Frontend v0.34</value>
   </data>
   <data name="FileTypeXlsx" xml:space="preserve">
     <value>Xlsx</value>
@@ -182,5 +180,8 @@ Otherwise, the first result set will be named Sheet1, the second Sheet2, etc.</v
   </data>
   <data name="MaxSize" xml:space="preserve">
     <value>The maximum uncompressed total size of all worksheets, in gigabytes. If this value is exceeded before starting a new worksheet, writing output stops. Empirical evidence suggests the default of around 2.5 is safe.</value>
+  </data>
+  <data name="DupeKeyColumnsToolTip" xml:space="preserve">
+    <value>A comma-separated list of column names that when the query results has the same values in these columns as the previous row the worksheet will not split results to another sheet or workbook until there's new values in these columns.</value>
   </data>
 </root>

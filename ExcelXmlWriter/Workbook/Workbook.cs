@@ -137,7 +137,7 @@ namespace ExcelXmlWriter.Workbook
         }
 
         /// <summary>
-        /// Write the query result set(s) to the specified filename, starting a new worksheet for each resultset.
+        /// Write the query result set(s) to the specified filename, starting a new worksheet for each resultset. Also 
         /// </summary>
         public WorkBookStatus WriteQueryResults(string path)
         {

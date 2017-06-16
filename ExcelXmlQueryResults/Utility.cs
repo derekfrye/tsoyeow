@@ -22,19 +22,25 @@ namespace ExcelXmlQueryResults
 
     public class Utility
     {
-        public static string getIncrFileName(int i, string p3)
+        /// <summary>
+        /// Create a new filename of format originalfilename_i.originalextension. If originalfilename_i.originalextension exists, it'll create originalfilename_(i+1).originalextension and return that.
+        /// </summary>
+        /// <param name="i">The number of append to the filename</param>
+        /// <param name="originalFileName">The original filename</param>
+        /// <returns></returns>
+        public static string getIncrFileName(int i, string originalFileName)
         {
-            string a =Path.Combine(Path.GetDirectoryName(p3)
-                , Path.GetFileNameWithoutExtension(p3)
+            string a =Path.Combine(Path.GetDirectoryName(originalFileName)
+                , Path.GetFileNameWithoutExtension(originalFileName)
                 + "_" + i.ToString()
-                + Path.GetExtension(p3));
+                + Path.GetExtension(originalFileName));
             while (File.Exists(a))
             {
                 i++;
-                a = Path.Combine(Path.GetDirectoryName(p3)
-                , Path.GetFileNameWithoutExtension(p3)
+                a = Path.Combine(Path.GetDirectoryName(originalFileName)
+                , Path.GetFileNameWithoutExtension(originalFileName)
                 + "_" + i.ToString()
-                + Path.GetExtension(p3));
+                + Path.GetExtension(originalFileName));
             }
 
             return a;

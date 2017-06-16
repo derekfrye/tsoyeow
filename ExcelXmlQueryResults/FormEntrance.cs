@@ -245,7 +245,10 @@ namespace ExcelXmlQueryResults
         }
 
      
-
+        /// <summary>
+        /// Write results to separate tabs. If 
+        /// </summary>
+        /// <param name="p"></param>
         void WriteResultsToSeparateTabs(ExcelXmlQueryResultsParams p)
         {
 
