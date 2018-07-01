@@ -1,5 +1,5 @@
 # tsoyeow
-This is a tool, written in .NET, that exports all resultsets from SQL Server queries to an Excel-compatible file (creates a ".xlsx" file that modern Excel can open). 
+This is a tool, written in .NET, that exports results from SQL Server queries to an Excel-compatible file (creates a ".xlsx" file that modern Excel can open). 
 
 It was written to quickly export large result sets efficiently (1 million rows and larger) to an Excel file. It's focused on Excel-compatability, data type auto-detection, and speed; it offers very few user-customizable options (e.g., no support for creating Excel formulas or charts, etc.).
 
