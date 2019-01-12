@@ -14,6 +14,7 @@ using System.Xml.Linq;
 using System.Globalization;
 using ExcelXmlWriter;
 using ExcelXmlWriter.Workbook;
+using System.Text.RegularExpressions;
 
 namespace ExcelXmlQueryResults
 {
@@ -186,6 +187,10 @@ namespace ExcelXmlQueryResults
 
         }
 
+        /// <summary>
+        /// Load an array with string paths to all the files a user has selected.
+        /// </summary>
+        /// <returns>The files.</returns>
         string[] OpenFiles()
         {
             DialogResult result = openFileDialog1.ShowDialog();
@@ -219,8 +224,8 @@ namespace ExcelXmlQueryResults
                 + "Resources" + Path.DirectorySeparatorChar.ToString()
                 + "Data.xml";
 
-            p.p.query = path;
-            p.p.fromFile = true;
+            p.Query = path;
+            p.FromFile = true;
 #else
             p.Query = richTextBox1.Text;
             p.FromFile = false;
@@ -232,10 +237,8 @@ namespace ExcelXmlQueryResults
             workbookStart = DateTime.Now;
 
 #if DEBUGNOTHREAD
-            if (String.Equals(p.newResultSetMethod, Resources.NewResultSetWorksheet))
-                work(new object[] { p, fileName });
-            else
-                work1(new object[] { p, fileName });
+
+                WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e=p, filenm=fileName });
 #else
             Thread t;
             t = new Thread(delegate() { WriteResultsToSeparateTabs(new ExcelXmlQueryResultsParams() { e = p, filenm = fileName }); });
@@ -244,9 +247,10 @@ namespace ExcelXmlQueryResults
 #endif
         }
 
-     
+
         /// <summary>
-        /// Write results to separate tabs. If 
+        /// Write results to separate tabs. 
+        /// If MaximumResultSetsPerWorkbook > count of select statements, it'll create auto-numbered output files.
         /// </summary>
         /// <param name="p"></param>
         void WriteResultsToSeparateTabs(ExcelXmlQueryResultsParams p)
@@ -263,18 +267,40 @@ namespace ExcelXmlQueryResults
             wb.QueryStarted += new EventHandler<EventArgs>(wb_QueryStarted);
             wb.QueryException += new EventHandler<QueryExceptionEvents>(wb_QueryError);
             wb.QueryRowsOverTime += new EventHandler<QueryRowsOverTimeEvents>(wb_QueryRowsOverTime);
-            wb.SaveFile+=new EventHandler<SaveFileEvent>(wb_SaveBegan);
+            wb.SaveFile += new EventHandler<SaveFileEvent>(wb_SaveBegan);
 
             if (wb.RunQuery())
             {
-                int currentFileCount = 1;
-                
-                WorkBookStatus status = wb.WriteQueryResults(destinationFileName);
+                int currentFileCount = 0;
+
+                var r = new Regex(@"(select)\s+", RegexOptions.IgnoreCase);
+                var m = r.Match(workbookParams.Query);
+                var countOfResultSets = r.Matches(workbookParams.Query).Count;
+
+                // append "_000..." to the filename if we're writing more than workbook
+                // if we're writing < 10 results, we'll rename them _0, _1, ... up to _9
+                // if we're writing > 10 but < 100 results, we'll rename them _00, _01, ... up to _99
+                // etc.
+                var padleft = 0;
+                var modifiableFileName = destinationFileName;
+                if (workbookParams.MaximumResultSetsPerWorkbook < countOfResultSets)
+                {
+                    padleft = countOfResultSets.ToString().Length + 1;
+                    currentFileCount = currentFileCount + 1;
+                    modifiableFileName = Utility.getIncrPaddedFileName(currentFileCount, destinationFileName, padleft);
+                }
+
+                WorkBookStatus status = wb.WriteQueryResults(modifiableFileName);
                 while (status != WorkBookStatus.Completed)
                 {
                     currentFileCount = currentFileCount + 1;
-                    string a = Utility.getIncrFileName(currentFileCount, destinationFileName);
-                    status = wb.WriteQueryResults(a);
+
+                    if (workbookParams.MaximumResultSetsPerWorkbook < countOfResultSets)
+                        modifiableFileName = Utility.getIncrPaddedFileName(currentFileCount, destinationFileName, padleft);
+                    else
+                        modifiableFileName = Utility.getIncrFileName(currentFileCount, destinationFileName);
+
+                    status = wb.WriteQueryResults(modifiableFileName);
                 }
             }
         }

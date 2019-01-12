@@ -76,8 +76,10 @@ namespace ExcelXmlWriter.Workbook
         public bool WriteEmptyResultSetColumns
         { get; set; }
         /// <summary>
-        /// The maximum uncompressed total size of all worksheets, in bytes. If this value is exceeded before starting a new worksheet, writing output stops.
-        /// Empirical evidence suggests the default of around 2,500,000,000 is safe. The recommended action after exceeding this value is to finish writing the remaining query results to a new stream.
+        /// The maximum uncompressed total size of all worksheets, in bytes. 
+        /// If this value is exceeded before starting a new worksheet, writing output stops.
+        /// Empirical evidence suggests the default of around 2,500,000,000 is safe. 
+        /// The recommended action after exceeding this value is to finish writing the remaining query results to a new stream.
         /// </summary>
         public long MaxWorkBookSize
         { get; set; }

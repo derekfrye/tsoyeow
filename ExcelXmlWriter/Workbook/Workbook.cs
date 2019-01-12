@@ -137,7 +137,8 @@ namespace ExcelXmlWriter.Workbook
         }
 
         /// <summary>
-        /// Write the query result set(s) to the specified filename, starting a new worksheet for each resultset. Also 
+        /// Write the query result set(s) to the specified filename, starting a new worksheet for each resultset. 
+        /// Will exit with the query still open if MaximumResultSetsPerWorkbook is exceeded.
         /// </summary>
         public WorkBookStatus WriteQueryResults(string path)
         {
@@ -181,6 +182,11 @@ namespace ExcelXmlWriter.Workbook
             }
         }
 
+        /// <summary>
+        /// Writes the results.
+        /// </summary>
+        /// <returns>The results.</returns>
+        /// <param name="path">Path.</param>
         WorkBookStatus WriteResults(Stream path)
         {
             if (!queryRan)
@@ -203,11 +209,15 @@ namespace ExcelXmlWriter.Workbook
             }
 
             WorkbookTracking w = new WorkbookTracking();
+
+            // start to keep track of the result sets
             int resultSetTotal = 1;
 
+            // loop through the result sets and write the results
             while (queryReader.MoveToNextResultSet())
             {
 
+                // if this result set is over the max results per workbook, close this one and indicate a break has happened
                 if (resultSetTotal > runParameters.MaximumResultSetsPerWorkbook)
                 {
                     OnSave("Saving incremental result...");
