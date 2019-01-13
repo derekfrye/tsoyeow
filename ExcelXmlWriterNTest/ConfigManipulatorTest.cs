@@ -18,6 +18,7 @@ namespace ExcelXmlWriterTest
     {
 
         string originalAppConfigPath = Assembly.GetExecutingAssembly().Location;
+        // holds standard app.config values from ExcelXmlQueryResults - setup in class init
         string testAppConfigPath = Path.GetTempPath();
 
         #region Test Setup/Teardown
@@ -25,7 +26,7 @@ namespace ExcelXmlWriterTest
         [SetUp()]
         public void MyClassInitialize()
         {
-            originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
+            originalAppConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
             originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
             originalAppConfigPath = Path.GetDirectoryName(originalAppConfigPath);
@@ -46,6 +47,10 @@ namespace ExcelXmlWriterTest
 
         #endregion
 
+        /// <summary>
+        /// Check that, once loaded, ConfigManipulator's value for "server" 
+        /// matches the value from app.config of ExcelXmlQueryResults
+        /// </summary>
         [Test()]
         public void GetSingularValueTest()
         {
@@ -59,6 +64,10 @@ namespace ExcelXmlWriterTest
             Assert.AreEqual(currentServer, target.GetValue("Server"));
         }
 
+        /// <summary>
+        /// Check that we can overwrite value for "server" 
+        /// Tests ConfigManipulator functions SaveValue, WriteConfig, and GetValue
+        /// </summary>
         [Test()]
         public void SaveWriteAndRetrieveSingularValueTest()
         {
@@ -70,26 +79,23 @@ namespace ExcelXmlWriterTest
             Assert.AreEqual(target.GetValue("Server"), currentServer + "a");
         }
 
-        [Test()]
-        public void SaveAndRetrieveSingularValueTest()
-        {
-            ConfigManipulator target = new ConfigManipulator(testAppConfigPath);
-            string currentServer = target.GetValue("Server");
-            target.SaveValue("Server", currentServer + "a");
-            Assert.AreEqual(target.GetValue("Server"), currentServer + "a");
-        }
-        
+        /// <summary>
+        /// Check that we can overwrite value for "server" 
+        /// Tests ConfigManipulator functions SaveValue and GetDictionary
+        /// </summary>
         [Test()]
         public void SaveAndRetrieveDictionaryValueTest()
         {
-            Dictionary<object, object> firstDictionary = new Dictionary<object, object>();
-            firstDictionary.Add((int)1, "a longer string");
-            firstDictionary.Add((int)2, @"a messud up
-string");
-            firstDictionary.Add((int)3, @"a string with some icky characters! <a><&b><c;>");
-            firstDictionary.Add("asdf", @"a string with some icky characters! <a><&b><<c;>    ");
-            firstDictionary.Add(false, @"true");
-            firstDictionary.Add(true, @"false");
+            Dictionary<object, object> firstDictionary = new Dictionary<object, object>
+            {
+                { (int)1, "a longer string" },
+                { (int)2, @"a messud up
+string" },
+                { (int)3, @"a string with some icky characters! <a><&b><c;>" },
+                { "asdf", @"a string with some icky characters! <a><&b><<c;>    " },
+                { false, @"true" },
+                { true, @"false" }
+            };
 
             ConfigManipulator target = new ConfigManipulator(testAppConfigPath);
             target.SaveValue(firstDictionary, "test1");
@@ -102,11 +108,13 @@ string");
                 Assert.AreEqual(firstDictionary[o], retrievedDictionary[o]);
             }
 
-            Dictionary<object, object> secondDictionary = new Dictionary<object, object>();
-            secondDictionary.Add("", "a longer string");
-            secondDictionary.Add("a longer string", @"a messud up
-string");
-            secondDictionary.Add("a string with some icky characters! <a><&b><c;>", @"a string with some icky characters! <a><&b><c;>");
+            Dictionary<object, object> secondDictionary = new Dictionary<object, object>
+            {
+                { "", "a longer string" },
+                { "a longer string", @"a messud up
+string" },
+                { "a string with some icky characters! <a><&b><c;>", @"a string with some icky characters! <a><&b><c;>" }
+            };
 
             target = new ConfigManipulator(testAppConfigPath);
             target.SaveValue(secondDictionary, "test2");

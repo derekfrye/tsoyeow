@@ -18,6 +18,10 @@ namespace ExcelXmlQueryResults
                 , LoadOptions.PreserveWhitespace);
         }
 
+        /// <summary>
+        /// Create a config file in the specified location.
+        /// </summary>
+        /// <param name="path">Path.</param>
         public ConfigManipulator(string path)
         {
             xd = XDocument.Load(path

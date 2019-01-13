@@ -66,10 +66,13 @@ namespace ExcelXmlWriter
             }
             else
             {
-                ds = new DataSet();
-                ds.Locale = CultureInfo.GetCultureInfo("en-US");
+                ds = new DataSet
+                {
+                    Locale = CultureInfo.GetCultureInfo("en-US")
+                };
                 ds.ReadXml(query);
                 fromFile = true;
+                currentResultSetStillHasRecords = true;
             }
         }
 
@@ -136,6 +139,7 @@ namespace ExcelXmlWriter
                     dr = ds.Tables[tableCount].CreateDataReader();
                     lock (currentResultLocker)
                         currentResult++;
+                    currentResultSetStillHasRecords = true;
                     return true;
                 }
                 else

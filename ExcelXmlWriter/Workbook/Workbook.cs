@@ -148,9 +148,10 @@ namespace ExcelXmlWriter.Workbook
                 return t;
             }
         }
-        
-         /// <summary>
+
+        /// <summary>
         /// Write the query result set(s) to the specified stream, starting a new worksheet for each resultset.
+        /// May return WorkBookStatus.OverSize if a new WB is needed.
         /// </summary>
         public WorkBookStatus WriteQueryResults(Stream stream)
         {

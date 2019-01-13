@@ -1,7 +1,14 @@
 ﻿################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
-
+.vs/
+.DS_Store
+ExcelXmlQueryResults/.DS_Store
+ExcelXmlQueryResults/bin/
+ExcelXmlQueryResults/obj/
+ExcelXmlWriter/bin/
+ExcelXmlWriter/obj/
+ExcelXmlWriterNTest/obj/
 /.vs/Tsoyeow/v14/.suo
 /ExcelXmlQueryResults/bin/Debug/$RANDOM_SEED$
 /ExcelXmlQueryResults/bin/Debug/Ionic.Zip.dll

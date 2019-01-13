@@ -64,7 +64,7 @@ namespace ExcelXmlWriter.Xlsx
 
             SharedStringResult f = new SharedStringResult();
 
-            var p = string.Join(null, value.ToArray().Where(x => XmlConvert.IsXmlChar(x)));
+            var p = string.Join(null, value.ToArray().Where(XmlConvert.IsXmlChar));
             var hdhdsdafd = p.GetHashCode();
 
             var found = sharedStringDictionary.TryGetValue(hdhdsdafd, out f);
@@ -93,7 +93,8 @@ namespace ExcelXmlWriter.Xlsx
                 // FIXME make this count() test a parameter
                 if (!found && sharedStringDictionary.Count < 500000)
                 {
-                    sharedStringDictionary.Add(hdhdsdafd, new SharedStringResult() { Item1 = curentSharedStringPosition, Item2 = value });
+                    sharedStringDictionary.Add(hdhdsdafd, 
+                        new SharedStringResult() { Item1 = curentSharedStringPosition, Item2 = value });
                 }
                 curentSharedStringPosition++;
 

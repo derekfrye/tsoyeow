@@ -118,7 +118,7 @@ namespace ExcelXmlWriter.Xlsx
             {
                 // FIXME don't hardcode 100
                 // FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
-                writeval(rows["ColumnName"].ToString(), StaticFunctions.ResolveDataType(rows["ColumnName"].ToString()));
+                Writeval(rows["ColumnName"].ToString(), StaticFunctions.ResolveDataType(rows["ColumnName"].ToString()));
             }
             // write row close
 
@@ -126,8 +126,9 @@ namespace ExcelXmlWriter.Xlsx
             wx.WriteWhitespace(Environment.NewLine);
         }
 
-        void writeval(string p, ExcelDataType excelDataType)
+        void Writeval(string p, ExcelDataType excelDataType)
         {
+            // cell
             wx.WriteStartElement("c");
 
             switch (excelDataType)
@@ -204,7 +205,7 @@ namespace ExcelXmlWriter.Xlsx
             {
                 // FIXME don't hardcode 100
                 // FIXME the call to overpunch happens twice, could just happen once with appropriate reutnr value
-                writeval(queryReader[i].ToString(), StaticFunctions.ResolveDataType(queryReader[i].ToString()));
+                Writeval(queryReader[i].ToString(), StaticFunctions.ResolveDataType(queryReader[i].ToString()));
             }
 
             // write row close

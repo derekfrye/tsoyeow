@@ -8,5 +8,6 @@
     <Setting Name="database" Type="System.String" Scope="User">
       <Value Profile="(Default)">master</Value>
     </Setting>
+   
   </Settings>
 </SettingsFile>

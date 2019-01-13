@@ -15,6 +15,7 @@ using System.Globalization;
 using ExcelXmlWriter;
 using ExcelXmlWriter.Workbook;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace ExcelXmlQueryResults
 {
@@ -78,18 +79,20 @@ namespace ExcelXmlQueryResults
 
 #if DEBUG
 
-            string path = Environment.CurrentDirectory;
-            if(!string.IsNullOrEmpty(path))
-            path = Path.GetDirectoryName(path);
+            string path = Assembly.GetExecutingAssembly().Location;
             if (!string.IsNullOrEmpty(path))
-            path = Path.GetDirectoryName(path);
+                path = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(path))
-            path = Path.GetDirectoryName(path);
+                path = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(path))
-            path = path + Path.DirectorySeparatorChar.ToString()
-                + "ExcelXmlWriterNTest" + Path.DirectorySeparatorChar.ToString()
-                + "Resources" + Path.DirectorySeparatorChar.ToString()
-                + "Sql exceeds filesize limit.sql";
+                path = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(path))
+                path = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(path))
+                path = path + Path.DirectorySeparatorChar.ToString()
+                    + "ExcelXmlWriterNTest" + Path.DirectorySeparatorChar.ToString()
+                    + "Resources" + Path.DirectorySeparatorChar.ToString()
+                    + "Sql exceeds filesize limit.sql";
             if (File.Exists(path))
             {
                 FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);

@@ -6,12 +6,10 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{699CBD61-CF03-415E-8D00-EC82A1839252}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
+		clean.ps1 = clean.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlQueryResults", "ExcelXmlQueryResults\ExcelXmlQueryResults.csproj", "{20DDAFBB-ED39-42D9-A5CE-737ED50FCEE9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3A145151-9621-4D4E-A22F-06BB35157022} = {3A145151-9621-4D4E-A22F-06BB35157022}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlWriter", "ExcelXmlWriter\ExcelXmlWriter.csproj", "{3A145151-9621-4D4E-A22F-06BB35157022}"
 EndProject

@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using ExcelXmlQueryResults;
 using ExcelXmlWriter.Workbook;
 using ExcelXmlWriterNTest.Properties;
+using System.Reflection;
+using System.Configuration;
 
 namespace ExcelXmlWriterTest
 {
@@ -24,8 +26,12 @@ namespace ExcelXmlWriterTest
     public class WorkbookTest
     {
 
+        /// <summary>
+        /// Test processing multiple batches.
+        /// Tests WorkBookParams, Workbook instantiation, Workbook.RunQuery, 
+        /// Utility.getIncrFileName, Workbook.WriteQueryResults
+        /// </summary>
         [Test()]
-        [TestCase(1,1)]
         public void WorkbookProcessBatchesTest()
         {
 
@@ -33,7 +39,8 @@ namespace ExcelXmlWriterTest
 
             string[] tt = new string[2];
 
-            string path = Environment.CurrentDirectory;
+            string path = Assembly.GetExecutingAssembly().Location;
+            path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
@@ -47,7 +54,8 @@ namespace ExcelXmlWriterTest
 
             tt[0] = path;
 
-            path = Environment.CurrentDirectory;
+            path = Assembly.GetExecutingAssembly().Location;
+            path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
@@ -64,17 +72,21 @@ namespace ExcelXmlWriterTest
             Dictionary<string, FileStream> fs1 = new Dictionary<string, FileStream>();
             int i = 1;
 
-            // re-create rather than make the original static, or have to instantiate a FormEntrance
+            // we re-create the code rather than make the original static, or have to instantiate a FormEntrance
             foreach (var qry in tt)
             {
                 using (StreamReader sr = new StreamReader(new FileStream(qry, FileMode.Open, FileAccess.Read)))
                 {
                     p.Query = sr.ReadToEnd();
                     p.FromFile = false;
-                    SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
-                    sb.DataSource = Settings.Default.datasource;
-                    sb.InitialCatalog = Settings.Default.database;
-                    sb.IntegratedSecurity = true;
+                    SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder
+                    {
+                        DataSource = ConfigurationManager.AppSettings["datasource"],
+                        InitialCatalog = ConfigurationManager.AppSettings["database"],
+                        IntegratedSecurity = false,
+                        UserID = ConfigurationManager.AppSettings["username"],
+                        Password = ConfigurationManager.AppSettings["password"]
+                    };
                     p.ConnectionString = sb.ConnectionString;
                     p.MaxRowsPerSheet = 150000;
                     //p.MaxWorkBookSize = 1000000;
@@ -87,7 +99,7 @@ namespace ExcelXmlWriterTest
                     {
                         i = i + 1;
                         string pht = Path.Combine(tempOutputPath
-                            , Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name) + ".xlsx");
+                            , Utility.getIncrFileName(i, System.Reflection.MethodBase.GetCurrentMethod().Name) + ".xlsx");
                         FileStream fs = new FileStream(pht
                             , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                         fs1.Add(pht, fs);
@@ -96,7 +108,7 @@ namespace ExcelXmlWriterTest
                         {
                             i = i + 1;
                             pht = Path.Combine(tempOutputPath
-                                , Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name) + ".xlsx");
+                                , Utility.getIncrFileName(i, System.Reflection.MethodBase.GetCurrentMethod().Name) + ".xlsx");
                             FileStream fsa = new FileStream(pht
                             , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                             fs1.Add(pht, fsa);
@@ -132,7 +144,7 @@ namespace ExcelXmlWriterTest
                     if (worksheet < 6)
                     {
                         ZipFile z = new ZipFile(fs.Key);
-                        // broken here
+
                         var t = z.SelectEntries("xl/worksheets/sheet" + worksheet.ToString() + "_1.xml").First();
 
                         MemoryStream ms = new MemoryStream();
@@ -187,14 +199,24 @@ namespace ExcelXmlWriterTest
                 currentStream++;
             }
         }
-        
 
+
+        /// <summary>
+        /// Workbooks the query write results over size test.
+        /// Breaks into 6 workbooks:
+        /// workbooks 1 & 2: 4097 rows, all in 1 sheet
+        /// workbook 3: 8193 rows, all in 1 sheet
+        /// workbook 4: 16385 rows, all in 1 sheet
+        /// workbook 5: 32769 rows, all in 1 sheet
+        /// workbook 6: 65537 rows, all in 1 sheet
+        /// </summary>
         [Test()]
         public void WorkbookQueryWriteResultsOverSizeTest()
         {
             WorkBookParams p = new WorkBookParams();
 
-            string path = Environment.CurrentDirectory;
+            string path = Assembly.GetExecutingAssembly().Location;
+            path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
@@ -211,10 +233,14 @@ namespace ExcelXmlWriterTest
             sr.Close();
             p.FromFile = false;
 
-            SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
-            sb.DataSource = Settings.Default.datasource;
-            sb.InitialCatalog = Settings.Default.database;
-            sb.IntegratedSecurity = true;
+            SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder
+            {
+                DataSource = ConfigurationManager.AppSettings["datasource"],
+                InitialCatalog = ConfigurationManager.AppSettings["database"],
+                IntegratedSecurity = false,
+                UserID = ConfigurationManager.AppSettings["username"],
+                Password = ConfigurationManager.AppSettings["password"]
+            };
             p.ConnectionString = sb.ConnectionString;
             //p.columnTypeMappings = columnTypeMappings;
 
@@ -244,7 +270,7 @@ namespace ExcelXmlWriterTest
             if (target.RunQuery())
             {
                 string pht=Path.Combine(tempOutputPath
-                    , Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name) + ".xlsx");
+                    , Utility.getIncrFileName(i, MethodBase.GetCurrentMethod().Name) + ".xlsx");
                 FileStream fs = new FileStream(pht
                     , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                 fs1.Add(pht,fs);
@@ -253,7 +279,7 @@ namespace ExcelXmlWriterTest
                 {
                     i = i + 1;
                     pht=Path.Combine(tempOutputPath
-                        , Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name) + ".xlsx");
+                        , Utility.getIncrFileName(i, MethodBase.GetCurrentMethod().Name) + ".xlsx");
                     FileStream fsa = new FileStream(pht
                     , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                     fs1.Add(pht,fsa);
@@ -269,68 +295,71 @@ namespace ExcelXmlWriterTest
                 //fs.Value.Seek(0, SeekOrigin.Begin);
 
                 ZipFile z = new ZipFile(fs.Key);
-                // broken here
+
                 var t = z.SelectEntries("xl/worksheets/sheet1_1.xml").First();
                 MemoryStream ms = new MemoryStream();
                 t.Extract(ms);
                 ms.Flush();
                 ms.Seek(0, SeekOrigin.Begin);
-
-                //PackagePart strm = pa.GetPart(new Uri("/xl/worksheets/sheet1_1.xml", UriKind.Relative));
-
-                //Stream m = t.InputStream;
-
                 StreamReader sr1 = new StreamReader(ms, Encoding.UTF8);
                 string b1 = sr1.ReadToEnd();
                 XDocument x = XDocument.Parse(b1, LoadOptions.None);
-
                 ms.Close();
 
-                var asdza =
+
+                var countRows =
                     // Xml is e.g. <worksheet><sheetData><row>...</row><row><c s="1">12345.2423</c>...
                     x.Elements().First(aa => aa.Name.LocalName == "worksheet")
                     .Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
-                    .Where(aaa => aaa.Name.LocalName == "row").Count();
-                if (currentStream == 1)
-                {                    
-                    Assert.AreEqual(asdza, 4097);
-                }
-                else if (currentStream == 2)
+                    .Count(aaa => aaa.Name.LocalName == "row");
+
+                switch (currentStream)
                 {
-                    Assert.AreEqual(asdza, 4097);
-                }
-                else if (currentStream == 3)
-                {
-                    Assert.AreEqual(asdza, 8193);
-                }
-                else if (currentStream == 4)
-                {
-                    Assert.AreEqual(asdza, 16385);
-                }
-                else if (currentStream == 5)
-                {
-                    Assert.AreEqual(asdza, 32769);
-                }
-                else if (currentStream == 6)
-                {
-                    Assert.AreEqual(asdza, 65537);
+                    case 1:
+                        Assert.AreEqual(countRows, 4097);
+                        break;
+                    case 2:
+                        Assert.AreEqual(countRows, 4097);
+                        break;
+                    case 3:
+                        Assert.AreEqual(countRows, 8193);
+                        break;
+                    case 4:
+                        Assert.AreEqual(countRows, 16385);
+                        break;
+                    case 5:
+                        Assert.AreEqual(countRows, 32769);
+                        break;
+                    case 6:
+                        Assert.AreEqual(countRows, 65537);
+                        break;
                 }
 
-                var asdz =
-                    // Xml is e.g. <worksheet><sheetData><row>...</row><row><c s="1">12345.2423</c>...
-                    x.Elements().First(aa => aa.Name.LocalName == "worksheet")
-                    .Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
-                    .First(aaa => aaa.Name.LocalName == "row"
-                    && aaa.Elements().Where(bbb => bbb.Name.LocalName == "c").Any(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1))
-                    .Elements().First(ccc => ccc.Name.LocalName == "c" && ccc.Attributes("s").Any() && Convert.ToInt32(ccc.Attribute("s").Value) == 1).Value;
+                //var asdz =
+                    //// Xml is e.g. <worksheet><sheetData><row>...</row><row><c s="1">12345.2423</c>...
+                    //// get the first worksheet (well, there is only one)
+                    //x.Elements().First(aa => aa.Name.LocalName == "worksheet")
+                        //// get the first "sheetdata" element, again there is only one, and get all its elements
+                        //.Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
+                            //// get first row
+                            //.First(aaa => aaa.Name.LocalName == "row"
+                            //// get all cells (denoted as "c" in Excel-speak)
+                            //&& aaa.Elements().Where(bbb => bbb.Name.LocalName == "c")
+                            //    // get those where attribute is set to "s=1" (means date)
+                            //    .Any(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1))
+                            //.Elements()
+                               // .First(ccc => ccc.Name.LocalName == "c" 
+                               //&& ccc.Attributes("s").Any() && Convert.ToInt32(ccc.Attribute("s").Value) == 1).Value;
 
                 // ensure correct xl date value
                 //Assert.AreEqual(Convert.ToDouble(asdz)
                 //, 40155.7633988426);
 
-                var asdz2 = x.Elements().First(aa => aa.Name.LocalName == "worksheet")
-                    .Elements().First(aa => aa.Name.LocalName == "sheetData").Elements().Last(aaa => aaa.Name.LocalName == "row")
-                    .Elements().Where(aaa => aaa.Name.LocalName == "c").Where(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1).First();
+                //var asdz2 = x.Elements().First(aa => aa.Name.LocalName == "worksheet")
+                    //.Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
+                    //.Last(aaa => aaa.Name.LocalName == "row")
+                    //.Elements().Where(aaa => aaa.Name.LocalName == "c")
+                    //.First(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1);
 
                 //sr = new StreamReader(fs, Encoding.UTF8);
                 //XDocument x = XDocument.Parse(sr.ReadToEnd(), LoadOptions.PreserveWhitespace);
@@ -389,12 +418,18 @@ namespace ExcelXmlWriterTest
             }
         }
 
+        /// <summary>
+        /// Tests whether 
+        /// should break into 3 workbooks, 961 rows total, 2 result sets per workbook except for 
+        /// last WB with 1 result set
+        /// </summary>
         [Test()]
         public void WorkbookQueryMaxResultsPerWorkbookTest()
         {
             WorkBookParams p = new WorkBookParams();
 
-            string path = Environment.CurrentDirectory;
+            string path = Assembly.GetExecutingAssembly().Location;
+            path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
@@ -411,10 +446,14 @@ namespace ExcelXmlWriterTest
             sr.Close();
             p.FromFile = false;
 
-            SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder();
-            sb.DataSource = Settings.Default.datasource;
-            sb.InitialCatalog = Settings.Default.database;
-            sb.IntegratedSecurity = true;
+            SqlConnectionStringBuilder sb = new SqlConnectionStringBuilder
+            {
+                DataSource = ConfigurationManager.AppSettings["datasource"],
+                InitialCatalog = ConfigurationManager.AppSettings["database"],
+                IntegratedSecurity = false,
+                UserID = ConfigurationManager.AppSettings["username"],
+                Password = ConfigurationManager.AppSettings["password"]
+            };
             p.ConnectionString = sb.ConnectionString;
             //p.columnTypeMappings = columnTypeMappings;
 
@@ -425,9 +464,9 @@ namespace ExcelXmlWriterTest
             p.WriteEmptyResultSetColumns = false;
             //p.numberFormatCulture = c1;            
 
-            // should break into 3 workbooks, 961 rows total, 2 result sets per workbook
+            // should break into 3 workbooks, 961 rows total, 2 result sets per workbook except for last WB
             // 256, 256, 90, 103, 256
-            
+
             p.MaxRowsPerSheet = 150000;
             //p.MaxWorkBookSize = 1000000;
             p.DupeKeysToDelayStartingNewWorksheet = new string[] { "a1" };
@@ -439,10 +478,12 @@ namespace ExcelXmlWriterTest
             //string tempOutputPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
             int i = 1;
+
+            // run query and save results
             if (target.RunQuery())
             {
                 string pht = Path.Combine(tempOutputPath
-                    , Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name) + ".xlsx");
+                    , Utility.getIncrFileName(i, MethodBase.GetCurrentMethod().Name) + ".xlsx");
                 FileStream fs = new FileStream(pht
                     , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                 fs1.Add(pht, fs);
@@ -451,7 +492,7 @@ namespace ExcelXmlWriterTest
                 {
                     i = i + 1;
                     pht = Path.Combine(tempOutputPath
-                        , Utility.getIncrFileName(i, System.Reflection.MethodInfo.GetCurrentMethod().Name) + ".xlsx");
+                        , Utility.getIncrFileName(i, MethodBase.GetCurrentMethod().Name) + ".xlsx");
                     FileStream fsa = new FileStream(pht
                     , FileMode.Create, FileAccess.ReadWrite, FileShare.None);
                     fs1.Add(pht, fsa);
@@ -461,6 +502,7 @@ namespace ExcelXmlWriterTest
                 fs.Close();
             }
 
+            // make sure 3 files have been created
             Assert.AreEqual(fs1.Count, 3);
 
             int currentStream = 1;
@@ -474,53 +516,52 @@ namespace ExcelXmlWriterTest
                 {
                     if (worksheet < 6)
                     {
+                        // open the xlsx
                         ZipFile z = new ZipFile(fs.Key);
-                        // broken here
+
+                        // pick the first worksheet
                         var t = z.SelectEntries("xl/worksheets/sheet" + worksheet.ToString() + "_1.xml").First();
 
+                        // read results
                         MemoryStream ms = new MemoryStream();
                         t.Extract(ms);
                         ms.Flush();
                         ms.Seek(0, SeekOrigin.Begin);
-
-                        //PackagePart strm = pa.GetPart(new Uri("/xl/worksheets/sheet1_1.xml", UriKind.Relative));
-
-                        //Stream m = t.InputStream;
-
                         StreamReader sr1 = new StreamReader(ms, Encoding.UTF8);
                         string b1 = sr1.ReadToEnd();
                         XDocument x = XDocument.Parse(b1, LoadOptions.None);
-
                         ms.Close();
 
-                        var asdza =
+
+                        var countOfRows =
                             // Xml is e.g. <worksheet><sheetData><row>...</row><row><c s="1">12345.2423</c>...
                             x.Elements().First(aa => aa.Name.LocalName == "worksheet")
                             .Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
-                            .Where(aaa => aaa.Name.LocalName == "row").Count();
-                        if (currentStream == 1)
-                        {
-                            if (worksheet == 1 || worksheet == 2)
-                            {
-                                Assert.AreEqual(asdza, 257);
-                            }
+                            .Count(aaa => aaa.Name.LocalName == "row");
 
-                        }
-                        else if (currentStream == 2)
+                        switch (currentStream)
                         {
-                            if (worksheet == 3)
-                            {
-                                Assert.AreEqual(asdza, 91);
-                            }
-                            else if (worksheet == 4)
-                            {
-                                Assert.AreEqual(asdza, 104);
-                            }
-                        }
+                            case 1:
+                                if (worksheet == 1 || worksheet == 2)
+                                {
+                                    Assert.AreEqual(countOfRows, 257);
+                                }
 
-                        else if (currentStream == 3)
-                        {
-                            Assert.AreEqual(asdza, 257);
+                                break;
+                            case 2:
+                                if (worksheet == 3)
+                                {
+                                    Assert.AreEqual(countOfRows, 91);
+                                }
+                                else if (worksheet == 4)
+                                {
+                                    Assert.AreEqual(countOfRows, 104);
+                                }
+
+                                break;
+                            case 3:
+                                Assert.AreEqual(countOfRows, 257);
+                                break;
                         }
 
                         worksheet++;
@@ -536,7 +577,8 @@ namespace ExcelXmlWriterTest
         {
             WorkBookParams p = new WorkBookParams();
 
-            string path = Environment.CurrentDirectory;
+            string path = Assembly.GetExecutingAssembly().Location;
+            path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
             path = Path.GetDirectoryName(path);
@@ -550,10 +592,12 @@ namespace ExcelXmlWriterTest
             //p.connStr = connStr;
             //p.columnTypeMappings = columnTypeMappings;
             p.MaxRowsPerSheet = 100000;
-            p.ResultNames = new Dictionary<int, string>();
-            p.ResultNames.Add(1, "blah blah");
-            p.ResultNames.Add(2, "x");
-            
+            p.ResultNames = new Dictionary<int, string>
+            {
+                { 1, "blah blah" },
+                { 2, "x" }
+            };
+
             p.QueryTimeout = 0;
             //p.numberFormatCulture = c1;
 
@@ -578,11 +622,23 @@ namespace ExcelXmlWriterTest
             //Package pa = Package.Open(path2);
             ZipFile z = new ZipFile(path1);
             // broken here, looks like due to reading from file is broken in queryreader
-            var t = z.SelectEntries("xl/worksheets/sheet1_1.xml").First();
+            var t = z.SelectEntries("xl/worksheets/sheet2_1.xml").First();
             MemoryStream ms = new MemoryStream();
             t.Extract(ms);
             ms.Flush();
             ms.Seek(0, SeekOrigin.Begin);
+
+
+
+            //var t = z.SelectEntries("xl/worksheets/sheet1_1.xml").First();
+            //MemoryStream ms = new MemoryStream();
+            //t.Extract(ms);
+            //ms.Flush();
+            //ms.Seek(0, SeekOrigin.Begin);
+            //StreamReader sr1 = new StreamReader(ms, Encoding.UTF8);
+            //string b1 = sr1.ReadToEnd();
+            //XDocument x = XDocument.Parse(b1, LoadOptions.None);
+            //ms.Close();
 
             //PackagePart strm = pa.GetPart(new Uri("/xl/worksheets/sheet1_1.xml", UriKind.Relative));
 
@@ -599,8 +655,10 @@ namespace ExcelXmlWriterTest
                 x.Elements().First(aa => aa.Name.LocalName == "worksheet")
                 .Elements().First(aa => aa.Name.LocalName == "sheetData").Elements()
                 .First(aaa => aaa.Name.LocalName == "row"
-                && aaa.Elements().Where(bbb => bbb.Name.LocalName == "c").Any(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1))
-                .Elements().First(ccc => ccc.Name.LocalName == "c" && ccc.Attributes("s").Any() && Convert.ToInt32(ccc.Attribute("s").Value) == 1).Value;
+                && aaa.Elements().Where(bbb => bbb.Name.LocalName == "c")
+                .Any(xx => xx.Attributes("s").Any() && Convert.ToInt32(xx.Attribute("s").Value) == 1))
+                .Elements().First(ccc => ccc.Name.LocalName == "c" 
+                && ccc.Attributes("s").Any() && Convert.ToInt32(ccc.Attribute("s").Value) == 1).Value;
 
             // ensure correct xl date value
             Assert.AreEqual(Convert.ToDouble(asdz)
