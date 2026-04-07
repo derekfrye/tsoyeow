@@ -259,6 +259,18 @@ Objectives:
 - derive a compact per-result-set structure from that schema and reuse it through sheet initialization and key-column lookup
 - avoid repeated `GetSchemaTable().Rows.Cast<DataRow>()` scans in row-writing logic
 
+### 4. Expand modern test coverage
+
+The new SDK-style `xUnit` suite covers the current file-backed export path and core XLSX internals, but a few high-value behaviors still need explicit tests.
+
+Recommended next additions:
+
+- add SQL-backed integration tests for `QueryReader` and `ExcelExporter`, ideally using a disposable SQL Server fixture rather than machine-local config
+- add cancellation and progress-loop tests for `WorkbookExportSession`, including cancellation after `Open()` and during multi-workbook export
+- add worksheet-boundary tests for `DupeKeysToDelayStartingNewWorksheet`, especially the case where the row limit is reached inside a duplicate-key group
+- add explicit package-metadata tests for `XlsxWorkbookMetadata`, `XlsxAppXml`, `ContentTypes`, and `Relationships` so workbook manifests are validated directly instead of only through broad XLSX smoke tests
+- add malformed and hostile XML fixture tests for the file-backed path, including prohibited DTD input and schema-shape failures
+
 Status:
 
 - done: result-set schema metadata is now cached once and reused through the write path

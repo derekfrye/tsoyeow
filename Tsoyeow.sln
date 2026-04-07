@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlQueryResults.App", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlQueryResults.Desktop", "ExcelXmlQueryResults.Desktop\ExcelXmlQueryResults.Desktop.csproj", "{1290F307-75AD-4FDC-8803-0337EAD11108}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXmlWriter.Tests", "ExcelXmlWriter.Tests\ExcelXmlWriter.Tests.csproj", "{F0BD2033-A345-43C6-87EA-E143E1CD89DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -154,6 +156,46 @@ Global
 		{1290F307-75AD-4FDC-8803-0337EAD11108}.Release|x86.Build.0 = Release|Any CPU
 		{1290F307-75AD-4FDC-8803-0337EAD11108}.Release|x64.ActiveCfg = Release|Any CPU
 		{1290F307-75AD-4FDC-8803-0337EAD11108}.Release|x64.Build.0 = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|x86.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Debug|x64.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|Any CPU.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|x86.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|x86.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|x64.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFile|x64.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|Any CPU.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|x86.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|x86.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|x64.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugFromFileNoThread|x64.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|Any CPU.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|x86.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|x86.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|x64.ActiveCfg = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.DebugNoThread|x64.Build.0 = Debug|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|x86.ActiveCfg = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|x86.Build.0 = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|x64.ActiveCfg = Release|Any CPU
+		{F0BD2033-A345-43C6-87EA-E143E1CD89DB}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
