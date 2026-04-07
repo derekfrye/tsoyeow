@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>ExcelXmlQueryResults.App</RootNamespace>
+    <AssemblyName>ExcelXmlQueryResults.App</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ExcelXmlWriter\ExcelXmlWriter.csproj" />
+  </ItemGroup>
+</Project>

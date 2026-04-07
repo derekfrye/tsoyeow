@@ -1,0 +1,115 @@
+<Window
+    x:Class="ExcelXmlQueryResults.Desktop.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Tsoyeow Exporter"
+    Width="1500"
+    Height="920"
+    MinWidth="1100"
+    MinHeight="760">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24">
+    <StackPanel Spacing="6">
+      <TextBlock FontSize="30" FontWeight="Bold" Text="Tsoyeow Exporter" />
+      <TextBlock Foreground="#9FB4D8" Text="Modern desktop shell over the refactored export engine." />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,20,0,20" ColumnDefinitions="420,20,*">
+      <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+        <Border Classes="card">
+          <StackPanel Spacing="14">
+            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Connection and Export Settings" />
+
+            <TextBlock Text="Server" />
+            <TextBox Text="{Binding Server}" Watermark="SQL Server instance" />
+
+            <TextBlock Text="Database" />
+            <TextBox Text="{Binding Database}" Watermark="Database name" />
+
+            <CheckBox Content="Use integrated security" IsChecked="{Binding UseIntegratedSecurity}" />
+
+            <TextBlock Text="Username" />
+            <TextBox Text="{Binding Username}" Watermark="Only used when integrated security is off" />
+
+            <TextBlock Text="Password" />
+            <TextBox Text="{Binding Password}" Watermark="Only used when integrated security is off" />
+
+            <Grid ColumnDefinitions="*,12,*">
+              <StackPanel Grid.Column="0" Spacing="6">
+                <TextBlock Text="Query Timeout (sec)" />
+                <TextBox Text="{Binding QueryTimeoutSeconds}" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="6">
+                <TextBlock Text="Max Rows / Worksheet" />
+                <TextBox Text="{Binding MaxRowsPerWorksheet}" />
+              </StackPanel>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,12,*">
+              <StackPanel Grid.Column="0" Spacing="6">
+                <TextBlock Text="Max Workbook Size (GiB)" />
+                <TextBox Text="{Binding MaxWorkbookSizeGiB}" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Spacing="6">
+                <TextBlock Text="Max Result Sets / Workbook" />
+                <TextBox Text="{Binding MaxResultSetsPerWorkbook}" />
+              </StackPanel>
+            </Grid>
+
+            <TextBlock Text="Boundary Columns" />
+            <TextBox Text="{Binding BoundaryColumns}" Watermark="Comma-separated columns that delay worksheet breaks" />
+
+            <TextBlock Text="Result Set Names" />
+            <TextBox Text="{Binding ResultSetNames}" Watermark="Example: 1=Customers, 2=Orders" />
+          </StackPanel>
+        </Border>
+      </ScrollViewer>
+
+      <StackPanel Grid.Column="2" Spacing="18">
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Query Input" />
+            <TextBlock Foreground="#9FB4D8" Text="Use the editor for a single export, or load one or more SQL files for batch mode." />
+            <TextBox
+                AcceptsReturn="True"
+                Height="280"
+                IsEnabled="{Binding IsSingleQueryMode}"
+                Text="{Binding QueryText}"
+                TextWrapping="Wrap"
+                Watermark="Paste SQL here for a single export run" />
+
+            <Grid ColumnDefinitions="Auto,12,Auto,12,*">
+              <Button Classes="ghost" Click="BrowseQueryFiles_Click" Content="Load SQL Files" />
+              <Button Grid.Column="2" Classes="ghost" Click="ClearQueryFiles_Click" Content="Clear Batch Files" />
+              <TextBlock Grid.Column="4" VerticalAlignment="Center" Foreground="#9FB4D8" Text="If one or more files are loaded, the editor is ignored and each file is exported separately." />
+            </Grid>
+
+            <ListBox Height="120" ItemsSource="{Binding QueryFiles}" />
+          </StackPanel>
+        </Border>
+
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <TextBlock FontSize="20" FontWeight="SemiBold" Text="Output and Progress" />
+
+            <Grid ColumnDefinitions="*,12,Auto">
+              <TextBox Grid.Column="0" Text="{Binding OutputPath}" Watermark="Choose the primary output .xlsx path" />
+              <Button Grid.Column="2" Classes="ghost" Click="BrowseOutputFile_Click" Content="Choose Output" />
+            </Grid>
+
+            <TextBlock FontWeight="SemiBold" Text="{Binding StatusText}" />
+            <TextBlock Foreground="#9FB4D8" Text="{Binding ProgressText}" TextWrapping="Wrap" />
+
+            <TextBlock FontWeight="SemiBold" Text="Generated Files" />
+            <ListBox Height="150" ItemsSource="{Binding GeneratedFiles}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Grid>
+
+    <Grid Grid.Row="2" ColumnDefinitions="*,Auto,12,Auto">
+      <TextBlock VerticalAlignment="Center" Foreground="#7E93B8" Text="Settings are stored as JSON under your application data directory and legacy App.config values are imported on first run when available." />
+      <Button Grid.Column="1" Classes="ghost" Click="CancelExport_Click" Content="Cancel" />
+      <Button Grid.Column="3" Classes="primary" Click="RunExport_Click" Content="Run Export" />
+    </Grid>
+  </Grid>
+</Window>

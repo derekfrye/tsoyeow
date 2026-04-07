@@ -112,6 +112,14 @@ namespace ExcelXmlWriter
             }
         }
 
+        internal void Cancel()
+        {
+            if (!fromFile)
+            {
+                command.Cancel();
+            }
+        }
+
         IDataReader EnsureReader()
         {
             return reader ?? throw new InvalidOperationException("The query reader has not been opened.");

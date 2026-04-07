@@ -41,15 +41,17 @@ namespace ExcelXmlWriter.Workbook
     {
         readonly WorkBookParams options;
         readonly QueryReader queryReader;
+        readonly CancellationToken cancellationToken;
 
         CancellationTokenSource? progressCancellationSource;
         Task? progressTask;
         bool queryOpened;
         bool closed;
 
-        internal WorkbookExportSession(WorkBookParams options)
+        internal WorkbookExportSession(WorkBookParams options, CancellationToken cancellationToken = default)
         {
             this.options = options;
+            this.cancellationToken = cancellationToken;
             queryReader = new QueryReader(options.Query, options.QueryTimeout, options.FromFile, options.ConnectionString);
         }
 
@@ -61,8 +63,11 @@ namespace ExcelXmlWriter.Workbook
 
         internal event EventHandler<ExportFinishedEventArgs>? Finished;
 
+        internal int TotalRecordsRead => queryReader.TotalRecordsRead;
+
         internal void Open()
         {
+            cancellationToken.ThrowIfCancellationRequested();
             QueryStarted?.Invoke(this, EventArgs.Empty);
             queryReader.OpenReader();
             queryOpened = true;
@@ -77,6 +82,7 @@ namespace ExcelXmlWriter.Workbook
 
         internal WorkBookStatus WriteQueryResults(Stream stream)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (!queryOpened)
             {
                 throw new WorkbookNotStartedException();
@@ -89,6 +95,7 @@ namespace ExcelXmlWriter.Workbook
 
             while (hasResultSet)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (resultSetTotal > options.MaximumResultSetsPerWorkbook)
                 {
                     OnSaveStarted("Saving incremental result...");
@@ -104,6 +111,7 @@ namespace ExcelXmlWriter.Workbook
 
                 while (queryReader.Read())
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     if (!tracking.WorksheetOpen && schema is not null)
                     {
                         InitializeSheet(backend, tracking, schema);
@@ -167,8 +175,8 @@ namespace ExcelXmlWriter.Workbook
 
         void StartProgressLoop()
         {
-            progressCancellationSource = new CancellationTokenSource();
-            progressTask = Task.Run(() => EmitRowsOverTimeAsync(progressCancellationSource.Token));
+            progressCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            progressTask = Task.Run(() => EmitRowsOverTimeAsync(progressCancellationSource.Token), CancellationToken.None);
         }
 
         void StopProgressLoop()
