@@ -142,7 +142,6 @@ public sealed class ExcelExporter
         {
             Query = request.QueryText,
             ConnectionString = request.ConnectionString,
-            BackendMethod = ExcelBackend.Xlsx,
             FromFile = request.SourceKind == ExportSourceKind.XmlDataSetFile,
             MaxRowsPerSheet = request.MaxRowsPerWorksheet,
             QueryTimeout = request.QueryTimeoutSeconds,

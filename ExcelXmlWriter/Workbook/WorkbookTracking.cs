@@ -9,27 +9,9 @@
 namespace ExcelXmlWriter.Workbook
 {
     /// <summary>
-    /// An Excel data type. A setting of general forces the workbook to infer each cell's type 
-    /// throughout query execution (without truncating numbers over Excel's length limit). The default is string.
-    /// </summary>
-    public enum ExcelDataType
-    {
-        String, Number, Date, General, OverpunchNumber
-    }
-
-    /// <summary>
-    /// An Excel data type. A setting of general forces the workbook to infer each cell's type 
-    /// throughout query execution (without truncating numbers over Excel's length limit). The default is string.
-    /// </summary>
-    public enum ExcelBackend
-    {
-        Xml, Xlsx
-    }
-
-    /// <summary>
-    /// Various statues a workbook can be in.
-    /// </summary>
-    public enum WorkBookStatus
+     /// Various statues a workbook can be in.
+     /// </summary>
+    internal enum WorkBookStatus
     {
         /// <summary>
         /// The WorkBook has written an entire result set to the stream.
@@ -44,7 +26,7 @@ namespace ExcelXmlWriter.Workbook
         BreakWanted,
     }
 
-    class DupKeyResults
+    sealed class DupKeyResults
     {
         public string[]? PrevDupKey
         {
@@ -60,7 +42,7 @@ namespace ExcelXmlWriter.Workbook
         }
     }
 
-    class WorkbookTracking
+    sealed class WorkbookTracking
     {
         public WorkBookStatus Status
         {

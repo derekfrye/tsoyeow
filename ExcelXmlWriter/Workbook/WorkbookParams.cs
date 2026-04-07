@@ -1,9 +1,6 @@
 namespace ExcelXmlWriter.Workbook
 {
-    /// <summary>
-    /// Required parameters for constructing an Excel 2003 XML-compatible workbook file from a query.
-    /// </summary>
-    public class WorkBookParams
+    internal sealed class WorkBookParams
     {
         /// <summary>
         /// The query to execute and output results to the workbook.
@@ -19,16 +16,6 @@ namespace ExcelXmlWriter.Workbook
         {
             get; set;
         } = string.Empty;
-        /// <summary>
-        /// The filetype to write.
-        /// </summary>
-        public ExcelBackend BackendMethod
-        {
-            get; set;
-        }
-        /// <summary>
-        /// If true, the query is a path to an XML file representation of a DataSet.
-        /// </summary>
         public bool FromFile
         {
             get; set;
@@ -101,7 +88,6 @@ namespace ExcelXmlWriter.Workbook
             ColumnTypeMappings = new Dictionary<int, ExcelDataType>();
             WriteEmptyResultSetColumns = true;
             MaxWorkBookSize = 2500000000;
-            BackendMethod = ExcelBackend.Xlsx;
             MaximumResultSetsPerWorkbook = Int32.MaxValue;
         }
     }

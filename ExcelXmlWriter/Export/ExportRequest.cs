@@ -1,5 +1,3 @@
-using ExcelXmlWriter.Workbook;
-
 namespace ExcelXmlWriter;
 
 public enum ExportSourceKind
