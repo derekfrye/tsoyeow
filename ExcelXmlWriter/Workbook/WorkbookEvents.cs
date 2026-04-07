@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-
 namespace ExcelXmlWriter.Workbook
 {
-    public class ReaderFinishedEvents: EventArgs
+    public class ReaderFinishedEvents : EventArgs
     {
         public int totalRecordsRead
         {
@@ -23,7 +17,9 @@ namespace ExcelXmlWriter.Workbook
     public class QueryRowsOverTimeEvents : EventArgs
     {
         public decimal rowsPerSecond
-        { get; private set; }
+        {
+            get; private set;
+        }
         public int total
         {
             get;
@@ -39,8 +35,10 @@ namespace ExcelXmlWriter.Workbook
 
     public class QueryExceptionEvents : EventArgs
     {
-        public Exception e 
-        { get; private set; }
+        public Exception e
+        {
+            get; private set;
+        }
 
         public QueryExceptionEvents(Exception e)
         {
@@ -51,7 +49,9 @@ namespace ExcelXmlWriter.Workbook
     public class SaveFileEvent : EventArgs
     {
         public string Message
-        { get; private set; }
+        {
+            get; private set;
+        }
         public SaveFileEvent(string message)
         {
             Message = message;

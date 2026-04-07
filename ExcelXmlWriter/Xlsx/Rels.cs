@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml.Linq;
-using System.Xml;
-using System.IO;
 
 namespace ExcelXmlWriter.Xlsx
 {
@@ -26,10 +20,14 @@ namespace ExcelXmlWriter.Xlsx
 
     class ContentRelationships
     {
-        internal string PackagePath
-        { get; set; }
-        internal string RelationshipType
-        { get; set; }
+        internal string? PackagePath
+        {
+            get; set;
+        }
+        internal string? RelationshipType
+        {
+            get; set;
+        }
     }
 
     class Relationships

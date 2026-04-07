@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Globalization;
-using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using ExcelXmlWriter.Workbook;
 
@@ -13,38 +9,42 @@ namespace ExcelXmlWriter
     struct Overpunch
     {
         public bool IsOverpunchable
-        { get; set; }
+        {
+            get; set;
+        }
         public double val
-        { get; set; }
+        {
+            get; set;
+        }
     }
 
     static class StaticFunctions
     {
 
-        static readonly Dictionary<char, int> d = new Dictionary<char, int>() { 
+        static readonly Dictionary<char, int> d = new Dictionary<char, int>() {
         { '{', 0 }
 
-        , { 'A', 1 } 
-        , { 'a', 1 } 
-        , { 'B', 2 } 
-        , { 'b', 2 } 
-        , { 'C', 3 } 
-        , { 'c', 3 } 
-        , { 'D', 4 } 
-        , { 'd', 4 } 
-        , { 'E', 5 } 
-        , { 'e', 5 } 
-        , { 'F', 6 } 
-        , { 'f', 6 } 
-        , { 'G', 7 } 
-        , { 'g', 7 } 
-        , { 'H', 8 } 
-        , { 'h', 8 } 
-        , { 'I', 9 } 
-        , { 'i', 9 } 
+        , { 'A', 1 }
+        , { 'a', 1 }
+        , { 'B', 2 }
+        , { 'b', 2 }
+        , { 'C', 3 }
+        , { 'c', 3 }
+        , { 'D', 4 }
+        , { 'd', 4 }
+        , { 'E', 5 }
+        , { 'e', 5 }
+        , { 'F', 6 }
+        , { 'f', 6 }
+        , { 'G', 7 }
+        , { 'g', 7 }
+        , { 'H', 8 }
+        , { 'h', 8 }
+        , { 'I', 9 }
+        , { 'i', 9 }
 
-        , { '}', 0 } 
-        
+        , { '}', 0 }
+
         , { 'J', -1 }
         , { 'j', -1 }
         , { 'K', -2 }
@@ -101,8 +101,8 @@ namespace ExcelXmlWriter
             }
 
             // can't do anyting
-            
-                return new Overpunch() { val = 0.0, IsOverpunchable = false };
+
+            return new Overpunch() { val = 0.0, IsOverpunchable = false };
         }
 
         internal static ExcelDataType ResolveDataType(string dataValue)
@@ -113,13 +113,13 @@ namespace ExcelXmlWriter
             // Credit Card problem
             if (Decimal.TryParse(dataValue, out throwaway)
                 && dataValue.Trim().Length <= excelMaxNumberLength
-                && !dataValue.Trim().EndsWith("-")
+                && !dataValue.Trim().EndsWith('-')
                 )
                 return ExcelDataType.Number;
             else if (DateTime.TryParse(dataValue, out d)
                 // excel doesn't like dates before 1900
-                && d >= Convert.ToDateTime("1900-01-01")
-                && d <= Convert.ToDateTime("9999-12-31"))
+                && d >= Convert.ToDateTime("1900-01-01", CultureInfo.InvariantCulture)
+                && d <= Convert.ToDateTime("9999-12-31", CultureInfo.InvariantCulture))
                 return ExcelDataType.Date;
             else
             {

@@ -1,23 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Linq;
-using System.Data;
-using System.Collections;
-using ExcelXmlWriter;
-using System.Threading;
-using System.Globalization;
-using System.ComponentModel;
-using System.Data.SqlClient;
-using ExcelXmlWriter.Properties;
-using System.Xml.Linq;
-using System.Xml;
 using ExcelXmlWriter.Xlsx;
+using Microsoft.Data.SqlClient;
 
 namespace ExcelXmlWriter.Workbook
 {
-    public class Workbook:IDisposable
+    public class Workbook : IDisposable
     {
         #region LocalFields
 
@@ -271,7 +257,7 @@ namespace ExcelXmlWriter.Workbook
                     w.RowCount = 0;
                 }
 
-                
+
             }
 
             OnSave("Saving final result...");
@@ -315,9 +301,9 @@ namespace ExcelXmlWriter.Workbook
             //return w.keyColumnStatus;
         }
 
-        void WriteARow( WorkbookTracking w)
+        void WriteARow(WorkbookTracking w)
         {
-            if (w.RowCount>0&&w.RowCount % runParameters.MaxRowsPerSheet == 0)
+            if (w.RowCount > 0 && w.RowCount % runParameters.MaxRowsPerSheet == 0)
                 w.Status = WorkBookStatus.BreakWanted;
 
             if (w.PreviousAndCurrentRowKeyColumns.PreviousDiffersFromCurrent)
@@ -329,7 +315,7 @@ namespace ExcelXmlWriter.Workbook
                     w.WorksheetOpen = false;
                     w.RowCount = 0;
                     InitSheet(w);
-                    w.Status= WorkBookStatus.BreakCompleted;
+                    w.Status = WorkBookStatus.BreakCompleted;
 
                 }
                 else if (pts.FileSize >= runParameters.MaxWorkBookSize)
@@ -346,7 +332,7 @@ namespace ExcelXmlWriter.Workbook
             pts.WriteRow(queryReader, runParameters.DupeKeysToDelayStartingNewWorksheet);
             w.RowCount++;
         }
-        
+
         string retrieveSheetName(int sheetCount, int sheetSubCount)
         {
 
@@ -364,7 +350,7 @@ namespace ExcelXmlWriter.Workbook
         void OnSave(string message)
         {
             if (SaveFile != null)
-                SaveFile(this, new SaveFileEvent(message) );
+                SaveFile(this, new SaveFileEvent(message));
         }
 
         void OnReaderFinished()
@@ -435,7 +421,7 @@ namespace ExcelXmlWriter.Workbook
         {
             if (disposing)
             {
-                queryReader.Dispose();                
+                queryReader.Dispose();
             }
         }
 

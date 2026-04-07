@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using ExcelXmlWriter.Properties;
 using System.Data;
-using System.Xml.Linq;
+using System.IO.Compression;
+using System.Text;
 using System.Xml;
-
-using Ionic.Zip; 
+using System.Xml.Linq;
+using ExcelXmlWriter.Properties;
 
 namespace ExcelXmlWriter.Xlsx
 {
     public class XlsxParts : IExcelBackend, IDisposable
     {
-        ZipFile z;
         Stream p;
         Relationships mainRels;
         Relationships xlRels;
@@ -47,8 +42,6 @@ namespace ExcelXmlWriter.Xlsx
             string id = xlRels.Id(djfk).ToString();
 
             XlsxWorksheet w = new XlsxWorksheet(sheetName, id, resultHeaders, sharedStrings, filnm);
-            z.AddEntry(filnm, w.OutputStream);
-
             worksheets.Add(w);
             currentWorksheet = w;
         }
@@ -69,19 +62,28 @@ namespace ExcelXmlWriter.Xlsx
             mainRels.Link(XlsxAppXml.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties", "docProps/app.xml"));
 
             workbookXml.SetSheetCount(worksheets);
-
-            z.AddEntry("_rels/.rels", mainRels.Write().ToString());
-
-            z.AddEntry("/docProps/app.xml", a.Write().ToString());
-
-            ContentTypes f = new ContentTypes(worksheets);
-            z.AddEntry("/[Content_Types].xml", f.Write());
-
-            z.AddEntry("/xl/workbook.xml", workbookXml.Write());
-
-            z.AddEntry("/xl/_rels/workbook.xml.rels", xlRels.Write());
             sharedStrings.Close();
-            z.Save(p);
+
+            using (var archive = new ZipArchive(p, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                AddStringEntry(archive, "_rels/.rels", mainRels.Write());
+                AddStringEntry(archive, "/docProps/core.xml", _coreXml);
+                AddStringEntry(archive, "/docProps/app.xml", a.Write().ToString());
+
+                ContentTypes f = new ContentTypes(worksheets);
+                AddStringEntry(archive, "/[Content_Types].xml", f.Write());
+                AddStringEntry(archive, "/xl/workbook.xml", workbookXml.Write());
+                AddStringEntry(archive, "/xl/_rels/workbook.xml.rels", xlRels.Write());
+                AddStringEntry(archive, "/xl/theme/theme1.xml", _themeXml);
+                AddStringEntry(archive, "/xl/styles.xml", _stylesXml);
+
+                AddStreamEntry(archive, "/xl/sharedStrings.xml", sharedStrings.OutputStream);
+
+                foreach (var worksheet in worksheets)
+                {
+                    AddStreamEntry(archive, worksheet.PackageFileName, worksheet.OutputStream);
+                }
+            }
 
             foreach (var djfak in worksheets)
             {
@@ -99,8 +101,7 @@ namespace ExcelXmlWriter.Xlsx
 
         public XlsxParts(Stream path)
         {
-            p=path;
-        	z = new ZipFile();
+            p = path;
 
             mainRels = new Relationships();
             xlRels = new Relationships();
@@ -129,7 +130,7 @@ namespace ExcelXmlWriter.Xlsx
                 {
                     xdjfkd.Save(apo);
                     apo.Close();
-                    z.AddEntry("/docProps/core.xml", sb.ToString());
+                    _coreXml = sb.ToString();
                 }
             }
 
@@ -152,10 +153,10 @@ namespace ExcelXmlWriter.Xlsx
                 {
                     xdjfkdd.Save(apos);
                     apos.Close();
-                    z.AddEntry("/xl/theme/theme1.xml", sbs.ToString());
+                    _themeXml = sbs.ToString();
                 }
             }
-            
+
 
             #endregion
 
@@ -167,7 +168,7 @@ namespace ExcelXmlWriter.Xlsx
             xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles", "styles.xml"
                  ));
 
-            using (StringWriterWithEncoding sasb =new StringWriterWithEncoding(Encoding.UTF8))
+            using (StringWriterWithEncoding sasb = new StringWriterWithEncoding(Encoding.UTF8))
             {
                 var zaaa = new XmlWriterSettings();
                 zaaa.Encoding = Encoding.UTF8;
@@ -176,7 +177,7 @@ namespace ExcelXmlWriter.Xlsx
                 {
                     xdjfkdsa.Save(apso);
                     apso.Close();
-                    z.AddEntry("/xl/styles.xml", sasb.ToString());
+                    _stylesXml = sasb.ToString();
                 }
             }
 
@@ -186,7 +187,6 @@ namespace ExcelXmlWriter.Xlsx
 
             string jf = Path.GetTempFileName();
             var strm1 = new FileStream(jf, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            z.AddEntry("/xl/sharedStrings.xml", strm1);
             sharedStrings = new XlsxSharedStringsXml(strm1, jf);
 
             xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings", "sharedStrings.xml"));
@@ -204,10 +204,10 @@ namespace ExcelXmlWriter.Xlsx
         {
             currentWorksheet.writerow(queryReader, columnValuesToReturn);
         }
-        
+
         public string[] ReadKeyValues(IDataReader queryReader, string[] colsToObtainValsFrom)
         {
-        	return currentWorksheet.ReadKeyValues(queryReader, colsToObtainValsFrom);
+            return currentWorksheet.ReadKeyValues(queryReader, colsToObtainValsFrom);
         }
 
         #region IDisposable Members
@@ -222,8 +222,6 @@ namespace ExcelXmlWriter.Xlsx
         {
             if (disposing)
             {
-                if (z != null)
-                    z.Dispose();
                 if (sharedStrings != null)
                     sharedStrings.Dispose();
 
@@ -237,9 +235,32 @@ namespace ExcelXmlWriter.Xlsx
 
         #endregion
 
+        readonly string _coreXml;
+        readonly string _themeXml;
+        readonly string _stylesXml;
+
+        static string NormalizeEntryPath(string entryPath)
+        {
+            return entryPath.TrimStart('/');
+        }
+
+        static void AddStringEntry(ZipArchive archive, string entryPath, string content)
+        {
+            var entry = archive.CreateEntry(NormalizeEntryPath(entryPath), CompressionLevel.Optimal);
+            using var writer = new StreamWriter(entry.Open(), new UTF8Encoding(false));
+            writer.Write(content);
+        }
+
+        static void AddStreamEntry(ZipArchive archive, string entryPath, Stream source)
+        {
+            source.Seek(0, SeekOrigin.Begin);
+            var entry = archive.CreateEntry(NormalizeEntryPath(entryPath), CompressionLevel.Optimal);
+            using var destination = entry.Open();
+            source.CopyTo(destination);
+        }
 
 
-        
+
 
     }
 }

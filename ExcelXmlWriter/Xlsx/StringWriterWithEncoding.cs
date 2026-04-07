@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.IO;
 
 namespace ExcelXmlWriter.Xlsx
 {
@@ -17,7 +13,10 @@ namespace ExcelXmlWriter.Xlsx
 
         public override Encoding Encoding
         {
-            get { return encoding; }
+            get
+            {
+                return encoding;
+            }
         }
     }
 }

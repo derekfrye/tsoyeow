@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Created by SharpDevelop.
  * User: djfrye
  * Date: 10/30/2012
@@ -6,21 +6,25 @@
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
-using System;
-
 namespace ExcelXmlWriter.Workbook
 {
-	/// <summary>
+    /// <summary>
     /// An Excel data type. A setting of general forces the workbook to infer each cell's type 
     /// throughout query execution (without truncating numbers over Excel's length limit). The default is string.
     /// </summary>
-    public enum ExcelDataType { String, Number, Date, General, OverpunchNumber }
+    public enum ExcelDataType
+    {
+        String, Number, Date, General, OverpunchNumber
+    }
 
     /// <summary>
     /// An Excel data type. A setting of general forces the workbook to infer each cell's type 
     /// throughout query execution (without truncating numbers over Excel's length limit). The default is string.
     /// </summary>
-    public enum ExcelBackend { Xml, Xlsx }
+    public enum ExcelBackend
+    {
+        Xml, Xlsx
+    }
 
     /// <summary>
     /// Various statues a workbook can be in.
@@ -39,30 +43,46 @@ namespace ExcelXmlWriter.Workbook
         BreakCompleted,
         BreakWanted,
     }
-    
-	 class DupKeyResults
+
+    class DupKeyResults
     {
-        public string[] PrevDupKey
-        { get; set; }
-        public string[] CurrentRowDupKey
-        { get; set; }
+        public string[]? PrevDupKey
+        {
+            get; set;
+        }
+        public string[]? CurrentRowDupKey
+        {
+            get; set;
+        }
         public bool PreviousDiffersFromCurrent
-        { get; set; }
+        {
+            get; set;
+        }
     }
 
     class WorkbookTracking
     {
         public WorkBookStatus Status
-        { get; set; }
+        {
+            get; set;
+        }
         public int SheetSubCount
-        { get; set; }
-        public bool WorksheetOpen 
-        { get; set; }
+        {
+            get; set;
+        }
+        public bool WorksheetOpen
+        {
+            get; set;
+        }
         public int RowCount
-        { get; set; }
+        {
+            get; set;
+        }
         public DupKeyResults PreviousAndCurrentRowKeyColumns
-        { get; set; }
-        
+        {
+            get; set;
+        }
+
 
         public WorkbookTracking()
         {

@@ -1,27 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ExcelXmlWriter;
-using System.IO;
 using System.Data;
-using System.Collections;
 using System.Xml;
 using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlWriter.Xlsx
 {
-    class XlsxWorksheet: IDisposable
+    class XlsxWorksheet : IDisposable
     {
 
         internal string Sheetname
-        { get; private set; }
+        {
+            get; private set;
+        }
 
         XlsxSharedStringsXml SharedStringReference
-        { get; set; }
+        {
+            get; set;
+        }
 
         XmlWriter wx;
-        
+
         internal string RelationshipId
         {
             get;
@@ -35,13 +32,17 @@ namespace ExcelXmlWriter.Xlsx
         }
 
         internal string FileAssociatedWithOutputStream
-        { get; private set; }
+        {
+            get; private set;
+        }
 
         /// <summary>
         /// Filename within the zip archive.
         /// </summary>
         internal string PackageFileName
-        { get; private set; }
+        {
+            get; private set;
+        }
 
         internal XlsxWorksheet(string sheetName, string relationshipId, DataRowCollection inputData
             , XlsxSharedStringsXml sharedStringReference, string packageFileName)
@@ -49,7 +50,7 @@ namespace ExcelXmlWriter.Xlsx
             PackageFileName = packageFileName;
 
             string jf = Path.GetTempFileName();
-            FileAssociatedWithOutputStream =jf;
+            FileAssociatedWithOutputStream = jf;
 
             OutputStream = new FileStream(jf, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
 
@@ -167,7 +168,7 @@ namespace ExcelXmlWriter.Xlsx
 
         internal string[] ReadKeyValues(IDataReader queryReader, string[] colsToObtainValsFrom)
         {
-        	string[] retVal = null;
+            string[]? retVal = null;
             if (colsToObtainValsFrom != null)
             {
                 retVal = new string[colsToObtainValsFrom.Length];
@@ -178,26 +179,26 @@ namespace ExcelXmlWriter.Xlsx
                         retVal[i] = queryReader[colsToObtainValsFrom[i]].ToString();
                 }
             }
-            
+
             return retVal;
         }
-        
+
         internal void writerow(IDataReader queryReader, string[] colsToObtainValsFrom)
         {
-//            string[] retVal = null;
-//            if (colsToObtainValsFrom != null)
-//            {
-//                retVal = new string[colsToObtainValsFrom.Length];
-//                for (int i = 0; i < retVal.Length; i++)
-//                {
-//                    if (queryReader.GetSchemaTable().Rows.Cast<DataRow>()
-//                        .Any(x => string.Equals(x["ColumnName"].ToString(), colsToObtainValsFrom[i], StringComparison.InvariantCultureIgnoreCase)))
-//                        retVal[i] = queryReader[colsToObtainValsFrom[i]].ToString();
-//                }
-//            }
+            //            string[] retVal = null;
+            //            if (colsToObtainValsFrom != null)
+            //            {
+            //                retVal = new string[colsToObtainValsFrom.Length];
+            //                for (int i = 0; i < retVal.Length; i++)
+            //                {
+            //                    if (queryReader.GetSchemaTable().Rows.Cast<DataRow>()
+            //                        .Any(x => string.Equals(x["ColumnName"].ToString(), colsToObtainValsFrom[i], StringComparison.InvariantCultureIgnoreCase)))
+            //                        retVal[i] = queryReader[colsToObtainValsFrom[i]].ToString();
+            //                }
+            //            }
 
             // write row hdr
-            wx.WriteStartElement("row");            
+            wx.WriteStartElement("row");
             wx.WriteWhitespace(Environment.NewLine);
 
             // cycle through the columns, writing the values
@@ -238,7 +239,7 @@ namespace ExcelXmlWriter.Xlsx
             // close the stream
             OutputStream.Flush();
             OutputStream.Seek(0, SeekOrigin.Begin);
-            
+
         }
 
 

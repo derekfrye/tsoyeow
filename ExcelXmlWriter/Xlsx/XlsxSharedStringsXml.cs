@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Collections;
-using System.Security.Cryptography;
 using System.Xml;
-using System.Xml.Linq;
 
 namespace ExcelXmlWriter.Xlsx
 {
@@ -14,11 +6,15 @@ namespace ExcelXmlWriter.Xlsx
     class SharedStringResult
     {
         public long Item1
-        { get; set; }
-        public string Item2
-        { get; set; }
+        {
+            get; set;
+        }
+        public string? Item2
+        {
+            get; set;
+        }
     }
-    
+
     /// <summary>
     /// /xl/sharedStrings.xml
     /// </summary>
@@ -30,10 +26,14 @@ namespace ExcelXmlWriter.Xlsx
         Dictionary<int, SharedStringResult> sharedStringDictionary = new Dictionary<int, SharedStringResult>();
 
         internal Stream OutputStream
-        { get; private set; }
+        {
+            get; private set;
+        }
 
         internal string FileAssociateWithOutputStream
-        { get; private set; }
+        {
+            get; private set;
+        }
 
         internal XlsxSharedStringsXml(Stream outputStream, string fileAssociatedWithOutputStream)
         {
@@ -93,7 +93,7 @@ namespace ExcelXmlWriter.Xlsx
                 // FIXME make this count() test a parameter
                 if (!found && sharedStringDictionary.Count < 500000)
                 {
-                    sharedStringDictionary.Add(hdhdsdafd, 
+                    sharedStringDictionary.Add(hdhdsdafd,
                         new SharedStringResult() { Item1 = curentSharedStringPosition, Item2 = value });
                 }
                 curentSharedStringPosition++;

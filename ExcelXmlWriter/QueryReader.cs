@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Data.SqlClient;
-using System.Data;
-using System.Configuration;
 using System.Collections;
-using ExcelXmlWriter;
+using System.Data;
 using System.Globalization;
+using Microsoft.Data.SqlClient;
 
 namespace ExcelXmlWriter
 {
@@ -16,7 +10,7 @@ namespace ExcelXmlWriter
 
         #region LocalFields
 
-        IDataReader dr;
+        IDataReader? dr;
         bool fromFile;
 
         SqlCommand sc = new SqlCommand();
@@ -50,7 +44,7 @@ namespace ExcelXmlWriter
             {
                 lock (currentResultLocker)
                     return currentResult;
-            }            
+            }
         }
 
         internal QueryReader(string query, int queryTimeout, bool queryIsFile, string connStr)
@@ -146,7 +140,7 @@ namespace ExcelXmlWriter
                     return false;
             }
             else
-                if (dr.NextResult())
+                if (dr!.NextResult())
                 {
                     lock (currentResultLocker)
                         currentResult++;
@@ -162,7 +156,7 @@ namespace ExcelXmlWriter
             get
             {
                 rowConsumed = true;
-                return dr[i];
+                return dr![i];
             }
         }
 
@@ -171,24 +165,27 @@ namespace ExcelXmlWriter
             get
             {
                 rowConsumed = true;
-                return dr[i];
+                return dr![i];
             }
         }
 
-        public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
+        public long GetBytes(int i, long fieldOffset, byte[]? buffer, int bufferoffset, int length)
         {
             rowConsumed = true;
-            return dr.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
+            return dr!.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
         }
 
         public int FieldCount
         {
-            get { return dr.FieldCount; }
+            get
+            {
+                return dr!.FieldCount;
+            }
         }
 
         public DataTable GetSchemaTable()
         {
-            var t=dr.GetSchemaTable();
+            var t = dr!.GetSchemaTable();
             return t;
         }
 
@@ -196,7 +193,10 @@ namespace ExcelXmlWriter
 
         public object Current
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -205,10 +205,10 @@ namespace ExcelXmlWriter
         /// <returns></returns>
         public bool MoveNext()
         {
-            if(!rowConsumed)
+            if (!rowConsumed)
                 return currentResultSetStillHasRecords;
 
-            if (dr.Read())
+            if (dr!.Read())
             {
                 lock (dataReaderLocker)
                     totalRecordsRead++;
@@ -264,12 +264,18 @@ namespace ExcelXmlWriter
 
         public int Depth
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public bool IsClosed
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public bool NextResult()
@@ -284,7 +290,10 @@ namespace ExcelXmlWriter
 
         public int RecordsAffected
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion
@@ -307,7 +316,7 @@ namespace ExcelXmlWriter
             throw new NotImplementedException();
         }
 
-        public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
+        public long GetChars(int i, long fieldoffset, char[]? buffer, int bufferoffset, int length)
         {
             throw new NotImplementedException();
         }

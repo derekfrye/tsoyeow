@@ -34,6 +34,14 @@ That keeps the initial signal focused on real code you own.
 
 This is the highest-leverage project because both the app and tests depend on it.
 
+Current dependency state to keep in mind:
+
+- `ExcelXmlWriter` has already been converted to an SDK-style `net10.0` project
+- it no longer uses `Ionic.Zip` for XLSX packaging and now relies on `System.IO.Compression`
+- it still depends on `Microsoft.Data.SqlClient`, which is a normal modern dependency for direct SQL Server access
+- it still depends on `System.Configuration.ConfigurationManager`, which is a compatibility dependency tied to legacy settings usage inside the library
+- the repo still contains a vendored `DotNetZip/` tree, but `ExcelXmlWriter` itself is no longer wired to it
+
 Priority files for review after analyzers are enabled:
 
 - `ExcelXmlWriter/Workbook/Workbook.cs`
@@ -66,12 +74,19 @@ Once the library is under better tooling, move to:
 
 This phase should focus on code quality and maintainability, not UI redesign.
 
+Configuration work should be split into two tracks:
+
+- library track: remove `System.Configuration.ConfigurationManager` from `ExcelXmlWriter` by replacing `Settings.Default` usage with embedded resources or explicit inputs
+- app track: migrate the WinForms app's `App.config` read/write flow to a more modern configuration approach if that still provides enough value
+
+Those are related, but they are not the same task and should not be treated as a single migration.
+
 ### 6. Reassess `DotNetZip`
 
 Only after the first-party code is cleaner should you decide whether to:
 
-- keep the existing dependency as-is
-- replace vendored/legacy usage with a maintained packaging approach
+- keep the vendored source tree for historical/reference purposes
+- replace any remaining vendored/legacy usage with a maintained packaging approach
 - remove the local `DotNetZip` source tree if it is no longer needed
 
 ## Practical First Milestone
@@ -81,8 +96,9 @@ A strong first modernization milestone would be:
 1. Add docs and repo-level policy files.
 2. Enable analyzers for first-party code.
 3. Convert `ExcelXmlWriter` to a modern project format.
-4. Fix the first wave of analyzer findings in the core library.
-5. Confirm tests still run.
+4. Remove the library's remaining legacy configuration dependency if feasible without broad app changes.
+5. Fix the first wave of analyzer findings in the core library.
+6. Confirm tests still run.
 
 That sequence improves maintainability quickly without forcing a full framework migration on day one.
 
@@ -101,6 +117,7 @@ After the initial cleanup, the larger decisions are:
 
 - migrate to SDK-style projects throughout the repo
 - move from `.NET Framework 4.0` to a newer target where practical
+- migrate app-layer configuration separately from library internals
 - replace manual threading with more modern task-based patterns
 - improve test ergonomics and reduce fixture brittleness
 - separate the core export engine more cleanly from the WinForms front end
