@@ -1,68 +1,61 @@
+using System.Globalization;
 using System.Xml.Linq;
 
 namespace ExcelXmlWriter.Xlsx
 {
-    static class RelationshipIdGenerator
+    internal static class RelationshipIdGenerator
     {
-        static readonly object ll = new object();
-        static int i = 0;
+        static readonly object SyncRoot = new();
+        static int currentId;
+
         internal static string RetrieveNextId()
         {
-            lock (ll)
+            lock (SyncRoot)
             {
-                i = i + 1;
-
+                currentId++;
+                return "rId" + currentId.ToString(CultureInfo.InvariantCulture);
             }
-            // Excel must have rId prefixed to the Id.
-            return "rId" + i.ToString();
         }
     }
 
-    class ContentRelationships
+    internal sealed class ContentRelationships
     {
-        internal string? PackagePath
-        {
-            get; set;
-        }
-        internal string? RelationshipType
-        {
-            get; set;
-        }
+        internal string PackagePath { get; set; } = string.Empty;
+
+        internal string RelationshipType { get; set; } = string.Empty;
     }
 
-    class Relationships
+    internal sealed class Relationships
     {
-        Dictionary<string, ContentRelationships> rels;
+        readonly Dictionary<string, ContentRelationships> relationships = new();
 
-        internal Relationships()
+        internal string Id(ContentRelationships relationship)
         {
-            rels = new Dictionary<string, ContentRelationships>();
+            return relationships.First(entry => ReferenceEquals(entry.Value, relationship)).Key;
         }
 
-        internal string Id(ContentRelationships x)
+        internal void Link(ContentRelationships relationship)
         {
-            return rels.First(xx => xx.Value == x).Key;
-        }
-
-        internal void Link(ContentRelationships x)
-        {
-            var t = RelationshipIdGenerator.RetrieveNextId();
-            rels.Add(t, x);
+            relationships.Add(RelationshipIdGenerator.RetrieveNextId(), relationship);
         }
 
         internal string Write()
         {
-            XNamespace xn2 = "http://schemas.openxmlformats.org/package/2006/relationships";
+            XNamespace relationshipsNamespace = "http://schemas.openxmlformats.org/package/2006/relationships";
 
-            var t = new XElement(xn2 + "Relationships");
-            foreach (var z in rels)
+            var root = new XElement(relationshipsNamespace + "Relationships");
+            foreach (var relationship in relationships)
             {
-                t.Add(new XElement(xn2 + "Relationship", new XAttribute("Type", z.Value.RelationshipType), new XAttribute("Target", z.Value.PackagePath), new XAttribute("Id", z.Key.ToString())));
+                root.Add(
+                    new XElement(
+                        relationshipsNamespace + "Relationship",
+                        new XAttribute("Type", relationship.Value.RelationshipType),
+                        new XAttribute("Target", relationship.Value.PackagePath),
+                        new XAttribute("Id", relationship.Key)));
             }
-            XDocument x = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), t);
 
-            return XlsxPart.Write(x);
+            var document = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root);
+            return XlsxPart.Write(document);
         }
-
     }
 }

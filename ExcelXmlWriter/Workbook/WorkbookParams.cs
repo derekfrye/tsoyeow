@@ -1,13 +1,5 @@
 namespace ExcelXmlWriter.Workbook
 {
-
-
-    class WorkerProgress
-    {
-        public Thread? t;
-        public bool cancelled;
-    }
-
     /// <summary>
     /// Required parameters for constructing an Excel 2003 XML-compatible workbook file from a query.
     /// </summary>

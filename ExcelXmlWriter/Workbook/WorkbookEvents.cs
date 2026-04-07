@@ -1,60 +1,45 @@
 namespace ExcelXmlWriter.Workbook
 {
-    public class ReaderFinishedEvents : EventArgs
+    public sealed class ReaderFinishedEventArgs : EventArgs
     {
-        public int totalRecordsRead
+        public ReaderFinishedEventArgs(int totalRecordsRead)
         {
-            get;
-            private set;
+            TotalRecordsRead = totalRecordsRead;
         }
 
-        public ReaderFinishedEvents(int a)
-        {
-            this.totalRecordsRead = a;
-        }
+        public int TotalRecordsRead { get; }
     }
 
-    public class QueryRowsOverTimeEvents : EventArgs
+    public sealed class QueryRowsOverTimeEventArgs : EventArgs
     {
-        public decimal rowsPerSecond
+        public QueryRowsOverTimeEventArgs(decimal rowsPerSecond, int totalRows)
         {
-            get; private set;
-        }
-        public int total
-        {
-            get;
-            private set;
+            RowsPerSecond = rowsPerSecond;
+            TotalRows = totalRows;
         }
 
-        public QueryRowsOverTimeEvents(decimal rowsPerSecond, int total)
-        {
-            this.rowsPerSecond = rowsPerSecond;
-            this.total = total;
-        }
+        public decimal RowsPerSecond { get; }
+
+        public int TotalRows { get; }
     }
 
-    public class QueryExceptionEvents : EventArgs
+    public sealed class QueryExceptionEventArgs : EventArgs
     {
-        public Exception e
+        public QueryExceptionEventArgs(Exception exception)
         {
-            get; private set;
+            Exception = exception;
         }
 
-        public QueryExceptionEvents(Exception e)
-        {
-            this.e = e;
-        }
+        public Exception Exception { get; }
     }
 
-    public class SaveFileEvent : EventArgs
+    public sealed class SaveFileEventArgs : EventArgs
     {
-        public string Message
-        {
-            get; private set;
-        }
-        public SaveFileEvent(string message)
+        public SaveFileEventArgs(string message)
         {
             Message = message;
         }
+
+        public string Message { get; }
     }
 }

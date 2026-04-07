@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Xml.Linq;
 
 namespace ExcelXmlWriter.Xlsx
@@ -5,61 +6,81 @@ namespace ExcelXmlWriter.Xlsx
     /// <summary>
     /// /docProps/app.xml
     /// </summary>
-    class XlsxAppXml : XlsxPart
+    internal sealed class XlsxAppXml : XlsxPart
     {
+        readonly XNamespace propertiesNamespace = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties";
+        readonly XNamespace variantTypesNamespace = "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
 
-        XNamespace xn = "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
-        XNamespace xn2 = "http://schemas.openxmlformats.org/officeDocument/2006/extended-properties";
-
-        internal void SetSheetCount(IList<XlsxWorksheet> sheets)
+        internal void SetSheetCount(IReadOnlyList<XlsxWorksheet> sheets)
         {
-            XElement xx = appXml.Element(xn2 + "Properties").Element(xn2 + "TitlesOfParts")
-                    .Element(xn + "vector");
-            xx.RemoveNodes();
-            int totalsheets = 0;
-            foreach (var lk in sheets)
+            var properties = GetRequiredElement(appXml, propertiesNamespace + "Properties");
+            var titlesOfParts = GetRequiredElement(properties, propertiesNamespace + "TitlesOfParts");
+            var titlesVector = GetRequiredElement(titlesOfParts, variantTypesNamespace + "vector");
+
+            titlesVector.RemoveNodes();
+            foreach (var sheet in sheets)
             {
-                xx.Add(new XElement(xn + "lpstr", lk.Sheetname));
-                totalsheets++;
+                titlesVector.Add(new XElement(variantTypesNamespace + "lpstr", sheet.Sheetname));
             }
 
-            xx.Attribute("size").SetValue(totalsheets);
+            GetRequiredAttribute(titlesVector, "size").Value = sheets.Count.ToString(CultureInfo.InvariantCulture);
 
-            appXml.Element(xn2 + "Properties").Element(xn2 + "HeadingPairs")
-                .Element(xn + "vector").Elements(xn + "variant").Where(x => x.Elements(xn + "i4").Any()).First().Element(xn + "i4").SetValue(totalsheets);
+            var headingPairs = GetRequiredElement(properties, propertiesNamespace + "HeadingPairs");
+            var headingVector = GetRequiredElement(headingPairs, variantTypesNamespace + "vector");
+            var worksheetCountNode = headingVector
+                .Elements(variantTypesNamespace + "variant")
+                .Select(variant => variant.Element(variantTypesNamespace + "i4"))
+                .FirstOrDefault(value => value is not null)
+                ?? throw new InvalidOperationException("The app.xml heading pairs structure is missing the worksheet count node.");
+
+            worksheetCountNode.Value = sheets.Count.ToString(CultureInfo.InvariantCulture);
         }
 
         internal XlsxAppXml()
         {
             appXml.Add(
-                new XElement(xn2 + "Properties"
-                    , new XAttribute(XNamespace.Xmlns + "vt"
-                        , "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes")
-                    , new XElement(xn2 + "Application", "Microsoft Excel")
-                    , new XElement(xn2 + "DocSecurity", "0")
-                    , new XElement(xn2 + "ScaleCrop", "false")
-                    , new XElement(xn2 + "HeadingPairs"
-                        , new XElement(xn + "vector", new XAttribute("size", 2), new XAttribute("baseType", "variant")
-                            , new XElement(xn + "variant"
-                                , new XElement(xn + "lpstr", "Worksheets")
-                            )
-                            , new XElement(xn + "variant"
-                                , new XElement(xn + "i4", 0)
-                            )
-                        )
-                    )
-                    , new XElement(xn2 + "TitlesOfParts"
-                        , new XElement(xn + "vector"
-                            , new XAttribute("size", 0), new XAttribute("baseType", "lpstr")
-                            , new XElement(xn + "lpstr", "placeholder")
-                        )
-                    )
-                    , new XElement(xn2 + "Company", Environment.UserName)
-                    , new XElement(xn2 + "LinksUpToDate", false)
-                    , new XElement(xn2 + "SharedDoc", false)
-                    , new XElement(xn2 + "HyperlinksChanged", false)
-                    , new XElement(xn2 + "AppVersion", "12.0000")
-             ));
+                new XElement(
+                    propertiesNamespace + "Properties",
+                    new XAttribute(XNamespace.Xmlns + "vt", variantTypesNamespace.NamespaceName),
+                    new XElement(propertiesNamespace + "Application", "Microsoft Excel"),
+                    new XElement(propertiesNamespace + "DocSecurity", "0"),
+                    new XElement(propertiesNamespace + "ScaleCrop", "false"),
+                    new XElement(
+                        propertiesNamespace + "HeadingPairs",
+                        new XElement(
+                            variantTypesNamespace + "vector",
+                            new XAttribute("size", 2),
+                            new XAttribute("baseType", "variant"),
+                            new XElement(
+                                variantTypesNamespace + "variant",
+                                new XElement(variantTypesNamespace + "lpstr", "Worksheets")),
+                            new XElement(
+                                variantTypesNamespace + "variant",
+                                new XElement(variantTypesNamespace + "i4", 0)))),
+                    new XElement(
+                        propertiesNamespace + "TitlesOfParts",
+                        new XElement(
+                            variantTypesNamespace + "vector",
+                            new XAttribute("size", 0),
+                            new XAttribute("baseType", "lpstr"),
+                            new XElement(variantTypesNamespace + "lpstr", "placeholder"))),
+                    new XElement(propertiesNamespace + "Company", Environment.UserName),
+                    new XElement(propertiesNamespace + "LinksUpToDate", false),
+                    new XElement(propertiesNamespace + "SharedDoc", false),
+                    new XElement(propertiesNamespace + "HyperlinksChanged", false),
+                    new XElement(propertiesNamespace + "AppVersion", "12.0000")));
+        }
+
+        static XElement GetRequiredElement(XContainer container, XName name)
+        {
+            return container.Element(name)
+                ?? throw new InvalidOperationException($"Expected XML element '{name}' was not found.");
+        }
+
+        static XAttribute GetRequiredAttribute(XElement element, XName name)
+        {
+            return element.Attribute(name)
+                ?? throw new InvalidOperationException($"Expected XML attribute '{name}' was not found.");
         }
     }
 }

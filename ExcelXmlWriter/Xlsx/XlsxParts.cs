@@ -1,82 +1,118 @@
 using System.Data;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using ExcelXmlWriter.Properties;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlWriter.Xlsx
 {
-    public class XlsxParts : IExcelBackend, IDisposable
+    internal sealed class XlsxParts : IExcelBackend, IDisposable
     {
-        Stream p;
-        Relationships mainRels;
-        Relationships xlRels;
-        XlsxWorkbookMetadata workbookXml;
-        ContentRelationships workbookXmlPackagePart;
-        XlsxSharedStringsXml sharedStrings;
-        bool alreadyClosed = false;
+        readonly Stream output;
+        readonly Relationships mainRelationships;
+        readonly Relationships workbookRelationships;
+        readonly XlsxWorkbookMetadata workbookMetadata;
+        readonly XlsxSharedStringsXml sharedStrings;
+        readonly List<XlsxWorksheet> worksheets = [];
+        readonly string coreXml;
+        readonly string themeXml;
+        readonly string stylesXml;
 
-        XlsxWorksheet currentWorksheet;
-        List<XlsxWorksheet> worksheets = new List<XlsxWorksheet>();
+        bool closed;
+        XlsxWorksheet? currentWorksheet;
+
+        internal XlsxParts(Stream outputStream)
+        {
+            output = outputStream;
+            mainRelationships = new Relationships();
+            workbookRelationships = new Relationships();
+
+            workbookMetadata = new XlsxWorkbookMetadata();
+            mainRelationships.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument", "xl/workbook.xml"));
+
+            coreXml = SerializeXmlDocument(Settings.Default.CoreXml.OuterXml);
+            themeXml = SerializeXmlDocument(Settings.Default.ThemeXml.OuterXml);
+            stylesXml = SerializeXmlDocument(Settings.Default.StylesXml.OuterXml);
+
+            mainRelationships.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties", "docProps/core.xml"));
+            workbookRelationships.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme", "theme/theme1.xml"));
+            workbookRelationships.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles", "styles.xml"));
+
+            sharedStrings = new XlsxSharedStringsXml(new TempFileBuffer());
+            workbookRelationships.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings", "sharedStrings.xml"));
+        }
 
         public long FileSize
         {
             get
             {
-                long ret = sharedStrings.OutputStream.Length;
-                foreach (var wksht in worksheets)
+                long total = sharedStrings.OutputStream.Length;
+                foreach (var worksheet in worksheets)
                 {
-                    ret += wksht.OutputStream.Length;
+                    total += worksheet.OutputStream.Length;
                 }
-                return ret;
+
+                return total;
             }
         }
 
-        public void CreateSheet(int sheetCount, int subSheetCount, string sheetName, DataRowCollection resultHeaders)
+        public void CreateSheet(int sheetCount, int subSheetCount, string sheetName, ResultSetSchema schema)
         {
-            string shtnm = "worksheets/sheet" + sheetCount.ToString() + "_" + subSheetCount.ToString() + ".xml";
-            string filnm = "/xl/" + shtnm;
-            var djfk = new ContentRelationships() { PackagePath = shtnm, RelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" };
-            xlRels.Link(djfk);
-            string id = xlRels.Id(djfk).ToString();
+            string sheetPath = "worksheets/sheet" + sheetCount.ToString(CultureInfo.InvariantCulture) + "_" + subSheetCount.ToString(CultureInfo.InvariantCulture) + ".xml";
+            var relationship = new ContentRelationships
+            {
+                PackagePath = sheetPath,
+                RelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet",
+            };
+            workbookRelationships.Link(relationship);
+            string relationshipId = workbookRelationships.Id(relationship);
 
-            XlsxWorksheet w = new XlsxWorksheet(sheetName, id, resultHeaders, sharedStrings, filnm);
-            worksheets.Add(w);
-            currentWorksheet = w;
+            currentWorksheet = new XlsxWorksheet(sheetName, relationshipId, schema, sharedStrings, "/xl/" + sheetPath);
+            worksheets.Add(currentWorksheet);
+        }
+
+        public void WriteRow(IDataRecord data)
+        {
+            if (currentWorksheet is null)
+            {
+                throw new InvalidOperationException("A worksheet must be created before rows can be written.");
+            }
+
+            currentWorksheet.WriteRow(data);
         }
 
         public void CloseSheet()
         {
-            currentWorksheet.Close();
+            currentWorksheet?.Close();
+            currentWorksheet = null;
         }
 
         public void Close()
         {
-            if (alreadyClosed)
+            if (closed)
+            {
                 return;
+            }
 
-            XlsxAppXml a = new XlsxAppXml();
-
-            a.SetSheetCount(worksheets);
-            mainRels.Link(XlsxAppXml.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties", "docProps/app.xml"));
-
-            workbookXml.SetSheetCount(worksheets);
+            var appXml = new XlsxAppXml();
+            appXml.SetSheetCount(worksheets);
+            mainRelationships.Link(XlsxAppXml.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties", "docProps/app.xml"));
+            workbookMetadata.SetSheetCount(worksheets);
             sharedStrings.Close();
 
-            using (var archive = new ZipArchive(p, ZipArchiveMode.Create, leaveOpen: true))
+            using (var archive = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true))
             {
-                AddStringEntry(archive, "_rels/.rels", mainRels.Write());
-                AddStringEntry(archive, "/docProps/core.xml", _coreXml);
-                AddStringEntry(archive, "/docProps/app.xml", a.Write().ToString());
-
-                ContentTypes f = new ContentTypes(worksheets);
-                AddStringEntry(archive, "/[Content_Types].xml", f.Write());
-                AddStringEntry(archive, "/xl/workbook.xml", workbookXml.Write());
-                AddStringEntry(archive, "/xl/_rels/workbook.xml.rels", xlRels.Write());
-                AddStringEntry(archive, "/xl/theme/theme1.xml", _themeXml);
-                AddStringEntry(archive, "/xl/styles.xml", _stylesXml);
-
+                AddStringEntry(archive, "_rels/.rels", mainRelationships.Write());
+                AddStringEntry(archive, "/docProps/core.xml", coreXml);
+                AddStringEntry(archive, "/docProps/app.xml", appXml.Write());
+                AddStringEntry(archive, "/[Content_Types].xml", new ContentTypes(worksheets).Write());
+                AddStringEntry(archive, "/xl/workbook.xml", workbookMetadata.Write());
+                AddStringEntry(archive, "/xl/_rels/workbook.xml.rels", workbookRelationships.Write());
+                AddStringEntry(archive, "/xl/theme/theme1.xml", themeXml);
+                AddStringEntry(archive, "/xl/styles.xml", stylesXml);
                 AddStreamEntry(archive, "/xl/sharedStrings.xml", sharedStrings.OutputStream);
 
                 foreach (var worksheet in worksheets)
@@ -85,159 +121,33 @@ namespace ExcelXmlWriter.Xlsx
                 }
             }
 
-            foreach (var djfak in worksheets)
+            foreach (var worksheet in worksheets)
             {
-                djfak.OutputStream.Close();
-                if (File.Exists(djfak.FileAssociatedWithOutputStream))
-                    File.Delete(djfak.FileAssociatedWithOutputStream);
+                worksheet.Dispose();
             }
 
-            sharedStrings.OutputStream.Close();
-            if (File.Exists(sharedStrings.FileAssociateWithOutputStream))
-                File.Delete(sharedStrings.FileAssociateWithOutputStream);
-
-            alreadyClosed = true;
+            sharedStrings.Dispose();
+            closed = true;
         }
-
-        public XlsxParts(Stream path)
-        {
-            p = path;
-
-            mainRels = new Relationships();
-            xlRels = new Relationships();
-
-            #region workbook.xml_Content_Type
-
-            workbookXml = new XlsxWorkbookMetadata();
-            workbookXmlPackagePart = XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument", "xl/workbook.xml");
-            mainRels.Link(workbookXmlPackagePart);
-
-            #endregion
-
-            #region core.xml
-
-            XDocument xdjfkd = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
-
-            xdjfkd = XDocument.Parse(Settings.Default.CoreXml.OuterXml, LoadOptions.None);
-            mainRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties", "docProps/core.xml"
-                ));
-
-            using (StringWriterWithEncoding sb = new StringWriterWithEncoding(Encoding.UTF8))
-            {
-                var za = new XmlWriterSettings();
-                za.Encoding = Encoding.UTF8;
-                using (XmlWriter apo = XmlWriter.Create(sb, za))
-                {
-                    xdjfkd.Save(apo);
-                    apo.Close();
-                    _coreXml = sb.ToString();
-                }
-            }
-
-            #endregion
-
-            #region theme
-
-            XDocument xdjfkdd = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
-
-            xdjfkdd = XDocument.Parse(Settings.Default.ThemeXml.OuterXml, LoadOptions.None);
-            xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme", "theme/theme1.xml"
-                ));
-
-            using (StringWriterWithEncoding sbs = new StringWriterWithEncoding(Encoding.UTF8))
-            {
-                var zas = new XmlWriterSettings();
-                zas.Encoding = Encoding.UTF8;
-
-                using (XmlWriter apos = XmlWriter.Create(sbs, zas))
-                {
-                    xdjfkdd.Save(apos);
-                    apos.Close();
-                    _themeXml = sbs.ToString();
-                }
-            }
-
-
-            #endregion
-
-            #region styles
-
-            XDocument xdjfkdsa = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
-
-            xdjfkdsa = XDocument.Parse(Settings.Default.StylesXml.OuterXml, LoadOptions.None);
-            xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles", "styles.xml"
-                 ));
-
-            using (StringWriterWithEncoding sasb = new StringWriterWithEncoding(Encoding.UTF8))
-            {
-                var zaaa = new XmlWriterSettings();
-                zaaa.Encoding = Encoding.UTF8;
-
-                using (XmlWriter apso = XmlWriter.Create(sasb, zaaa))
-                {
-                    xdjfkdsa.Save(apso);
-                    apso.Close();
-                    _stylesXml = sasb.ToString();
-                }
-            }
-
-            #endregion
-
-            #region sharedstrings
-
-            string jf = Path.GetTempFileName();
-            var strm1 = new FileStream(jf, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-            sharedStrings = new XlsxSharedStringsXml(strm1, jf);
-
-            xlRels.Link(XlsxPart.LinkToPackage("http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings", "sharedStrings.xml"));
-
-            #endregion
-
-        }
-
-        public void WriteRow(IDataReader queryReader)
-        {
-            currentWorksheet.writerow(queryReader);
-        }
-
-        public void WriteRow(IDataReader queryReader, string[] columnValuesToReturn)
-        {
-            currentWorksheet.writerow(queryReader, columnValuesToReturn);
-        }
-
-        public string[] ReadKeyValues(IDataReader queryReader, string[] colsToObtainValsFrom)
-        {
-            return currentWorksheet.ReadKeyValues(queryReader, colsToObtainValsFrom);
-        }
-
-        #region IDisposable Members
 
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
+            if (!closed)
             {
-                if (sharedStrings != null)
-                    sharedStrings.Dispose();
-
-                foreach (var w in worksheets)
-                {
-                    w.Dispose();
-                }
-
+                Close();
             }
         }
 
-        #endregion
-
-        readonly string _coreXml;
-        readonly string _themeXml;
-        readonly string _stylesXml;
+        static string SerializeXmlDocument(string xmlDocument)
+        {
+            var document = XDocument.Parse(xmlDocument, LoadOptions.None);
+            using var stringWriter = new StringWriterWithEncoding(Encoding.UTF8);
+            var settings = new XmlWriterSettings { Encoding = Encoding.UTF8 };
+            using var xmlWriter = XmlWriter.Create(stringWriter, settings);
+            document.Save(xmlWriter);
+            xmlWriter.Close();
+            return stringWriter.ToString();
+        }
 
         static string NormalizeEntryPath(string entryPath)
         {
@@ -253,14 +163,9 @@ namespace ExcelXmlWriter.Xlsx
 
         static void AddStreamEntry(ZipArchive archive, string entryPath, Stream source)
         {
-            source.Seek(0, SeekOrigin.Begin);
             var entry = archive.CreateEntry(NormalizeEntryPath(entryPath), CompressionLevel.Optimal);
             using var destination = entry.Open();
             source.CopyTo(destination);
         }
-
-
-
-
     }
 }

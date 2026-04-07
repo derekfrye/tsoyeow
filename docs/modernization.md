@@ -42,6 +42,23 @@ Current dependency state to keep in mind:
 - it still depends on `System.Configuration.ConfigurationManager`, which is a compatibility dependency tied to legacy settings usage inside the library
 - the repo still contains a vendored `DotNetZip/` tree, but `ExcelXmlWriter` itself is no longer wired to it
 
+Current implementation status for the library:
+
+- done: the library has been restructured around a new internal export session and a thinner `Workbook` compatibility facade
+- done: `QueryReader` now delegates `IDataReader` members instead of leaving most of the interface unimplemented
+- done: progress reporting now uses task-based primitives rather than a raw background `Thread`
+- done: file-backed dataset loading now goes through `XmlReader`
+- done: schema metadata is cached once per result set and reused in the write path
+- done: the shared-string cache now uses a capped `Dictionary<string, long>` with ordinal comparison
+- done: repeated XLSX value-writing logic has been consolidated and some magic numbers have been extracted to named constants
+- done: public event payloads were renamed to modern `*EventArgs` names and the GUI source was updated to use them
+- done: the main nullability and culture/formatting fixes in the refactored library write path have been applied
+- not done: `System.Configuration.ConfigurationManager` is still used by the library
+- not done: a true Excel-compatible XML backend has not yet been implemented
+- not done: the disk-backed temp-buffer abstraction described below has not yet been introduced
+- not done: lower-priority analyzer/style cleanup is still pending
+- not done: full regression-test verification for the refactor has not been completed
+
 Recommended modernization scope for the next library pass:
 
 - complete the nullability cleanup in `ExcelXmlWriter` rather than suppressing warnings piecemeal
@@ -85,6 +102,12 @@ Objectives:
 - replace chains of XML dereferences with guarded lookups so the code expresses the expected document shape clearly
 - rename event payload types to end in `EventArgs` so the public surface matches .NET conventions
 
+Status:
+
+- partially done: event payload types were renamed to `*EventArgs`, `Workbook` event declarations were updated, and the GUI source was updated to match
+- partially done: the main XML helper nullability hazards in the XLSX path were replaced with explicit required-element checks
+- not done: some lower-value nullability/analyzer cleanup still remains in the library
+
 Guardrails:
 
 - prefer making lifecycle assumptions explicit over using null-forgiving operators
@@ -101,6 +124,10 @@ Objectives:
 - preserve the existing row-consumption bookkeeping where it is behaviorally important
 - make the wrapped-reader lifecycle obvious for both SQL-backed and file-backed execution
 - remove `NotImplementedException` members from normal runtime paths
+
+Status:
+
+- done: `QueryReader` now acts as a real delegating adapter over the active reader for both SQL-backed and file-backed execution
 
 Design notes:
 
@@ -119,6 +146,10 @@ Objectives:
 - ensure shutdown paths cancel and await progress work consistently
 - keep the current user-visible event cadence unless there is a reason to change it
 
+Status:
+
+- done: progress emission was moved to task-based primitives in the new export session layer
+
 Guardrails:
 
 - do not introduce concurrent reads of the underlying reader beyond what the current design already assumes
@@ -135,6 +166,10 @@ Objectives:
 - disable DTD processing and avoid permissive resolver behavior
 - preserve the existing XML-to-`DataSet` behavior expected by tests and the GUI flow
 
+Status:
+
+- done: file-backed dataset loading now uses `XmlReader` with restrictive settings
+
 Guardrails:
 
 - validate the new load path against the existing file-backed fixtures before and after the change
@@ -149,6 +184,11 @@ Objectives:
 - replace culture-sensitive `ToString()` calls in serialization paths with explicit invariant formatting where appropriate
 - standardize string comparisons to `Ordinal` or `OrdinalIgnoreCase` unless there is a documented business reason to use culture-aware comparison
 - review workbook naming, relationship IDs, numeric serialization, and shared-string comparisons first
+
+Status:
+
+- partially done: the refactored write path now uses invariant formatting and ordinal comparison in the most important serialization and cache paths
+- not done: lower-priority culture/analyzer cleanup still remains in some library helpers
 
 Guardrails:
 
@@ -165,6 +205,11 @@ Objectives:
 - extract the overpunch precision value into a named constant instead of repeating `100`
 - extract the shared-string cache limit into a named constant instead of repeating a bare integer
 - consolidate header-cell and row-cell value writing so type resolution and overpunch handling flow through one shared path
+
+Status:
+
+- partially done: overpunch precision and shared-string cache limits are now named constants in the refactored XLSX path
+- done: header and row value writing now flow through one shared worksheet write path
 
 Design notes:
 
@@ -188,6 +233,10 @@ Objectives:
 - once the cache cap is reached, continue writing shared strings without caching newly encountered values
 - accept the resulting duplicate shared-string entries beyond the cap as a deliberate tradeoff for bounded memory usage and fast writes
 
+Status:
+
+- done: the shared-string cache now uses a capped ordinal `Dictionary<string, long>`
+
 Design notes:
 
 - start with a named cap such as `100_000` cached strings and treat it as a tuning value
@@ -209,6 +258,10 @@ Objectives:
 - read schema metadata once at the start of each result set
 - derive a compact per-result-set structure from that schema and reuse it through sheet initialization and key-column lookup
 - avoid repeated `GetSchemaTable().Rows.Cast<DataRow>()` scans in row-writing logic
+
+Status:
+
+- done: result-set schema metadata is now cached once and reused through the write path
 
 Design notes:
 
@@ -233,6 +286,11 @@ Objectives:
 - introduce one internal abstraction that owns the temp file path, backing stream, rewind behavior, and cleanup
 - remove duplicated `Path.GetTempFileName()` plus `FileStream` setup from worksheet and shared-string code
 - centralize best-effort delete behavior so cleanup policy lives in one place
+
+Status:
+
+- partially done: the refactor kept disk-backed buffering and reduced some duplication in the XLSX path
+- not done: there is still no dedicated temp-buffer abstraction with centralized lifecycle ownership
 
 Design notes:
 
@@ -267,7 +325,7 @@ After analyzer setup and project-file work, lean on:
 
 The tests are also legacy, but they still provide useful regression coverage while the library evolves.
 
-### 5. Tackle the WinForms app second
+### 5. Tackle the desktop app second
 
 Once the library is under better tooling, move to:
 
@@ -275,22 +333,134 @@ Once the library is under better tooling, move to:
 - `ExcelXmlQueryResults/FormOptions.cs`
 - `ExcelXmlQueryResults/ConfigManipulator.cs`
 
-This phase should focus on code quality and maintainability, not UI redesign.
+The current GUI is a legacy `.NET Framework 4.0` WinForms application. If the goal is a desktop GUI that runs on both Windows and Linux, the right modernization path is to replace that front end with a cross-platform desktop shell rather than carrying WinForms forward.
+
+Recommended direction:
+
+- keep `ExcelXmlWriter` as the export engine and avoid moving workbook logic into the new UI
+- build the replacement desktop app on Avalonia rather than trying to make WinForms cross-platform
+- treat the GUI migration as an architectural cleanup opportunity, not just a visual redesign
+
+The current UI behavior is modest and portable:
+
+- query text entry
+- destination file picking
+- batch query-file selection
+- options editing for connection and workbook settings
+- progress and error reporting while exports run
+
+That behavior should be reproduced, but the new app should not preserve the current WinForms structure.
+
+#### 5a. Extract application services before or during the GUI port
+
+Before binding a new UI to the existing code, move non-UI logic out of forms and into plain modern classes.
+
+Primary extraction targets:
+
+- export workflow orchestration currently embedded in `FormEntrance`
+- settings load/save logic currently embedded in `FormOptions` and `ConfigManipulator`
+- connection-string building
+- output-path validation and file naming
+- progress/state projection from workbook events into UI-friendly state objects
+
+Target architecture:
+
+- `ExcelXmlWriter`:
+  owns export behavior only
+- application/service layer:
+  owns settings, workflow coordination, validation, and progress state
+- Avalonia UI layer:
+  owns view models, bindings, dialogs, and presentation only
+
+This keeps the Avalonia app from becoming a straight port of WinForms event handlers.
+
+#### 5b. Replace legacy config mutation with modern settings storage
+
+The current app edits `App.config` directly with `XDocument`. That is fragile, tightly coupled to legacy executable config behavior, and a poor fit for a cross-platform desktop app.
+
+Recommended replacement:
+
+- use a typed settings model
+- persist settings in a JSON file under the user's application data directory
+- add one-time migration logic that can import the legacy config values on first run if preserving existing user settings matters
 
 Configuration work should be split into two tracks:
 
 - library track: remove `System.Configuration.ConfigurationManager` from `ExcelXmlWriter` by replacing `Settings.Default` usage with embedded resources or explicit inputs
-- app track: migrate the WinForms app's `App.config` read/write flow to a more modern configuration approach if that still provides enough value
+- app track: replace the WinForms app's `App.config` read/write flow with a modern desktop settings approach
 
 Those are related, but they are not the same task and should not be treated as a single migration.
 
-### 6. Reassess `DotNetZip`
+#### 5c. Clean up app-layer threading and progress
+
+Do not port the current raw-thread and `Invoke` patterns into the new UI.
+
+Recommended changes:
+
+- replace raw `Thread` usage with `Task` and `async`/`await`
+- use `CancellationToken` for cancellation and shutdown
+- expose progress through a narrow state/progress abstraction rather than direct form callbacks
+- make the UI consume state changes instead of controlling worker lifetime directly
+
+This work belongs mostly in the shared application/service layer so both tests and the new UI can exercise it.
+
+#### 5d. Normalize the public engine surface before binding a new UI to it
+
+The current workbook API still exposes legacy naming and lifecycle patterns. If a new UI is going to depend on it long-term, clean up that surface first instead of baking the old API into a new application shell.
+
+Useful targets:
+
+- rename legacy types such as `WorkBookParams` and `WorkBookStatus`
+- make lifecycle expectations explicit around query execution, export continuation, and cleanup
+- reduce accidental public surface area
+- keep backend-specific implementation details out of the UI-facing contract
+
+#### 5e. Resolve misleading or obsolete UI-facing options
+
+The current app still exposes an `Xml` backend mode even though the implementation path is effectively the XLSX writer.
+
+Resolve this before or during the GUI migration:
+
+- either implement a true Excel-compatible XML backend
+- or remove the XML backend option from both the app and public API
+
+Do not carry forward options that are not truly supported.
+
+#### 5f. Remove legacy-only dependencies and project structure while the UI is in motion
+
+The GUI migration is a good time to stop carrying forward dependencies and project patterns that only exist to support the old WinForms application.
+
+Good candidates:
+
+- remove `System.Configuration` from the app layer
+- migrate the remaining legacy projects from old project format to SDK-style projects
+- replace `packages.config` usage with `PackageReference`
+- standardize on `Microsoft.Data.SqlClient` rather than splitting provider usage across old and new SQL client packages
+- retire WinForms designer-generated assumptions instead of recreating them in Avalonia
+
+#### 5g. Reassess historical debug modes and one-off code paths
+
+The repo contains historical debug configurations and conditional compilation paths such as file-driven and no-thread execution modes. Preserve them long enough to understand what behavior they protect, but do not assume they all deserve to survive the migration unchanged.
+
+During the port:
+
+- identify which debug modes still represent useful troubleshooting workflows
+- replace the useful ones with explicit modern switches or test coverage where possible
+- remove dead debug-only path walking and form-specific scaffolding once equivalent coverage exists
+
+### 6. Reassess `DotNetZip` and other leftover legacy dependencies
 
 Only after the first-party code is cleaner should you decide whether to:
 
 - keep the vendored source tree for historical/reference purposes
 - replace any remaining vendored/legacy usage with a maintained packaging approach
 - remove the local `DotNetZip` source tree if it is no longer needed
+
+Related cleanup opportunities:
+
+- remove `Ionic.Zip` usage from tests if `System.IO.Compression` is sufficient
+- remove test or utility dependencies that only existed to support the legacy packaging path
+- keep third-party dependency removal separate from behavior changes when possible
 
 ## Practical First Milestone
 

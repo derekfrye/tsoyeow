@@ -3,19 +3,20 @@ using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlWriter.Xlsx
 {
-    static class XlsxData
+    internal static class XlsxData
     {
-        static readonly DateTime ExcelSince = new DateTime(1899, 12, 30, 0, 0, 0, DateTimeKind.Utc);
+        static readonly DateTime ExcelSince = new(1899, 12, 30, 0, 0, 0, DateTimeKind.Utc);
 
         internal static string ConvertToWriteableValue(string value, ExcelDataType dataType)
         {
-            if (dataType == ExcelDataType.Date)
-                return (((TimeSpan)(Convert.ToDateTime(value, CultureInfo.CurrentCulture) - ExcelSince)).TotalDays).ToString();
-            else if (dataType == ExcelDataType.Number)
-                return value.Trim();
-            else
-                return value;
-
+            return dataType switch
+            {
+                ExcelDataType.Date => (Convert.ToDateTime(value, CultureInfo.CurrentCulture) - ExcelSince)
+                    .TotalDays
+                    .ToString(CultureInfo.InvariantCulture),
+                ExcelDataType.Number => value.Trim(),
+                _ => value,
+            };
         }
     }
 }

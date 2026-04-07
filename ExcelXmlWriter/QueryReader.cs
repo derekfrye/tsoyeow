@@ -1,414 +1,237 @@
-using System.Collections;
 using System.Data;
 using System.Globalization;
+using System.Xml;
 using Microsoft.Data.SqlClient;
 
 namespace ExcelXmlWriter
 {
-    class QueryReader : IEnumerator, IDisposable, IDataReader
+    internal sealed class QueryReader : IDataReader
     {
+        readonly bool fromFile;
+        readonly SqlCommand command;
+        readonly SqlConnection connection;
+        readonly DataSet dataSet;
 
-        #region LocalFields
-
-        IDataReader? dr;
-        bool fromFile;
-
-        SqlCommand sc = new SqlCommand();
-        SqlConnection scc = new SqlConnection();
-
-        DataSet ds = new DataSet();
-        int tableCount;
-
-        readonly object dataReaderLocker = new object();
-        /// <summary>
-        ///lock to read/write 
-        /// </summary>
-        int totalRecordsRead = 0;
-        readonly object currentResultLocker = new object();
-        /// <summary>
-        ///  lock to read/write
-        /// </summary>
+        IDataReader? reader;
+        int tableIndex;
+        int totalRecordsRead;
         int currentResult = 1;
-
-        bool currentResultSetStillHasRecords;
-        bool rowConsumed;
-
-        #endregion
-
-        /// <summary>
-        /// 1-based result number maintained separately from the DataReader NextResult() call.
-        /// </summary>
-        internal int CurrentResult
-        {
-            get
-            {
-                lock (currentResultLocker)
-                    return currentResult;
-            }
-        }
 
         internal QueryReader(string query, int queryTimeout, bool queryIsFile, string connStr)
         {
+            fromFile = queryIsFile;
+
             if (!queryIsFile)
             {
-                this.scc = new SqlConnection(connStr);
-                this.sc = new SqlCommand(query, this.scc);
-                this.sc.CommandType = System.Data.CommandType.Text;
-                this.sc.CommandTimeout = queryTimeout;
-                currentResultSetStillHasRecords = true;
-                rowConsumed = true;
-            }
-            else
-            {
-                ds = new DataSet
+                connection = new SqlConnection(connStr);
+                command = new SqlCommand(query, connection)
                 {
-                    Locale = CultureInfo.GetCultureInfo("en-US")
+                    CommandType = CommandType.Text,
+                    CommandTimeout = queryTimeout,
                 };
-                ds.ReadXml(query);
-                fromFile = true;
-                currentResultSetStillHasRecords = true;
+                dataSet = new DataSet();
+                return;
             }
+
+            dataSet = new DataSet
+            {
+                Locale = CultureInfo.GetCultureInfo("en-US"),
+            };
+
+            var settings = new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Prohibit,
+                XmlResolver = null,
+            };
+
+            using var xmlReader = XmlReader.Create(query, settings);
+            dataSet.ReadXml(xmlReader);
+
+            command = new SqlCommand();
+            connection = new SqlConnection();
         }
 
-        internal int TotalRecordsRead
-        {
-            get
-            {
-                lock (dataReaderLocker)
-                    return totalRecordsRead;
-            }
-        }
+        internal int CurrentResult => currentResult;
+
+        internal int TotalRecordsRead => totalRecordsRead;
+
+        internal bool HasActiveResultSet => reader is not null;
 
         public void OpenReader()
         {
             if (fromFile)
-                dr = ds.Tables[tableCount].CreateDataReader();
-            else
             {
-                if (dr == null || dr.IsClosed)
+                if (dataSet.Tables.Count == 0)
                 {
-                    try
-                    {
-                        if (sc.Connection.State == ConnectionState.Closed)
-                            sc.Connection.Open();
-
-                        //SqlDataAdapter sa = new SqlDataAdapter(sc);
-                        //ds = new DataSet();
-                        //sa.Fill(ds);
-                        //ds.WriteXml(@"P:\ExcelXmlQueryResults\ExcelXmlQueryResults\bin\Debug\test.xml");
-
-                        dr = sc.ExecuteReader(CommandBehavior.CloseConnection);
-                    }
-                    catch
-                    {
-                        if (sc.Connection.State == ConnectionState.Open)
-                            sc.Connection.Close();
-
-                        throw;
-                    }
+                    reader = null;
+                    return;
                 }
+
+                tableIndex = 0;
+                reader = dataSet.Tables[tableIndex].CreateDataReader();
+                currentResult = 1;
+                return;
+            }
+
+            if (reader is not null && !reader.IsClosed)
+            {
+                return;
+            }
+
+            try
+            {
+                if (command.Connection.State == ConnectionState.Closed)
+                {
+                    command.Connection.Open();
+                }
+
+                reader = command.ExecuteReader(CommandBehavior.CloseConnection);
+                currentResult = 1;
+            }
+            catch
+            {
+                if (command.Connection.State == ConnectionState.Open)
+                {
+                    command.Connection.Close();
+                }
+
+                throw;
             }
         }
 
         public void CloseReader()
         {
-            if (!fromFile && sc.Connection.State == ConnectionState.Open)
+            if (reader is not null && !reader.IsClosed)
             {
-                if (dr != null && !dr.IsClosed)
-                    dr.Close();
-                sc.Connection.Close();
+                reader.Close();
+            }
+
+            if (!fromFile && command.Connection.State == ConnectionState.Open)
+            {
+                command.Connection.Close();
             }
         }
 
-        public bool MoveToNextResultSet()
+        IDataReader EnsureReader()
         {
-            if (currentResultSetStillHasRecords)
-                return currentResultSetStillHasRecords;
-
-            tableCount++;
-            if (fromFile)
-            {
-                if (ds.Tables.Count > tableCount)
-                {
-                    dr = ds.Tables[tableCount].CreateDataReader();
-                    lock (currentResultLocker)
-                        currentResult++;
-                    currentResultSetStillHasRecords = true;
-                    return true;
-                }
-                else
-                    return false;
-            }
-            else
-                if (dr!.NextResult())
-                {
-                    lock (currentResultLocker)
-                        currentResult++;
-                    currentResultSetStillHasRecords = true;
-                    return true;
-                }
-                else
-                    return false;
+            return reader ?? throw new InvalidOperationException("The query reader has not been opened.");
         }
 
-        public object this[int i]
-        {
-            get
-            {
-                rowConsumed = true;
-                return dr![i];
-            }
-        }
+        public object this[int i] => EnsureReader()[i];
 
-        public object this[string i]
-        {
-            get
-            {
-                rowConsumed = true;
-                return dr![i];
-            }
-        }
+        public object this[string name] => EnsureReader()[name];
 
-        public long GetBytes(int i, long fieldOffset, byte[]? buffer, int bufferoffset, int length)
-        {
-            rowConsumed = true;
-            return dr!.GetBytes(i, fieldOffset, buffer, bufferoffset, length);
-        }
+        public int Depth => EnsureReader().Depth;
 
-        public int FieldCount
-        {
-            get
-            {
-                return dr!.FieldCount;
-            }
-        }
+        public bool IsClosed => reader?.IsClosed ?? true;
 
-        public DataTable GetSchemaTable()
-        {
-            var t = dr!.GetSchemaTable();
-            return t;
-        }
+        public int RecordsAffected => EnsureReader().RecordsAffected;
 
-        #region IEnumerator Members
-
-        public object Current
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        /// <summary>
-        /// Read the next record.
-        /// </summary>
-        /// <returns></returns>
-        public bool MoveNext()
-        {
-            if (!rowConsumed)
-                return currentResultSetStillHasRecords;
-
-            if (dr!.Read())
-            {
-                lock (dataReaderLocker)
-                    totalRecordsRead++;
-                currentResultSetStillHasRecords = true;
-                rowConsumed = false;
-            }
-            else
-            {
-                currentResultSetStillHasRecords = false;
-                rowConsumed = true;
-            }
-
-            return currentResultSetStillHasRecords;
-        }
-
-        /// <summary>
-        /// Call to MoveNext() will consume current row.
-        /// </summary>
-        public void Reset()
-        {
-            rowConsumed = false;
-        }
-
-        #endregion
-
-        #region IDisposable Members
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                ds.Dispose();
-                sc.Dispose();
-                scc.Dispose();
-            }
-        }
-
-
-        #endregion
-
-        #region IDataReader Members
+        public int FieldCount => EnsureReader().FieldCount;
 
         public void Close()
         {
-            throw new NotImplementedException();
+            CloseReader();
         }
 
-        public int Depth
+        public void Dispose()
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public bool IsClosed
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            reader?.Dispose();
+            command.Dispose();
+            connection.Dispose();
+            dataSet.Dispose();
         }
 
         public bool NextResult()
         {
-            throw new NotImplementedException();
+            if (reader is null)
+            {
+                return false;
+            }
+
+            if (fromFile)
+            {
+                tableIndex++;
+                if (tableIndex >= dataSet.Tables.Count)
+                {
+                    return false;
+                }
+
+                reader.Dispose();
+                reader = dataSet.Tables[tableIndex].CreateDataReader();
+                currentResult++;
+                return true;
+            }
+
+            if (reader.NextResult())
+            {
+                currentResult++;
+                return true;
+            }
+
+            return false;
         }
 
         public bool Read()
         {
-            throw new NotImplementedException();
-        }
-
-        public int RecordsAffected
-        {
-            get
+            var hasRow = EnsureReader().Read();
+            if (hasRow)
             {
-                throw new NotImplementedException();
+                totalRecordsRead++;
             }
+
+            return hasRow;
         }
 
-        #endregion
-
-        #region IDataRecord Members
-
-
-        public bool GetBoolean(int i)
+        public DataTable? GetSchemaTable()
         {
-            throw new NotImplementedException();
+            return EnsureReader().GetSchemaTable();
         }
 
-        public byte GetByte(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public bool GetBoolean(int i) => EnsureReader().GetBoolean(i);
 
-        public char GetChar(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public byte GetByte(int i) => EnsureReader().GetByte(i);
+
+        public long GetBytes(int i, long fieldOffset, byte[]? buffer, int bufferoffset, int length)
+            => EnsureReader().GetBytes(i, fieldOffset, buffer, bufferoffset, length);
+
+        public char GetChar(int i) => EnsureReader().GetChar(i);
 
         public long GetChars(int i, long fieldoffset, char[]? buffer, int bufferoffset, int length)
-        {
-            throw new NotImplementedException();
-        }
+            => EnsureReader().GetChars(i, fieldoffset, buffer, bufferoffset, length);
 
-        public IDataReader GetData(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public IDataReader GetData(int i) => EnsureReader().GetData(i);
 
-        public string GetDataTypeName(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public string GetDataTypeName(int i) => EnsureReader().GetDataTypeName(i);
 
-        public DateTime GetDateTime(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public DateTime GetDateTime(int i) => EnsureReader().GetDateTime(i);
 
-        public decimal GetDecimal(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public decimal GetDecimal(int i) => EnsureReader().GetDecimal(i);
 
-        public double GetDouble(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public double GetDouble(int i) => EnsureReader().GetDouble(i);
 
-        public Type GetFieldType(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public Type GetFieldType(int i) => EnsureReader().GetFieldType(i);
 
-        public float GetFloat(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public float GetFloat(int i) => EnsureReader().GetFloat(i);
 
-        public Guid GetGuid(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public Guid GetGuid(int i) => EnsureReader().GetGuid(i);
 
-        public short GetInt16(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public short GetInt16(int i) => EnsureReader().GetInt16(i);
 
-        public int GetInt32(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public int GetInt32(int i) => EnsureReader().GetInt32(i);
 
-        public long GetInt64(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public long GetInt64(int i) => EnsureReader().GetInt64(i);
 
-        public string GetName(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public string GetName(int i) => EnsureReader().GetName(i);
 
-        public int GetOrdinal(string name)
-        {
-            throw new NotImplementedException();
-        }
+        public int GetOrdinal(string name) => EnsureReader().GetOrdinal(name);
 
-        public string GetString(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public string GetString(int i) => EnsureReader().GetString(i);
 
-        public object GetValue(int i)
-        {
-            rowConsumed = true;
-            return dr.GetValue(i);
-        }
+        public object GetValue(int i) => EnsureReader().GetValue(i);
 
-        public int GetValues(object[] values)
-        {
-            rowConsumed = true;
-            return dr.GetValues(values);
-        }
+        public int GetValues(object[] values) => EnsureReader().GetValues(values);
 
-        public bool IsDBNull(int i)
-        {
-            rowConsumed = true;
-            return dr.IsDBNull(i);
-        }
-
-        #endregion
+        public bool IsDBNull(int i) => EnsureReader().IsDBNull(i);
     }
 }

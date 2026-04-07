@@ -1,13 +1,12 @@
 using System.Data;
+using ExcelXmlWriter.Workbook;
 
 namespace ExcelXmlWriter
 {
-    interface IExcelBackend
+    interface IExcelBackend : IDisposable
     {
-        void CreateSheet(int sheetCount, int subSheetCount, string sheetName, DataRowCollection resultHeaders);
-        void WriteRow(IDataReader data);
-        void WriteRow(IDataReader data, string[] columnValuesToReturn);
-        string[] ReadKeyValues(IDataReader queryReader, string[] colsToObtainValsFrom);
+        void CreateSheet(int sheetCount, int subSheetCount, string sheetName, ResultSetSchema schema);
+        void WriteRow(IDataRecord data);
         void CloseSheet();
         void Close();
         long FileSize
@@ -15,9 +14,4 @@ namespace ExcelXmlWriter
             get;
         }
     }
-
-
-
-
-
 }

@@ -29,7 +29,7 @@ namespace ExcelXmlQueryResults
 
         delegate void IncrFinishedD(QueryState b, int total, string msg);
         delegate void IncrSomeResultsD(decimal a, int rowsProcessed);
-        delegate void CatchQueryExceptionD(QueryExceptionEvents e);
+        delegate void CatchQueryExceptionD(QueryExceptionEventArgs e);
         delegate void DSaveFileBegan(QueryState b, int total, string msg);
 
         public FormEntrance()
@@ -266,11 +266,11 @@ namespace ExcelXmlQueryResults
             Workbook wb = new Workbook(workbookParams);
 
             // subscribe to progress events
-            wb.ReaderFinished += new EventHandler<ReaderFinishedEvents>(wb_ReaderFinished);
+            wb.ReaderFinished += new EventHandler<ReaderFinishedEventArgs>(wb_ReaderFinished);
             wb.QueryStarted += new EventHandler<EventArgs>(wb_QueryStarted);
-            wb.QueryException += new EventHandler<QueryExceptionEvents>(wb_QueryError);
-            wb.QueryRowsOverTime += new EventHandler<QueryRowsOverTimeEvents>(wb_QueryRowsOverTime);
-            wb.SaveFile += new EventHandler<SaveFileEvent>(wb_SaveBegan);
+            wb.QueryException += new EventHandler<QueryExceptionEventArgs>(wb_QueryError);
+            wb.QueryRowsOverTime += new EventHandler<QueryRowsOverTimeEventArgs>(wb_QueryRowsOverTime);
+            wb.SaveFile += new EventHandler<SaveFileEventArgs>(wb_SaveBegan);
 
             if (wb.RunQuery())
             {
@@ -322,12 +322,12 @@ namespace ExcelXmlQueryResults
                 + Path.GetExtension(currentBaseName);
         }
 
-        void wb_QueryRowsOverTime(object sender, QueryRowsOverTimeEvents e)
+        void wb_QueryRowsOverTime(object sender, QueryRowsOverTimeEventArgs e)
         {
-            this.Invoke(new IncrSomeResultsD(this.IncrSomeResults), new object[] { e.rowsPerSecond, e.total });
+            this.Invoke(new IncrSomeResultsD(this.IncrSomeResults), new object[] { e.RowsPerSecond, e.TotalRows });
         }
 
-        void wb_QueryError(object sender, QueryExceptionEvents e)
+        void wb_QueryError(object sender, QueryExceptionEventArgs e)
         {
             this.Invoke(new CatchQueryExceptionD(this.CatchQueryException), e);
         }
@@ -337,12 +337,12 @@ namespace ExcelXmlQueryResults
             this.Invoke(new IncrFinishedD(this.IncrFinished), new object[] { QueryState.Running, null, null });
         }
 
-        void wb_ReaderFinished(object sender, ReaderFinishedEvents a)
+        void wb_ReaderFinished(object sender, ReaderFinishedEventArgs a)
         {
-            this.Invoke(new IncrFinishedD(this.IncrFinished), new object[] { QueryState.Finished, a.totalRecordsRead, null });
+            this.Invoke(new IncrFinishedD(this.IncrFinished), new object[] { QueryState.Finished, a.TotalRecordsRead, null });
         }
 
-        void wb_SaveBegan(object sender, SaveFileEvent s)
+        void wb_SaveBegan(object sender, SaveFileEventArgs s)
         {
             this.Invoke(new DSaveFileBegan(this.IncrFinished), new object[] { QueryState.Saving, 0, s.Message });
         }
@@ -388,9 +388,9 @@ namespace ExcelXmlQueryResults
             }
         }
 
-        void CatchQueryException(QueryExceptionEvents e)
+        void CatchQueryException(QueryExceptionEventArgs e)
         {
-            MessageBox.Show(e.e.Message, "Error");
+            MessageBox.Show(e.Exception.Message, "Error");
             LockUnlockGUIControls(false);
             toolStripStatusLabel2.Text = Resources.Waiting;
         }
