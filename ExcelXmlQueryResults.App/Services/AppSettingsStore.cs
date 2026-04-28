@@ -48,6 +48,20 @@ public sealed class AppSettingsStore
         await JsonSerializer.SerializeAsync(stream, settings, SerializerOptions, cancellationToken);
     }
 
+    public void Save(AppSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var directory = Path.GetDirectoryName(SettingsPath);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        using var stream = File.Create(SettingsPath);
+        JsonSerializer.Serialize(stream, settings, SerializerOptions);
+    }
+
     AppSettings? TryImportLegacySettings()
     {
         foreach (var candidate in GetLegacyCandidates())

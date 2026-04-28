@@ -160,6 +160,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         await settingsStore.SaveAsync(CreateSettingsSnapshot());
     }
 
+    public void Save()
+    {
+        settingsStore.Save(CreateSettingsSnapshot());
+    }
+
     public void SetOutputPath(string path)
     {
         OutputPath = path;
@@ -184,6 +189,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
+        exportCancellation?.Cancel();
         exportCancellation?.Dispose();
         exportCancellation = null;
     }

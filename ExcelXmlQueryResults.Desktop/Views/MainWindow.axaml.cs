@@ -37,7 +37,8 @@ public partial class MainWindow : Window
 
     void OnClosing(object? sender, WindowClosingEventArgs e)
     {
-        ViewModel.SaveAsync().GetAwaiter().GetResult();
+        ViewModel.CancelExport();
+        ViewModel.Save();
         ViewModel.Dispose();
     }
 
